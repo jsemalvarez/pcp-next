@@ -9,7 +9,7 @@ export const HeroSection = () => {
         className='min-h-screen pt-[100px] pb-16 flex flex-col justify-center items-center'
     >
 
-        {/* <ImageSlider /> */}
+        <ImageSlider />
 
         <header className="text-center mt-6">
             <h2 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-indigo-500 to-indigo-100 drop-shadow-lg">
