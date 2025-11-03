@@ -28,7 +28,7 @@ export const PublicNavbar = () => {
       className='fixed top-0 w-full flex justify-between items-center px-4 py-3 bg-primary text-indigo-100 border-b border-solid border-secondary z-1500'
     >
       <a
-        href='#presentation'
+        href='#hero'
         className='w-[35px] h-[35px] bg-secondary rounded-full flex justify-center items-center text-primary font-semibold transition-all duration-300 hover:bg-rose-300'
       >PcP</a>
 

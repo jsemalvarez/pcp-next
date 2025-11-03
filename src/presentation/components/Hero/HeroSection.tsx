@@ -1,4 +1,5 @@
 import { ImageSlider } from "../ImageSlider/ImageSlider"
+import { HeroActions } from "./HeroActions"
 
 export const HeroSection = () => {
 
@@ -20,7 +21,7 @@ export const HeroSection = () => {
             </h1>
         </header>
 
-        {/* <PresentationCards /> */}
+        <HeroActions />
 
         <div className="py-4 text-4xl font-bold text-center tracking-widest max-w-3xl w-full text-sky-200">
             Acá te podemos ayudar!!!
