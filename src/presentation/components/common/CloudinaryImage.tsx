@@ -28,6 +28,7 @@ export const CloudinaryImage = ({
       height={400}
       className={className}
       loading="lazy"
+      unoptimized={true}
     />
   );
 }
