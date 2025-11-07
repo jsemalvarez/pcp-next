@@ -1,4 +1,4 @@
-import { Place } from "@/presentation/types/places"
+import { Place } from "@/domain/entities/Place";
 import { PlacesSearchClient } from "./PlacesSearchClient"
 
 

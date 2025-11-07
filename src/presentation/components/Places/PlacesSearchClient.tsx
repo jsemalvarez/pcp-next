@@ -1,6 +1,6 @@
 'use client';
 
-import { Place } from "@/presentation/types/places";
+import { Place } from "@/domain/entities/Place";
 import { useMemo, useState } from "react";
 import { PlacesSearchGrid } from "./PlacesSearchGrid";
 import { PaginationControls } from "./PaginationControls";

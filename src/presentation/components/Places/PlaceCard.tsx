@@ -1,11 +1,8 @@
 import { FacebookIcon, InstagramIcon, WebIcon } from "@/presentation/components/common/icons";
-import { Place } from "@/presentation/types/places";
-import { ViewOnMapButton } from "../common/buttons/ViewOnMapButton";
+import { Place } from "@/domain/entities/Place";
+
 import { VideoIcon } from "@/presentation/components/common/icons/VideoIcon";
-import { WhatsAppButton } from "../common/buttons";
-
-
-
+import { WhatsAppButton, ViewOnMapButton } from "../common/buttons";
 
 
 interface Props{
