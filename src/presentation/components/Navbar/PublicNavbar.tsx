@@ -1,5 +1,5 @@
 import { NavItem } from "./NavItem"
-import { CalendarIcon, FacebookIcon, InstagramIcon, LocationIcon, SearchIcon } from "@/presentation/icons"
+import { CalendarIcon, FacebookIcon, InstagramIcon, LocationIcon, SearchIcon } from "@/presentation/components/common/icons"
 
 
 const navItems = [

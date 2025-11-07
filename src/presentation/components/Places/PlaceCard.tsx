@@ -1,7 +1,7 @@
-import { FacebookIcon, InstagramIcon, WebIcon } from "@/presentation/icons";
+import { FacebookIcon, InstagramIcon, WebIcon } from "@/presentation/components/common/icons";
 import { Place } from "@/presentation/types/places";
 import { ViewOnMapButton } from "../common/buttons/ViewOnMapButton";
-import { VideoIcon } from "@/presentation/icons/VideoIcon";
+import { VideoIcon } from "@/presentation/components/common/icons/VideoIcon";
 import { WhatsAppButton } from "../common/buttons";
 
 

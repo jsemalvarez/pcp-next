@@ -1,4 +1,4 @@
-import { CustomIcon } from "../types/icons"
+import { CustomIcon } from "../../../types/icons"
 
 export const CalendarIcon = ({style}:CustomIcon) => {
     return (

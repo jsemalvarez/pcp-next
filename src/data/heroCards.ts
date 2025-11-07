@@ -1,4 +1,4 @@
-import { CalendarIcon, LocationIcon, SearchIcon } from "@/presentation/icons";
+import { CalendarIcon, LocationIcon, SearchIcon } from "@/presentation/components/common/icons";
 
 export const heroCards = [
   {
