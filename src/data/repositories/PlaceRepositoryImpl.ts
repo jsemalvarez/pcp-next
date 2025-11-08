@@ -1,4 +1,4 @@
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { FirebaseDB } from "@/config/firebase";
 
 import { Place } from "../../domain/entities/Place";
@@ -11,7 +11,11 @@ export class PlaceRepositoryImpl implements PlaceRepository {
     async getAllPlacesOrderByName(): Promise<Place[]> {
         try {
             const placesRef = collection(FirebaseDB, COLLECTION_NAME);
-            const q = query(placesRef, orderBy("name", "asc"));
+            const q = query(
+                placesRef, 
+                where("isPlaceAvtive", "==", true),
+                orderBy("name", "asc"),
+            );
             const querySnapshot = await getDocs(q);
 
             return querySnapshot.docs.map(
@@ -19,6 +23,7 @@ export class PlaceRepositoryImpl implements PlaceRepository {
             );
         } catch (error) {
             console.error("[PlaceRepositoryImpl] Error fetching places:", error);
+            console.log(error)
             throw new Error("Failed to fetch places");
         }
     }
