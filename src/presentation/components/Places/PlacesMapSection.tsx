@@ -8,9 +8,12 @@ interface Props{
 
 export const PlacesMapSection = async({places}:Props) => {
     return (
-        <div id='mapSection' className='min-h-screen py-[100px]'>            
-            <h3 className="text-3xl text-center font-semibold">Mapa</h3>
+        <section id='mapSection' className='min-h-screen py-[100px] text-center'>            
+            <h2 className="text-4xl md:text-5xl font-semibold text-secondary mb-4">Nuestro mapa para familias</h2>
+            <p className="mx-auto max-w-3xl text-lg md:text-xl mb-8">
+                Explorá el mapa interactivo y encontrá cafés, restaurantes y espacios pensados para disfrutar con los peques. Todo en un solo lugar, fácil y divertido
+            </p>
             <PlacesMapClient places={places} />
-        </div>
+        </section>
     )
 }
