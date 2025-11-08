@@ -5,7 +5,7 @@ export const HeroSection = () => {
 
   return (
     <section 
-        id="presentation" 
+        id="hero" 
         aria-labelledby="presentation-title"
         className='min-h-screen pt-[100px] pb-16 flex flex-col justify-center items-center'
     >
