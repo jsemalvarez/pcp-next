@@ -19,8 +19,8 @@ export interface Place {
     hasShow: boolean;
     hasGames: boolean;
     hasSupervision: boolean;
-    categories: [string];
-    ageRanges: [string];
+    categories: string[];
+    ageRanges: string[];
     description: string;
     iconType: string;
     bgColor: string;
