@@ -1,14 +1,21 @@
 import { getPlacesFactory } from "@/domain/factories/getPlacesFactory";
-import { HeroSection } from "@/presentation/components/Hero/HeroSection";
 import { PublicNavbar } from "@/presentation/components/Navbar/PublicNavbar";
+import { HeroSection } from "@/presentation/components/Hero/HeroSection";
 import { PlacesMapSection } from "@/presentation/components/Places/PlacesMapSection";
+import { CalendarSection } from "@/presentation/components/Calendar/CalendarSection";
 import { PlacesSearchSection } from "@/presentation/components/Places/PlacesSearchSection";
+import { getEventsFactory } from "@/domain/factories/getEventsFactory";
 
 
 export default async function Home() {
   const getPlaces = getPlacesFactory();
+  const getEvents = getEventsFactory();
 
-  const places = await getPlaces.execute();
+  // const places = await getPlaces.execute();
+  const [places, events] = await Promise.all([
+    getPlaces.execute(),
+    getEvents.execute()
+  ])
 
   return (
     <>
@@ -16,6 +23,7 @@ export default async function Home() {
       <main className="min-h-[100vh] bg-gradient-to-bl from-primary via-primary-light to-primary text-indigo-100">
         <HeroSection />
         <PlacesMapSection places={places}/>
+        <CalendarSection events={events}/>
         <PlacesSearchSection places={places} />
       </main>
     </>

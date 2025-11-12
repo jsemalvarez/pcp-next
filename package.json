@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "dayjs": "^1.11.19",
     "firebase": "^12.5.0",
     "leaflet": "^1.9.4",
     "next": "16.0.1",
