@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { NavItem } from "./NavItem"
 import { CalendarIcon, FacebookIcon, InstagramIcon, LocationIcon, SearchIcon } from "@/presentation/components/common/icons"
 
@@ -29,8 +30,15 @@ export const PublicNavbar = () => {
     >
       <a
         href='#hero'
-        className='w-[35px] h-[35px] bg-secondary rounded-full flex justify-center items-center text-primary font-semibold transition-all duration-300 hover:bg-rose-300'
-      >PcP</a>
+        className='border border-secondary rounded-full bg-secondary'
+      >
+        <Image
+          src="/favicon.svg"
+          alt="Brand Logo"
+          width={40}
+          height={40}
+        />
+      </a>
 
       <ul className='flex gap-3'>
         {                  

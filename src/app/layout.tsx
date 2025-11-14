@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PcP - Paseos con Peques",
   description: "Paseos con Peques es un espacio donde podes encuentrar lugares y actividades para disfrutar con los peques en Mar del Plata.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
