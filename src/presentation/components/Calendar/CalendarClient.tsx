@@ -8,6 +8,8 @@ import { Event } from "@/domain/entities/Event";
 import { ChevronRightIcon, ChevronLeftIcon } from "../common/icons";
 import { FeaturedEvents } from "./FeaturedEvents";
 import { CalendarGrid } from "./CalendarGrid";
+import { FilterEventByTag } from "./FilterEventByTag";
+import { AGE_RANGES, EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
 dayjs.locale('es'); // lo setea como predeterminado
 
 interface Props{
@@ -18,13 +20,28 @@ export const CalendarClient = ({events}:Props) => {
 
     const [currentDate, setCurrentDate] = useState(dayjs());
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
+    const [selectedPriceEvent, setSelectedPriceEvent] = useState<string[]>([])
+    const [selectedEventType, setSelectedEventType] = useState<string[]>([])
 
     const filteredEvents = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
-        return events.filter((event) =>
-        event.title.toLowerCase().includes(term)
-        );
-    }, [searchTerm, events]);
+        // return events.filter((event) =>
+        // event.title.toLowerCase().includes(term)
+        return events.filter((event) => {
+            const matchesSearchTitle = term.length <= 1 || event.title.toLowerCase().includes(term);
+            const matchesSearchDescription = term.length <= 1 || event.description.toLowerCase().includes(term);
+            const matchesSearchArtists = term.length <= 1 || event.artists.toLowerCase().includes(term);
+            const matchesSearch = matchesSearchTitle || matchesSearchDescription || matchesSearchArtists;
+            const matchesAge = selectedAgeRanges.length === 0 || event.ageRanges?.some((range) => selectedAgeRanges.includes(range));
+            const matchesEventType = selectedEventType.length === 0 || event.activityTypes?.some((activityType) => selectedEventType.includes(activityType));
+            const matchesPriceEvent = selectedPriceEvent.length === 0 || selectedPriceEvent.includes(event.priceType);            
+        return matchesSearch 
+            && matchesAge 
+            && matchesPriceEvent 
+            && matchesEventType;
+        });        
+    }, [searchTerm, events, selectedAgeRanges, selectedPriceEvent, selectedEventType]);
 
     const handleFilterEvents = (term: string) => {
         setSearchTerm(term);
@@ -36,15 +53,6 @@ export const CalendarClient = ({events}:Props) => {
 
     return (
         <>
-            <div className="flex justify-center mb-6">
-                <input
-                    type="text"
-                    placeholder="Buscar evento..."
-                    value={searchTerm}
-                    onChange={(e) => handleFilterEvents(e.target.value)}
-                    className="w-full max-w-md mx-6 bg-primary p-2 border-cian border-2 shadow-lg shadow-primary p-2 rounded-lg focus:outline-hidden"
-                />
-            </div>
 
             <FeaturedEvents
                 events={filteredEvents}
@@ -80,6 +88,35 @@ export const CalendarClient = ({events}:Props) => {
                 <CalendarGrid
                     events={filteredEvents}
                     currentDate={currentDate}
+                />
+            </div>
+
+            <div className="flex flex-col justify-center items-center gap-1 mt-6">
+                <input
+                    type="text"
+                    placeholder="Buscar evento..."
+                    value={searchTerm}
+                    onChange={(e) => handleFilterEvents(e.target.value)}
+                    className="w-full max-w-md mx-6 bg-primary p-2 border-cian border-2 shadow-lg shadow-primary p-2 rounded-lg focus:outline-hidden"
+                />
+
+                <FilterEventByTag
+                    labelTag='Edad recomendada:'
+                    elementsTag={ AGE_RANGES }
+                    selectedTag={selectedAgeRanges}
+                    setSelectedTag={setSelectedAgeRanges}
+                />
+                <FilterEventByTag
+                    labelTag='Tipo de entrada:'
+                    elementsTag={ EVENT_PRICES }
+                    selectedTag={selectedPriceEvent}
+                    setSelectedTag={setSelectedPriceEvent}
+                />
+                <FilterEventByTag
+                    labelTag='Tipo de actividad:'
+                    elementsTag={ EVENT_TYPES }
+                    selectedTag={selectedEventType}
+                    setSelectedTag={setSelectedEventType}
                 />
             </div>
         </>
