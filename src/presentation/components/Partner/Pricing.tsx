@@ -4,7 +4,7 @@ const tiers = [
         discount: 10,
         features: [
             "Socios del 36 al 50",
-            "1 historia promocional por mes",
+            "2 historias promocionales por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
             "Tu logo en nuestro mapa",
             "Mini Sitio propio dentro de Paseos con Peques",
@@ -14,10 +14,10 @@ const tiers = [
     },
     {
         name: "Socio Preferencial",
-        discount: 25,
+        discount: 20,
         features: [
             "Socios del 21 al 35",
-            "1 historia promocionales por mes",
+            "2 historias promocionales por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
             "Tu logo en nuestro mapa",
             "Mini Sitio propio dentro de Paseos con Peques",
@@ -27,10 +27,10 @@ const tiers = [
     },
     {
         name: "Socio Estratégico",
-        discount: 50,
+        discount: 40,
         features: [
             "Socios del 11 al 20",
-            "2 historias promocionales por mes",
+            "1 historia promocionale por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",            
             "Tu logo en nuestro mapa",            
             "Mini Sitio propio dentro de Paseos con Peques",
@@ -40,10 +40,11 @@ const tiers = [
     },
     {
         name: "Socio Fundador",
-        discount: 75,
+        discount: 60
+        ,
         features: [
             "Primeros 10 socios",
-            "2 historias promocionales por mes",
+            "1 historia promocionale por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
             "Tu logo en nuestro mapa",
             "Mini Sitio propio dentro de Paseos con Peques",
