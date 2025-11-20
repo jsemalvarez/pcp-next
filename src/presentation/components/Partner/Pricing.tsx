@@ -1,40 +1,40 @@
 const tiers = [
-    {
-        name: "Socio Base",
-        discount: 10,
-        features: [
-            "Socios del 36 al 50",
-            "2 historias promocionales por mes",
-            "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
-            "Tu logo en nuestro mapa",
-            "Mini Sitio propio dentro de Paseos con Peques",
-            "Posibilidad de ser Socio Preferencial",
-        ],
-        members:"0/15"
-    },
+    // {
+    //     name: "Socio Base",
+    //     discount: 10,
+    //     features: [
+    //         "Socios del 36 al 50",
+    //         "2 historias promocionales por mes",
+    //         "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
+    //         "Tu logo en nuestro mapa",
+    //         "Mini Sitio propio dentro de Paseos con Peques",
+    //         "Posibilidad de ser Socio Preferencial",
+    //     ],
+    //     members:"0/15"
+    // },
     {
         name: "Socio Preferencial",
         discount: 20,
         features: [
-            "Socios del 21 al 35",
+            "Socios del 21 al 30",
             "2 historias promocionales por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
             "Tu logo en nuestro mapa",
-            "Mini Sitio propio dentro de Paseos con Peques",
-            "Posibilidad de ser Socio Estratégico",
+            "Mini Sitio Web propio preconfigurado, con diseño uniforme, dentro de Paseos con Peques",
+            "Lista de enlaces básico",
         ],
-        members:"0/15"
+        members:"0/10"
     },
     {
         name: "Socio Estratégico",
         discount: 40,
         features: [
             "Socios del 11 al 20",
-            "1 historia promocionale por mes",
+            "1 historia promocional por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",            
             "Tu logo en nuestro mapa",            
-            "Mini Sitio propio dentro de Paseos con Peques",
-            "Posibilidad de ser Socio Fundador",            
+            "Mini Sitio Web propio preconfigurado, con diseño uniforme, dentro de Paseos con Peques",     
+            "Lista de enlaces básico",   
         ],
         members:"0/10"
     },
@@ -44,10 +44,11 @@ const tiers = [
         ,
         features: [
             "Primeros 10 socios",
-            "1 historia promocionale por mes",
+            "1 historia promocional por mes",
             "Colaboraciones en Instagram: posteos, reels o carrusel (según disponibilidad mensual)",
             "Tu logo en nuestro mapa",
-            "Mini Sitio propio dentro de Paseos con Peques",
+            "Mini Sitio Web personalizado dentro de Paseos con Peques",
+            "Lista de enlaces customizados",
         ],
         members:"1/10"
     },
@@ -67,7 +68,7 @@ export const Pricing = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {tiers.map((tier, i) => (
             <div
               key={i}
