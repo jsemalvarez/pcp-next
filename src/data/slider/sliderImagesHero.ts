@@ -1,9 +1,9 @@
 export const sliderImagesHero = [
-    {
-      imageName: "banner_techno_kids_avartt.webp",
-      title: "Techno Kids",
-      subTitle: "Primera fiesta electrónica para niños y familias",
-    },
+    // {
+    //   imageName: "banner_techno_kids_avartt.webp",
+    //   title: "Techno Kids",
+    //   subTitle: "Primera fiesta electrónica para niños y familias",
+    // },
     {
       imageName: "banner_la_audacia_iagg08.webp", 
       title: "Circo La Audacia",
