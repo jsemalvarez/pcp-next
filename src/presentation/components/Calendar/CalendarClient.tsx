@@ -64,6 +64,7 @@ export const CalendarClient = ({events, places}:Props) => {
 
             <FeaturedEvents
                 events={filteredEvents}
+                setSelectedEvent={setSelectedEvent}
             />
 
             <div className="w-full md:w-8/10 max-w-[1200px] mx-auto border-cian border-2 shadow-lg shadow-primary rounded bg-primary">
@@ -98,11 +99,6 @@ export const CalendarClient = ({events, places}:Props) => {
                     currentDate={currentDate}
                     setSelectedEvent={setSelectedEvent}
                 />
-                <EventDetail 
-                    eventDetail={selectedEvent}
-                    setSelectedEvent={setSelectedEvent}
-                    handleFindPlaceById={handleFindPlaceById}
-                />
             </div>
 
             <div className="flex flex-col justify-center items-center gap-1 mt-6">
@@ -133,6 +129,12 @@ export const CalendarClient = ({events, places}:Props) => {
                     setSelectedTag={setSelectedEventType}
                 />
             </div>
+
+            <EventDetail 
+                eventDetail={selectedEvent}
+                setSelectedEvent={setSelectedEvent}
+                handleFindPlaceById={handleFindPlaceById}
+            />
         </>
     );
 }

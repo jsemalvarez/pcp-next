@@ -9,9 +9,10 @@ import { ChevronLeftIcon } from "../common/icons/ChevronLeftIcon";
 
 interface Props{
     events: Event[];
+    setSelectedEvent: (event: Event | null) => void;
 }
 
-export const FeaturedEvents = ({ events }: Props) => {
+export const FeaturedEvents = ({ events, setSelectedEvent }: Props) => {
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -78,6 +79,7 @@ export const FeaturedEvents = ({ events }: Props) => {
                         <div
                             key={event.id}
                             className="min-w-[180px] max-w-[180px] flex-shrink-0 cursor-pointer"
+                            onClick={()=>setSelectedEvent(event)}
                         >
                             <div className="bg-gradient-to-b from-primary to-gray-100 shadow-lg shadow-cyan-500/50 p-[2px] flex justify-center items-center rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 snap-start">
                                 <CloudinaryImage 
