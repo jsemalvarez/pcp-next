@@ -71,12 +71,12 @@ body {
 
 .custom-marker {
   position: relative;
-  display: inline-block;
-  width: 45px;
-  height: 45px;
-  background: #1b134f; 
+  /* display: inline-block; */
+  width: 46px;
+  height: 46px;
+  /* background: #1b134f;  */
   border-radius: 50%;
-  border: 4px solid #1b134f;
+  /* border: 2px solid #1b134f; */
 }
 
 .custom-marker img {
@@ -84,18 +84,20 @@ body {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid #1b134f;
+  background: #1b134f;
 }
 
 /* Triángulo */
 .custom-marker::after {
   content: "";
   position: absolute;
-  bottom: -23px;
-  right: -15px;
+  bottom: -19px;
+  right: -11px;
   transform: rotate(-30deg);
   width: 0;
   height: 0;
-  border-left: 20px solid transparent;
+  border-left: 21px solid transparent;
   border-right: 20px solid transparent;
   border-top: 35px solid #1b134f; /* color del triángulo */
   z-index: -2;
@@ -104,14 +106,14 @@ body {
 .custom-marker::before {
   content: "";
   position: absolute;
-  bottom: -18px;
-  right: -12px;
+  bottom: -17px;
+  right: -10px;
   transform: rotate(-30deg);
   width: 0;
   height: 0;
-  border-left: 20px solid transparent;
+  border-left: 21px solid transparent;
   border-right: 20px solid transparent;
-  border-top: 35px solid #ff637e; /* color del triángulo */
+  border-top: 35px solid #ff637e;
   z-index: -1;
 }
 
