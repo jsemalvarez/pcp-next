@@ -12,6 +12,7 @@ import { FilterEventByTag } from "./FilterEventByTag";
 import { AGE_RANGES, EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
 import { EventDetail } from "./EventDetail";
 import { Place } from "@/domain/entities/Place";
+import { CalendarDayAside } from "./CalendarDayAside";
 dayjs.locale('es'); // lo setea como predeterminado
 
 interface Props{
@@ -24,9 +25,10 @@ export const CalendarClient = ({events, places}:Props) => {
     const [currentDate, setCurrentDate] = useState(dayjs());
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
-    const [selectedPriceEvent, setSelectedPriceEvent] = useState<string[]>([])
-    const [selectedEventType, setSelectedEventType] = useState<string[]>([])
-    const [selectedEvent, setSelectedEvent] = useState<null | Event>(null)
+    const [selectedPriceEvent, setSelectedPriceEvent] = useState<string[]>([]);
+    const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<null | Event>(null);
+    const [calendarDayEvents, setCalendarDayEvents] = useState<Event[] | null>(null);
 
     const filteredEvents = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -98,6 +100,7 @@ export const CalendarClient = ({events, places}:Props) => {
                     events={filteredEvents}
                     currentDate={currentDate}
                     setSelectedEvent={setSelectedEvent}
+                    handleCalendarDayAside={setCalendarDayEvents}
                 />
             </div>
 
@@ -130,6 +133,11 @@ export const CalendarClient = ({events, places}:Props) => {
                 />
             </div>
 
+            <CalendarDayAside
+                calendarDayEvents={calendarDayEvents}
+                handleOpenEventDetail={setSelectedEvent}
+                handleCalendarDayAside={setCalendarDayEvents}
+            />
             <EventDetail 
                 eventDetail={selectedEvent}
                 setSelectedEvent={setSelectedEvent}

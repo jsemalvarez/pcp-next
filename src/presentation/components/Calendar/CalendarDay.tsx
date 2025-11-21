@@ -5,9 +5,10 @@ interface Props {
   dateKey: string;
   events: Event[];
   setSelectedEvent: (event: Event | null) => void;
+  handleCalendarDayAside: (event: Event[] | null) => void;
 }
 
-export const CalendarDay = ({ day, dateKey, events, setSelectedEvent }: Props) => {
+export const CalendarDay = ({ day, dateKey, events, setSelectedEvent, handleCalendarDayAside }: Props) => {
   const limitedEvents = events.slice(0, 2);
   const extraCount = events.length - limitedEvents.length;
 
@@ -28,6 +29,7 @@ export const CalendarDay = ({ day, dateKey, events, setSelectedEvent }: Props) =
       {extraCount > 0 && (
         <button
           className="block mx-auto w-9/10 bg-gray-200 text-blue-500 text-center rounded-full cursor-pointer truncate"
+          onClick={()=> handleCalendarDayAside(events)}
         >
           +{extraCount} más
         </button>
