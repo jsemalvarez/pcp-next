@@ -9,9 +9,10 @@ import { CalendarDay } from './CalendarDay';
 interface Props {
     events: Event[];
     currentDate: Dayjs;
+    setSelectedEvent: (event: Event | null) => void;
 }
 
-export const CalendarGrid = ({ events, currentDate }: Props) => {
+export const CalendarGrid = ({ events, currentDate, setSelectedEvent }: Props) => {
 
   const eventsByDate = groupEventsByDate(events);
 
@@ -40,6 +41,7 @@ export const CalendarGrid = ({ events, currentDate }: Props) => {
         day={day}
         dateKey={dateKey}
         events={eventsDate}
+        setSelectedEvent={setSelectedEvent}
       />
     );
   }

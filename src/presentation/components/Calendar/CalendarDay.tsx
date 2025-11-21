@@ -4,9 +4,10 @@ interface Props {
   day: number;
   dateKey: string;
   events: Event[];
+  setSelectedEvent: (event: Event | null) => void;
 }
 
-export const CalendarDay = ({ day, dateKey, events }: Props) => {
+export const CalendarDay = ({ day, dateKey, events, setSelectedEvent }: Props) => {
   const limitedEvents = events.slice(0, 2);
   const extraCount = events.length - limitedEvents.length;
 
@@ -18,6 +19,7 @@ export const CalendarDay = ({ day, dateKey, events }: Props) => {
         <button
           key={event.id}
           className={`${event.bgColor ? event.bgColor : 'bg-gray-500'} w-full cursor-pointer mb-1 px-1 truncate`}
+          onClick={()=>setSelectedEvent(event)}
         >
           {event.title}
         </button>

@@ -10,19 +10,23 @@ import { FeaturedEvents } from "./FeaturedEvents";
 import { CalendarGrid } from "./CalendarGrid";
 import { FilterEventByTag } from "./FilterEventByTag";
 import { AGE_RANGES, EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
+import { EventDetail } from "./EventDetail";
+import { Place } from "@/domain/entities/Place";
 dayjs.locale('es'); // lo setea como predeterminado
 
 interface Props{
     events: Event[];
+    places: Place[]
 }
 
-export const CalendarClient = ({events}:Props) => {
+export const CalendarClient = ({events, places}:Props) => {
 
     const [currentDate, setCurrentDate] = useState(dayjs());
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
     const [selectedPriceEvent, setSelectedPriceEvent] = useState<string[]>([])
     const [selectedEventType, setSelectedEventType] = useState<string[]>([])
+    const [selectedEvent, setSelectedEvent] = useState<null | Event>(null)
 
     const filteredEvents = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -50,6 +54,10 @@ export const CalendarClient = ({events}:Props) => {
     const handlePrevMonth = () => setCurrentDate(currentDate.subtract(1, "month"));
     const handleNextMonth = () => setCurrentDate(currentDate.add(1, "month"));
 
+    const handleFindPlaceById = (placeId:string): Place | undefined => {
+        return places.find( place => place.id == placeId);
+    }
+
 
     return (
         <>
@@ -73,21 +81,27 @@ export const CalendarClient = ({events}:Props) => {
 
                 <div className="grid grid-cols-7 text-center text-sm">
                     {
-                    ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => {
-                        const isWeekend = day === "Sáb" || day === "Dom";
-                        return (
-                        <div
-                            key={day}
-                            className={`${isWeekend ? "text-gray-200" : "text-secondary"}`}
-                        >{day}</div>
-                        )
-                    })
+                        ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => {
+                            const isWeekend = day === "Sáb" || day === "Dom";
+                            return (
+                                <div
+                                    key={day}
+                                    className={`${isWeekend ? "text-gray-200" : "text-secondary"}`}
+                                >{day}</div>
+                            )
+                        })
                     }
                 </div>
 
                 <CalendarGrid
                     events={filteredEvents}
                     currentDate={currentDate}
+                    setSelectedEvent={setSelectedEvent}
+                />
+                <EventDetail 
+                    eventDetail={selectedEvent}
+                    setSelectedEvent={setSelectedEvent}
+                    handleFindPlaceById={handleFindPlaceById}
                 />
             </div>
 

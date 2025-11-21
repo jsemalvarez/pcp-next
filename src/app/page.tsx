@@ -23,7 +23,10 @@ export default async function Home() {
       <main className="min-h-[100vh] bg-gradient-to-bl from-primary via-primary-light to-primary text-indigo-100">
         <HeroSection />
         <PlacesMapSection places={places}/>
-        <CalendarSection events={events}/>
+        <CalendarSection 
+          events={events}
+          places={places}
+        />
         <PlacesSearchSection places={places} />
       </main>
     </>
