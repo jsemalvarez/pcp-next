@@ -9,6 +9,7 @@ import { Place } from "@/domain/entities/Place"
 import { CATEGORIES, CATEGORIES_TRANSLATE } from '@/presentation/constants/categories';
 import { AGE_RANGES } from '@/presentation/constants/event-filters';
 import { BtnFilterMap } from '../common/buttons/BtnFilterMap';
+import { PlaceDetail } from './PlaceDetail';
 const MapView = dynamic(() => import('./components/MapView'), {
   ssr: false,
 })
@@ -22,6 +23,7 @@ export const PlacesMapClient = ({places}:Props) => {
 
     const [category, setCategory] = useState('all')
     const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
+    const [setselectedPlace, setSetselectedPlace] = useState<Place | null>(null)
 
     const handleAgeRangeChange = (rangeId:string) => {
         setSelectedAgeRanges((prev) =>
@@ -46,7 +48,10 @@ export const PlacesMapClient = ({places}:Props) => {
             <p className='text-cian'>*Click en los iconos para mas info</p>
             <div className='w-9/10 max-w-[1200px] border-cian border-2 shadow-lg shadow-primary rounded-xl bg-primary overflow-hidden'>
                 <div className='aspect-[4/5] md:aspect-[10/5]'>
-                    <MapView places={filteredPlaces} />
+                    <MapView 
+                        places={filteredPlaces} 
+                        setSetselectedPlace={setSetselectedPlace}
+                    />
                 </div>
 
                 <div className="text-white px-4 py-2 flex flex-wrap gap-2 items-center justify-center">
@@ -87,6 +92,10 @@ export const PlacesMapClient = ({places}:Props) => {
                 </div>
                 
             </div>
+            <PlaceDetail
+                placeDetail={setselectedPlace}
+                setSetselectedPlace={setSetselectedPlace}
+            />
         </div>
     )
 }

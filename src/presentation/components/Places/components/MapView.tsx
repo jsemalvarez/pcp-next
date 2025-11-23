@@ -12,11 +12,12 @@ const Markers = dynamic(() => import('./Markers'), {
 export const initLatLng = { lat:-38.00022116740122, lng:-57.551784619277406 }
 
 interface Props{ 
-    children?: React.ReactNode 
-    places: Place[]
+    children?: React.ReactNode;
+    places: Place[];
+    setSetselectedPlace: (place:Place | null) => void;
 }
 
-export default function MapView({ children, places }:Props ) {
+export default function MapView({ children, places, setSetselectedPlace }:Props ) {
     return (
         <MapContainer 
             center={initLatLng} zoom={14} 
@@ -27,7 +28,10 @@ export default function MapView({ children, places }:Props ) {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />            
-            <Markers places={places} />
+            <Markers 
+                places={places} 
+                setSetselectedPlace={setSetselectedPlace}
+            />
             { children }
         </MapContainer>
     )

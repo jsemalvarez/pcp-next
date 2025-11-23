@@ -12,37 +12,46 @@ import { getCustomSvgIcon } from '@/presentation/utils/getCustomSvgIcon'
 import { createSvgIcon } from '@/presentation/utils/createSvgIcon'
 
 interface Props{
-    places: Place[]
+    places: Place[];
+    setSetselectedPlace: (place:Place | null) => void;
 }
 
-export default function Markers({ places }:Props){
+export default function Markers({ places, setSetselectedPlace }:Props){
 
-    return (
-      <>
-        {
-          places.map( place => {
+  const eventHandler = (place:Place) => {      
+    return {
+      click() {
+        setSetselectedPlace(place)
+      },
+  }}
 
-            if(place.isShowInMap){
+  return (
+    <>
+      {
+        places.map( place => {
 
-              const placeType = place.iconType || ICONS_TYPES.PLAY_ROOM;
-              const svgIconType = ICONS_TYPES[ placeType as keyof typeof ICONS_TYPES ];
+          if(place.isShowInMap){
 
-              const bgColor = place.bgColor || COLORS_BY_CATEGORIES.ENTERTIME; 
-              const icon = (place.hasCustomIcon)
-                ?getCustomSvgIcon({imageId: place.photoUrl})
-                :createSvgIcon({ bgColor, svgIconType })
+            const placeType = place.iconType || ICONS_TYPES.PLAY_ROOM;
+            const svgIconType = ICONS_TYPES[ placeType as keyof typeof ICONS_TYPES ];
 
-              return (
-                < Marker 
-                  key={place.id} 
-                  position={place.position} 
-                  icon={icon}
-                />                
-              )
-            }
-            return null
-          })
-        }
+            const bgColor = place.bgColor || COLORS_BY_CATEGORIES.ENTERTIME; 
+            const icon = (place.hasCustomIcon)
+              ?getCustomSvgIcon({imageId: place.photoUrl})
+              :createSvgIcon({ bgColor, svgIconType })
+
+            return (
+              < Marker 
+                key={place.id} 
+                position={place.position} 
+                icon={icon}
+                eventHandlers={eventHandler(place)}
+              />                
+            )
+          }
+          return null
+        })
+      }
     </>
   )
 }
