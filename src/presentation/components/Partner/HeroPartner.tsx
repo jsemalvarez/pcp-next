@@ -1,4 +1,3 @@
-import React from 'react'
 import { CloudinaryImage } from '../common/CloudinaryImage'
 import { CalendarIcon, LocationIcon } from '../common/icons'
 import { HouseIcon } from '../common/icons/HouseIcon'
