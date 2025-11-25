@@ -20,7 +20,7 @@ export default async function Home() {
   return (
     <>
       <PublicNavbar />
-      <main className="min-h-[100vh] bg-gradient-to-bl from-primary via-primary-light to-primary text-indigo-100">
+      <main className="min-h-[100vh] bg-gradient-to-bl from-primary via-secondary to-primary text-indigo-100">
         <HeroSection />
         <PlacesMapSection places={places}/>
         <CalendarSection 

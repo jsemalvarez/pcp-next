@@ -12,7 +12,10 @@ interface Props{
 
 export const CalendarSection = ({events, places}:Props) => {
   return (
-    <section id='calendarSection' className='min-h-screen py-[100px] text-center'>
+    <section 
+      id='calendarSection' 
+      className='min-h-screen py-[100px] text-center'
+    >
         <TitleSection>
             Agenda familiar del mes
         </TitleSection>

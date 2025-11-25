@@ -6,7 +6,7 @@ interface Props {
 
 export const TitleSection = ({children}:Props) => {
   return (
-    <h2 className="p-2 text-center text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-300 tracking-widest">
+    <h2 className="p-2 text-center text-5xl font-extrabold text-transparent bg-clip-text bg-primary tracking-widest drop-shadow-lg drop-shadow-indigo-100">
         {children}
     </h2>
   )

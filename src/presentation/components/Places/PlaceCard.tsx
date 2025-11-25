@@ -23,7 +23,7 @@ export const PlaceCard = ({place}:Props) => {
 
     return (
         <div className="bg-gradient-to-b from-primary to-gray-100 shadow-lg shadow-cyan-500/50 p-[2px] flex justify-center items-center w-full max-w-sm h-[250px] rounded-lg shadow-md">
-            <div className="bg-gradient-to-b from-secondary to-primary flex flex-col w-full h-full rounded-lg overflow-hidden">
+            <div className="bg-secondary flex flex-col w-full h-full rounded-lg overflow-hidden">
                 {/* <div className="h-1/3 w-full">
                     <img
                         src={place.photoUrl}
@@ -34,7 +34,7 @@ export const PlaceCard = ({place}:Props) => {
   
                 {/* Contenido scrollable */}
                 <div className="flex-1 overflow-y-auto p-4 text-gray-200">
-                    <h2 className="text-purple-800 text-2xl font-extrabold">{place.name}</h2>
+                    <h2 className="text-primary text-2xl font-extrabold">{place.name}</h2>
                     <p className='font-bold -mt-1'>{place.schedules}</p>
                     <div className='-mt-1 text-sm'>
                         <p>{servicesToString}</p>
@@ -46,7 +46,7 @@ export const PlaceCard = ({place}:Props) => {
                         place.phone && (
                             <>
                                 <p className='mt-2 font-semibold'>
-                                    <span className='text-gray-400'>Telefono: </span>
+                                    <span className='text-primary'>Telefono: </span>
                                     {place.phone}
                                 </p>
                             </>
@@ -56,7 +56,7 @@ export const PlaceCard = ({place}:Props) => {
                         place.whatsapp &&  (
                             <>
                                 <p className='mt-2 font-semibold'>
-                                    <span className='text-gray-400'>Whatsapp: </span>
+                                    <span className='text-primary'>Whatsapp: </span>
                                     {place.whatsapp}
                                 </p>
                                 <WhatsAppButton whatsapp={ place.whatsapp } />
@@ -67,7 +67,7 @@ export const PlaceCard = ({place}:Props) => {
                         place.address && (
                             <>
                                 <p className='mt-2 font-semibold'>
-                                    <span className='text-gray-400'>Direccion: </span>
+                                    <span className='text-primary'>Direccion: </span>
                                     {place.address}
                                 </p>
                                 <ViewOnMapButton position={ place.position } />
