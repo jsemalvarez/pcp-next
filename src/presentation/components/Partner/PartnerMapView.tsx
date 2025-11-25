@@ -17,7 +17,7 @@ interface Props{
 
 export default function PartnerMapView({position}:Props){
 
-    const icon = getCustomSvgIcon({ imageId:'', alt: ""})
+    const icon = getCustomSvgIcon({ imageId:'feriainfinita/profile_feria_infinita_abgru6.webp', alt: "foto de perfil"})
 
     return(
         <MapContainer 

@@ -1,6 +1,8 @@
 import { LocationPartner } from "@/presentation/components/Partner/LocationPartner";
 import Image from "next/image";
 
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/feriainfinita/';
+
 const partner = {
     name: "Feria Infinita",
     category: "Tienda de Ropa - Moda circular",
@@ -19,56 +21,56 @@ const partner = {
         },
         {
             title: "Traé tus prendas",
-            text: "Recibimos prendas los días lunes. Es importante que estén impecables, actuales y de estación, así podemos darles una segunda vida y mantener la calidad que caracteriza a la feria."
+            text: "Recibimos prendas a consignación. Es importante que estén impecables, actuales y de estación para poder darles una segunda vida y mantener la calidad que caracteriza a la feria. Para más información, comunicate por WhatsApp."
         }
     ],
     galery:[
         {
             id:'DemoPartnerPage-1',
             alt:'Demo Partner Page img 1',
-            path:"https://images.unsplash.com/photo-1609590981063-d495e2914ce4?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}ropa-2_uerzwj.webp`,
             style:'relative h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-2',
             alt:'Demo Partner Page img 2',
-            path:"https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}ropa-3_h7f0cb.webp`,
             style:'relative h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-3',
             alt:'Demo Partner Page img 3',
-            path:"https://images.unsplash.com/photo-1609590981063-d495e2914ce4?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}profile_feria_infinita_abgru6.webp`,
             style:'relative col-span-2 row-span-2 md:col-span-3 lg:col-span-2 h-96 overflow-hidden'
         },
             {
             id:'DemoPartnerPage-4',
             alt:'Demo Partner Page img 4',
-            path:"https://images.unsplash.com/photo-1615557509870-98972c5e1396?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}zapatos_syc48r.webp`,
             style:'relative col-span-2 h-48 overflow-hidden'
         },
             {
             id:'DemoPartnerPage-5',
             alt:'Demo Partner Page img 5',
-            path:"https://images.unsplash.com/photo-1609590981063-d495e2914ce4?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}ropa-1_dejsk4.webp`,
             style:'relative h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-6',
             alt:'Demo Partner Page img 6',
-            path:"https://images.unsplash.com/photo-1514481538271-cf9f99627ab4?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}perchero_clmxp7.webp`,
             style:'relative md:col-span-2 h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-7',
             alt:'Demo Partner Page img 7',
-            path:"https://images.unsplash.com/photo-1634473115508-4291d758cf03?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            path:`${CLOUDINARY_BASE_URL}ropa-4_qsuy9j.webp`,
             style:'relative col-span-2 lg:col-span-1 h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-8',
             alt:'Demo Partner Page img 8',
-            path:"https://images.unsplash.com/photo-1683771419613-0a608d8f5cf6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGNhZmUlMjBmb29kfGVufDB8fDB8fHww",
+            path:`${CLOUDINARY_BASE_URL}entrada_ierb76.webp`,
             style:'relative col-span-2 sm:col-span-4 md:col-span-5 lg:col-span-2 h-48 overflow-hidden'
         },
     ],
