@@ -6,8 +6,7 @@ const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dwhdla1b4/image/upload/w
 const partner = {
     name: "Feria Infinita",
     category: "Tienda de Ropa - Moda circular",
-    coverImage:
-        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=1200&q=60",
+    coverImage:"https://res.cloudinary.com/dwhdla1b4/image/upload/v1764105596/pcp-images/feriainfinita/banner_feriainfinita_le7plk.webp",
     mision:"La ropa es mucho más que ropa y cómo te vestís importa. En Feria Infinita creemos en una moda más consciente, accesible y circular. Queremos que cada persona pueda renovar su estilo disfrutando de un espacio donde la moda y los buenos precios conviven en armonía. Por eso seleccionamos cada prenda con dedicación, dándole una segunda vida y asegurando siempre calidad.",
     description:'',
     services: [
@@ -77,7 +76,7 @@ const partner = {
     location:{
         address:'Santiago del Estero 4301',
         whatsApp:'02234268160',
-        position:{ lat:-38.020801042679714, lng:-57.56286621218633 }
+        position:{ lat:-38.02080773585313, lng:-57.56304730090762 }
     }
 };
 
@@ -93,6 +92,7 @@ export default function FeriaInfinitaPage() {
               alt={partner.name}
               className="w-full h-full object-cover opacity-70"
               fill
+              unoptimized={true}
           />
           <div className="absolute bottom-5 left-5 text-white drop-shadow-lg">
               <h1 className="text-3xl md:text-6xl font-bold">{partner.name}</h1>

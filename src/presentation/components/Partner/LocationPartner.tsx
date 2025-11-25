@@ -16,6 +16,8 @@ interface Props{
 
 export const LocationPartner = ({addrres, whatsApp, position}:Props) => {
 
+  const whatsappLink = `https://wa.me/${whatsApp}`;
+
   return (
     <section className="min-h-screen bg-partner2 flex flex-col justify-center items-center gap-6">
 
@@ -27,7 +29,14 @@ export const LocationPartner = ({addrres, whatsApp, position}:Props) => {
 
             <div className="p-4 shadow rounded-xl border-2 border-primary/70">
                 <p className="text-sm text-gray-300">WhatsApp:</p>
-                <p className="font-bold text-gray-100">{whatsApp}</p>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ whatsappLink }
+                  className="font-bold text-gray-100 underline"
+              >
+                  {whatsApp}
+              </a>
             </div>
         </div>
 

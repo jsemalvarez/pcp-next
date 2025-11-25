@@ -22,7 +22,7 @@ export default function PartnerMapView({position}:Props){
     return(
         <MapContainer 
               center={position} 
-              zoom={15} 
+              zoom={17} 
               scrollWheelZoom={true}
               style={{ height: '100%', width: '100%' }}
           >
