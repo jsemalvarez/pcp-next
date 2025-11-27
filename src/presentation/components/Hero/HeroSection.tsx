@@ -23,7 +23,7 @@ export const HeroSection = () => {
 
         <HeroActions />
 
-        <div className="py-4 text-4xl font-bold text-center tracking-widest max-w-3xl w-full text-primary">
+        <div className="py-4 text-4xl font-bold text-center tracking-widest max-w-3xl w-full text-indigo-100">
             Acá te podemos ayudar!!!
         </div>
 
