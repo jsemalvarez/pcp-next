@@ -1,7 +1,7 @@
 export const FacebookIcon = () => {
     return (
         <svg 
-            className="w-8 h-8 text-gray-400 hover:text-blue-600 transition duration-300"
+            className="w-8 h-8 text-slate-500 hover:text-sky-600 transition duration-300"
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"

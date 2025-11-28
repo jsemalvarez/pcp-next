@@ -1,7 +1,7 @@
 export const WebIcon = () => {
     return (
         <svg 
-            className="w-7 h-7 text-gray-400 hover:text-emerald-700 transition duration-300"
+            className="w-7 h-7 text-slate-500 hover:text-sky-600 transition duration-300"
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
