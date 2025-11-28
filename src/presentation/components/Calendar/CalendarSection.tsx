@@ -14,7 +14,7 @@ export const CalendarSection = ({events, places}:Props) => {
   return (
     <section 
       id='calendarSection' 
-      className='min-h-screen py-[100px] text-center'
+      className='min-h-screen py-[100px]'
     >
         <TitleSection>
             Agenda familiar del mes

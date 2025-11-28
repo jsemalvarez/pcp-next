@@ -12,7 +12,7 @@ export const PlacesMapSection = async({places}:Props) => {
     return (
         <section 
             id='mapSection' 
-            className='min-h-screen py-[100px] text-center'
+            className='min-h-screen py-[100px]'
         > 
             <TitleSection>
                 Nuestro mapa para familias
