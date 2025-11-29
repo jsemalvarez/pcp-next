@@ -5,6 +5,7 @@ import { PlacesMapSection } from "@/presentation/components/Places/PlacesMapSect
 import { CalendarSection } from "@/presentation/components/Calendar/CalendarSection";
 import { PlacesSearchSection } from "@/presentation/components/Places/PlacesSearchSection";
 import { getEventsFactory } from "@/domain/factories/getEventsFactory";
+import { FloatingWhatsAppButton } from "@/presentation/components/common/buttons";
 
 
 export default async function Home() {
@@ -28,6 +29,7 @@ export default async function Home() {
           places={places}
         />
         <PlacesSearchSection places={places} />
+        <FloatingWhatsAppButton />
       </main>
     </>
   );
