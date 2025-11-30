@@ -14,8 +14,8 @@ const baloo2 = Baloo_2({
 });
 
 export const metadata: Metadata = {
-  title: "PcP - Paseos con Peques",
-  description: "Paseos con Peques es un espacio donde podes encuentrar lugares y actividades para disfrutar con los peques en Mar del Plata.",
+title: 'Paseos con Peques | Guía de actividades en Mar del Plata',
+  description: 'Descubrí los mejores lugares, eventos y paseos para disfrutar con niños, chicos o peques. Mapa interactivo y agenda cultural actualizada.',
   icons: {
     icon: "/favicon.svg",
   },
