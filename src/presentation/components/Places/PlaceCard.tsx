@@ -34,12 +34,12 @@ export const PlaceCard = ({place}:Props) => {
   
                 {/* Contenido scrollable */}
                 <div className="flex-1 overflow-y-auto p-4 text-gray-200">
-                    <h2 className="text-primary text-2xl font-extrabold">{place.name}</h2>
+                    <h2 className="text-primary text-2xl font-extrabold text-center">{place.name}</h2>
                     <p className='font-bold -mt-1'>{place.schedules}</p>
                     <div className='-mt-1 text-sm'>
                         <p>{servicesToString}</p>
 
-                    <p className="text-sm whitespace-pre-line mt-2">{place.description}</p>
+                    <p className="text-gray-800 text-sm whitespace-pre-line mt-2">{place.description}</p>
 
                     </div>
                     {

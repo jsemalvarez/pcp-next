@@ -11,7 +11,7 @@ interface Props{
 
 export const PlacesSearchSection = async({places}:Props) => {
     return (
-        <div id='searchSection' className='min-h-screen py-[100px] text-center'>            
+        <div id='searchSection' className='min-h-screen py-[100px]'>            
             <TitleSection>
                 Buscá tu próximo paseo en familia
             </TitleSection>

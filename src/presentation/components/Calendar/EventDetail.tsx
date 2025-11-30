@@ -6,6 +6,7 @@ import { VideoIcon } from "../common/icons/VideoIcon";
 import { XMarkIcon } from "../common/icons/XMarkIcon";
 import { ClockIcon } from "../common/icons/ClockIcon";
 import { Place } from "@/domain/entities/Place";
+import { fortmatDate } from "@/presentation/utils/formatDate";
 
 interface Props{
     eventDetail: Event | null;
@@ -54,7 +55,7 @@ export const EventDetail = ({eventDetail, setSelectedEvent, handleFindPlaceById}
                 <div className="text-sm text-gray-600 space-y-1">
                     <div className="flex items-center gap-2">
                         <CalendarIcon />
-                        {/* <span className="font-medium">{ dayjs(eventDetail.date).format('D [de] MMMM') }</span>  */}
+                        <span className="font-medium">{ fortmatDate(eventDetail.date) }</span> 
                     </div>
                     <div className="flex items-center gap-2">
                         <ClockIcon />

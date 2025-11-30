@@ -1,6 +1,7 @@
 import { Event } from "@/domain/entities/Event"
 import { ClockIcon } from "../common/icons/ClockIcon"
 import { XMarkIcon } from "../common/icons/XMarkIcon"
+import { fortmatDate } from "@/presentation/utils/formatDate";
 
 interface Props{
     calendarDayEvents: Event[] | null;
@@ -25,8 +26,7 @@ export const CalendarDayAside = ({calendarDayEvents, handleOpenEventDetail, hand
         >
             <div className="flex justify-between items-center p-6">
                 <h2 className="font-extrabold text-xl">
-                    {/* Eventos  { dayjs(calendarDayEvents[0]?.date).format('D [de] MMMM') } */}
-                    Eventos
+                    Eventos:  { fortmatDate(calendarDayEvents[0]?.date) }
                 </h2>
                 <span
                     className='cursor-pointer text-gray-600 hover:text-red-500 text-lg font-bold' 
