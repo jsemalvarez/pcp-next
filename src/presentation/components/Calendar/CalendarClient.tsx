@@ -37,7 +37,7 @@ export const CalendarClient = ({events, places}:Props) => {
         return events.filter((event) => {
             const matchesSearchTitle = term.length <= 1 || event.title.toLowerCase().includes(term);
             const matchesSearchDescription = term.length <= 1 || event.description.toLowerCase().includes(term);
-            const matchesSearchArtists = term.length <= 1 || event.artists.toLowerCase().includes(term);
+            const matchesSearchArtists = term.length <= 1 || event.artists?.toLowerCase().includes(term);
             const matchesSearch = matchesSearchTitle || matchesSearchDescription || matchesSearchArtists;
             const matchesAge = selectedAgeRanges.length === 0 || event.ageRanges?.some((range) => selectedAgeRanges.includes(range));
             const matchesEventType = selectedEventType.length === 0 || event.activityTypes?.some((activityType) => selectedEventType.includes(activityType));
