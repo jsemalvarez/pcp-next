@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { sliderImagesHero } from "@/data/slider/sliderImagesHero";
 import { CloudinaryImage } from "../common/CloudinaryImage";
+import { ChevronLeftIcon, ChevronRightIcon } from "../common/icons";
 
 
 interface ImageSliderProps {
@@ -16,11 +17,19 @@ interface ImageSliderProps {
 
 export const ImageSlider = ({ images = sliderImagesHero, intervalTime = 4000 }: ImageSliderProps) => {
   const [current, setCurrent] = useState(0);
+    const handleNext = () => {
+    setCurrent((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrev = () => {
+    setCurrent((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
+      handleNext();
     }, intervalTime);
+
     return () => clearInterval(interval);
   }, [images.length, intervalTime]);
 
@@ -42,6 +51,19 @@ export const ImageSlider = ({ images = sliderImagesHero, intervalTime = 4000 }: 
           </div>
         </div>
       ))}
+      <button
+        onClick={handlePrev}
+        className="absolute top-1/2 left-3 -translate-y-1/2 bg-primary/80 p-2 rounded-full hover:bg-primary transition z-50 cursor-pointer"
+      >
+        <ChevronLeftIcon />
+      </button>
+
+      <button
+        onClick={handleNext}
+        className="absolute top-1/2 right-3 -translate-y-1/2 bg-primary/80 p-2 rounded-full hover:bg-primary transition z-50 cursor-pointer"
+      >
+        <ChevronRightIcon />
+      </button>
     </div>
   );
 };
