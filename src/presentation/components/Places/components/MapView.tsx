@@ -20,7 +20,7 @@ interface Props{
 export default function MapView({ children, places, setSetselectedPlace }:Props ) {
     return (
         <MapContainer 
-            center={initLatLng} zoom={14} 
+            center={initLatLng} zoom={12} 
             scrollWheelZoom={true}
             style={{ height: '100%', width: '100%' }}
         >
