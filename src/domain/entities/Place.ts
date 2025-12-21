@@ -24,4 +24,5 @@ export interface Place {
     description: string;
     iconType: string;
     bgColor: string;
+    isFeatured: boolean;
 }

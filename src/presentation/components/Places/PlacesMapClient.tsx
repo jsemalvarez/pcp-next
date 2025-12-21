@@ -10,9 +10,11 @@ import { CATEGORIES, CATEGORIES_TRANSLATE } from '@/presentation/constants/categ
 import { AGE_RANGES } from '@/presentation/constants/event-filters';
 import { BtnFilterMap } from '../common/buttons/BtnFilterMap';
 import { PlaceDetail } from './PlaceDetail';
+// import { FeaturedPlaces } from './FeaturedPlaces';
 const MapView = dynamic(() => import('./components/MapView'), {
   ssr: false,
 })
+const FeaturedPlaces = dynamic(() => import('./FeaturedPlaces'), { ssr: false })
 
 
 interface Props{
@@ -23,6 +25,7 @@ export const PlacesMapClient = ({places}:Props) => {
 
     const [category, setCategory] = useState('all')
     const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
+    // TODO: quitar el set para que no sea setSet....
     const [setselectedPlace, setSetselectedPlace] = useState<Place | null>(null)
 
     const handleAgeRangeChange = (rangeId:string) => {
@@ -44,6 +47,11 @@ export const PlacesMapClient = ({places}:Props) => {
 
     return (
         <div className='flex flex-col justify-center items-center'>
+
+            <FeaturedPlaces
+                places={filteredPlaces}
+                setSelectedPlace={setSetselectedPlace}
+            />
 
             <p className='text-cian'>*Click en los iconos para mas info</p>
             <div className='w-9/10 max-w-[1200px] border-cian border-2 shadow-lg shadow-primary rounded-xl bg-primary overflow-hidden'>
