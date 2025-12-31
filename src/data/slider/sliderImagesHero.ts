@@ -7,16 +7,16 @@ export const sliderImagesHero = [
     {
       imageName: "banner_la_audacia_iagg08.webp", 
       title: "Circo La Audacia",
-      subTitle: "Ahora en la Laguan de Los Padres",
+      subTitle: "Ahora en la Laguna de Los Padres",
     },
     {
       imageName: "banner_hazme_reir_lrdzhz.webp",
-      title: "Circo HAZME REIR",
-      subTitle: "Plaza del agua",
+      title: "Circo Plaza del Agua",
+      subTitle: "Plaza del Agua",
     },
-    {
-      imageName: "banner_las_dos_marias_tvrbmm.webp",
-      title: "Granja Las Dos Marias",
-      subTitle: "Granja educativa. Paseo rural",
-    },
+    // {
+    //   imageName: "banner_las_dos_marias_tvrbmm.webp",
+    //   title: "Granja Las Dos Marias",
+    //   subTitle: "Granja educativa. Paseo rural",
+    // },
   ]
