@@ -1,5 +1,10 @@
 export const sliderImagesHero = [
     {
+      imageName: "banner_technokids_fc8m2s.jpg",
+      title: "Techno Kids",
+      subTitle: "Fiesta electronica para toda la familia",
+    },
+    {
       imageName: "feriainfinita/Feria_infinita_banner_p11hmz.webp",
       title: "Feria Infinita",
       subTitle: "Tienda de Ropa - Moda circular",

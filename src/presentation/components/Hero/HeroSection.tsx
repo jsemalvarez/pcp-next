@@ -13,12 +13,12 @@ export const HeroSection = () => {
         <ImageSlider />
 
         <header className="text-center mt-6">
-            <h2 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-100 drop-shadow-lg drop-shadow-primary">
-                Bienvenidos a
-            </h2>
             <h1 className="text-4xl uppercase md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-100 drop-shadow-lg drop-shadow-primary">
                 Paseos con Peques
             </h1>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-100 drop-shadow-lg drop-shadow-primary">
+                Aventuras en familia
+            </h2>
         </header>
 
         <HeroActions />

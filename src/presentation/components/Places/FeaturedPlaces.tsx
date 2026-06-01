@@ -48,7 +48,7 @@ export default function FeaturedPlaces({ places, setSelectedPlace }: Props) {
         <section className="relative w-full max-w-[1600px] mx-auto mb-6">
             {/* Título */}
             <h3 className="ml-4 md:ml-12 text-2xl font-semibold">
-                Lugares Destacados
+                Nuestros favoritos
             </h3>
 
             {/* Contenedor del carrusel */}
