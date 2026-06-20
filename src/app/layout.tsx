@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito, Baloo_2 } from "next/font/google";
 import "./globals.css";
-
+import BottomNav from "@/presentation/components/BottomNav";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -16,6 +16,7 @@ const baloo2 = Baloo_2({
 export const metadata: Metadata = {
   title: 'Paseos con Peques | Guía de actividades en Mar del Plata',
   description: 'Descubrí los mejores lugares, eventos y paseos para disfrutar con niños, chicos o peques. Mapa interactivo y agenda cultural actualizada.',
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
   },
@@ -36,17 +37,28 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#ffffff",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es" suppressHydrationWarning>
       <body
-        className={`${nunito.variable} ${baloo2.variable} antialiased`}
+        className={`${nunito.variable} ${baloo2.variable} antialiased bg-gray-50 text-gray-900 pb-20`}
       >
-        {children}
+        <main className="min-h-screen pt-safe">
+          {children}
+        </main>
+        <BottomNav />
       </body>
     </html>
   );
