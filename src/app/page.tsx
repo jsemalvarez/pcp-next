@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import BannerCarousel from "@/presentation/components/BannerCarousel";
-import { Facebook, Instagram, MessageCircle, Newspaper, Calendar, MapPin } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Newspaper, Calendar, MapPin, User } from "lucide-react";
 
 export default function Home() {
   const news = [
@@ -50,6 +50,9 @@ export default function Home() {
               Guía cultural para familias
             </p>
           </div>
+          <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
+            <User className="w-5 h-5" />
+          </Link>
         </div>
       </header>
 

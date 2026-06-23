@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Paseos con Peques",
-    description:"Descubrí los mejores lugares, eventos y paseos para disfrutar con niños, chicos o peques. Mapa interactivo y agenda cultural actualizada.",
+    description: "Descubrí los mejores lugares, eventos y paseos para disfrutar con niños, chicos o peques. Mapa interactivo y agenda cultural actualizada.",
     url: "https://paseosconpeques.com.ar/",
     type: "website",
     locale: "es_ES",
@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${nunito.variable} ${baloo2.variable} antialiased bg-gray-50 text-gray-900 pb-20`}
+        className={`${nunito.variable} ${baloo2.variable} antialiased text-gray-900`}
       >
         <main className="min-h-screen pt-safe">
           {children}
