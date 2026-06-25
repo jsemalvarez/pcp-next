@@ -2,11 +2,12 @@ export interface Place {
     id: string;
     name: string;
     address: string;
-    isPlaceAvtive: boolean;
+    isActive: boolean;
     isShowInMap: boolean;
     hasCustomIcon: boolean;
     customIconName: string;
-    position: { lat: number, lng: number };
+    lat: number;
+    lng: number;
     schedules: string;
     phone: string;
     whatsapp: string;

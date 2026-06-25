@@ -2,6 +2,7 @@ import { getSession } from "@/data/auth/session";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 import prisma from "@/data/prisma/db";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -41,10 +42,10 @@ export default async function DashboardPage() {
             <p className="text-gray-600 font-medium text-sm mt-2">Pronto gestionaremos el calendario aquí.</p>
           </div>
           
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-colors">
-            <h2 className="text-2xl font-black text-brand-primary">Lugares</h2>
-            <p className="text-gray-600 font-medium text-sm mt-2">Pronto gestionaremos el directorio aquí.</p>
-          </div>
+          <Link href="/admin/lugares" className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-all hover:scale-[1.02] block group">
+            <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Lugares</h2>
+            <p className="text-gray-600 font-medium text-sm mt-2">Gestionar el directorio de lugares.</p>
+          </Link>
         </div>
       </div>
     </div>
