@@ -10,7 +10,7 @@ export default function BottomNav() {
   const publicNavItems = [
     { name: 'Inicio', href: '/', icon: Home },
     { name: 'Noticias', href: '/noticias', icon: Newspaper },
-    { name: 'Eventos', href: '/calendar', icon: Calendar },
+    { name: 'Eventos', href: '/calendario', icon: Calendar },
     { name: 'Mapa', href: '/map', icon: MapIcon },
     { name: 'Lugares', href: '/places', icon: MapPin },
     { name: 'Favoritos', href: '/favorites', icon: Heart },

@@ -5,6 +5,8 @@ import BannerCarousel from "@/presentation/components/BannerCarousel";
 import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User } from "lucide-react";
 import { getActiveNews } from "@/actions/news";
 
+import prisma from "@/data/prisma/db";
+
 // Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
 const Facebook = Share2;
 const Instagram = Camera;
@@ -39,23 +41,36 @@ export default async function Home() {
         }
       ];
 
+  // Calculate today's date at midnight UTC adjusted for UTC-3 (Argentina)
+  const today = new Date();
+  const offset = -3;
+  const localDate = new Date(today.getTime() + offset * 3600000);
+  const startOfToday = new Date(Date.UTC(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate()));
 
-  const events = [
-    {
-      id: 1,
-      title: "Festival de Títeres en Familia",
-      time: "Hoy • 16:00 hs",
-      location: "Teatro de la Ciudad",
-      image: "/images/evento_dia.png",
+  const dbOccurrences = await prisma.eventOccurrence.findMany({
+    where: {
+      date: startOfToday,
     },
-    {
-      id: 2,
-      title: "Cuenta Cuentos en el Parque",
-      time: "Hoy • 17:30 hs",
-      location: "Plaza Central",
-      image: "/images/lugar_recomendado.png", // Reusing an image for variety
-    }
-  ];
+    include: {
+      event: true,
+      place: true,
+    },
+    orderBy: {
+      timeStart: "asc",
+    },
+  });
+
+  const events = dbOccurrences.map((occ) => ({
+    id: occ.id,
+    eventId: occ.event.id,
+    title: occ.event.title,
+    time: `Hoy • ${occ.timeStart} hs`,
+    location: occ.place.name,
+    image: occ.event.photoId
+      ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_300,q_auto,f_auto/v1749595725/pcp-images/${occ.event.photoId}`
+      : "/images/evento_dia.png",
+  }));
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -113,7 +128,7 @@ export default async function Home() {
 
 
           {/* Eventos */}
-          <div className="w-[150%] z-20 -mt-[135%] animate-slide-in-left will-change-transform" style={{ animationDelay: '0.5s' }}>
+          <Link href="/calendario" className="w-[150%] z-20 -mt-[135%] animate-slide-in-left will-change-transform block" style={{ animationDelay: '0.5s' }}>
             <div className="group relative block w-full aspect-square active:scale-[0.98] transition-transform">
               <div className="absolute inset-0 bg-brand-primary/80 shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
                 <div className="flex items-center gap-4">
@@ -125,7 +140,7 @@ export default async function Home() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Lugares */}
           <div className="w-[150%] z-10 -mt-[135%] animate-slide-in-left will-change-transform" style={{ animationDelay: '1s' }}>
@@ -187,26 +202,37 @@ export default async function Home() {
         <section className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-100">Eventos del día</h2>
-            <Link href="/calendar" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Agenda completa</Link>
+            <Link href="/calendario" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Agenda completa</Link>
           </div>
           <div className="space-y-4">
-            {events.map((event) => (
-              <div key={event.id} className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="w-20 h-20 relative rounded-xl overflow-hidden flex-none">
-                  <Image
-                    src={event.image}
-                    alt={event.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col justify-center">
-                  <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{event.title}</h3>
-                  <p className="text-xs text-brand-primary font-black uppercase tracking-wider">{event.time}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{event.location}</p>
-                </div>
+            {events.length === 0 ? (
+              <div className="p-6 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-bold">No hay eventos programados para hoy.</p>
+                <Link href="/calendario" className="text-xs text-brand-primary hover:underline mt-1 inline-block font-bold">Ver toda la agenda ➔</Link>
               </div>
-            ))}
+            ) : (
+              events.map((event) => (
+                <Link 
+                  key={event.id} 
+                  href={`/calendario?event=${event.eventId}`}
+                  className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block"
+                >
+                  <div className="w-20 h-20 relative rounded-xl overflow-hidden flex-none bg-gray-150 dark:bg-gray-700">
+                    <Image
+                      src={event.image}
+                      alt={event.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{event.title}</h3>
+                    <p className="text-xs text-brand-primary font-black uppercase tracking-wider">{event.time}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{event.location}</p>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </section>
 
