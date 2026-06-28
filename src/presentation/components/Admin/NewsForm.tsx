@@ -43,6 +43,11 @@ export function NewsForm({ initialData }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const toLocalDateTimeString = (date: Date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+  };
+
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [isSlugCustomized, setIsSlugCustomized] = useState(!!initialData?.slug);
@@ -50,8 +55,8 @@ export function NewsForm({ initialData }: Props) {
   const [isFeatured, setIsFeatured] = useState(initialData ? initialData.isFeatured : false);
   const [publishedAt, setPublishedAt] = useState(
     initialData
-      ? new Date(initialData.publishedAt).toISOString().slice(0, 16)
-      : new Date().toISOString().slice(0, 16)
+      ? toLocalDateTimeString(new Date(initialData.publishedAt))
+      : toLocalDateTimeString(new Date())
   );
 
   // Image upload state
