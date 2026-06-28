@@ -56,6 +56,11 @@ export default async function DashboardPage() {
             <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Especialidades</h2>
             <p className="text-gray-600 font-medium text-sm mt-2">Gestionar las especialidades/categorías.</p>
           </Link>
+
+          <Link href="/admin/noticias" className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-all hover:scale-[1.02] block group">
+            <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Noticias</h2>
+            <p className="text-gray-600 font-medium text-sm mt-2">Gestionar artículos, novedades y anuncios.</p>
+          </Link>
         </div>
       </div>
     </div>

@@ -3,25 +3,42 @@ import Link from "next/link";
 
 import BannerCarousel from "@/presentation/components/BannerCarousel";
 import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User } from "lucide-react";
+import { getActiveNews } from "@/actions/news";
+
 // Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
 const Facebook = Share2;
 const Instagram = Camera;
 
-export default function Home() {
-  const news = [
-    {
-      id: 1,
-      title: "¡Gran Apertura del Harmony Family Park!",
-      description: "Descubre las nuevas instalaciones diseñadas para que los niños disfruten al máximo este fin de semana.",
-      image: "/images/noticia_preview.png",
-    },
-    {
-      id: 2,
-      title: "Taller de Pintura Creativa",
-      description: "Un espacio para que los más pequeños exploren su lado artístico con colores y mucha diversión.",
-      image: "/images/noticia_preview_2.png",
-    }
-  ];
+
+export default async function Home() {
+  const dbNews = await getActiveNews();
+  const news = dbNews.length > 0
+    ? dbNews.slice(0, 2).map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.subtitle || item.content.substring(0, 150),
+        image: item.photoId
+          ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/${item.photoId}`
+          : "/images/noticia_preview.png",
+        slug: item.slug,
+      }))
+    : [
+        {
+          id: "mock-1",
+          title: "¡Gran Apertura del Harmony Family Park!",
+          description: "Descubre las nuevas instalaciones diseñadas para que los niños disfruten al máximo este fin de semana.",
+          image: "/images/noticia_preview.png",
+          slug: "",
+        },
+        {
+          id: "mock-2",
+          title: "Taller de Pintura Creativa",
+          description: "Un espacio para que los más pequeños exploren su lado artístico con colores y mucha diversión.",
+          image: "/images/noticia_preview_2.png",
+          slug: "",
+        }
+      ];
+
 
   const events = [
     {
@@ -82,7 +99,7 @@ export default function Home() {
         {/* Navigation Squares - Rotated 35deg */}
         <div className="relative z-10 w-full flex-1 flex flex-col items-center pb-20 -mt-165 -translate-x-[10%]">
           {/* Noticias */}
-          <div className="group relative block w-[150%] aspect-square active:scale-[0.98] transition-transform z-30">
+          <Link href="/noticias" className="group relative block w-[150%] aspect-square active:scale-[0.98] transition-transform z-30">
             <div className="absolute inset-0 bg-brand-accent shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
               <div className="flex items-center gap-4 animate-slide-in-left">
                 <Newspaper className="w-10 h-10 text-white flex-shrink-0" strokeWidth={2.5} />
@@ -92,7 +109,8 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
+
 
           {/* Eventos */}
           <div className="w-[150%] z-20 -mt-[135%] animate-slide-in-left will-change-transform" style={{ animationDelay: '0.5s' }}>
@@ -132,7 +150,7 @@ export default function Home() {
         <section className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-100">Noticias</h2>
-            <Link href="/news" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Ver todas</Link>
+            <Link href="/noticias" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Ver todas</Link>
           </div>
           <div className="grid grid-cols-1 gap-6">
             {news.map((item) => (
@@ -146,7 +164,15 @@ export default function Home() {
                   />
                 </div>
                 <div className="p-4 bg-white dark:bg-gray-800">
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">{item.title}</h3>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                    {item.slug ? (
+                      <Link href={`/noticias/${item.slug}`} className="hover:text-brand-primary transition-colors">
+                        {item.title}
+                      </Link>
+                    ) : (
+                      item.title
+                    )}
+                  </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                     {item.description}
                   </p>
@@ -155,6 +181,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+
 
         {/* Eventos del dia section */}
         <section className="space-y-4">

@@ -240,3 +240,21 @@ model EventOccurrence {
   @@index([date])
   @@index([placeId])
 }
+
+// ─────────────────────────────────────────────
+// NEWS / NOTICIAS
+// ─────────────────────────────────────────────
+model News {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  subtitle    String?
+  content     String   @db.Text
+  photoId     String?  // Cloudinary public_id
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
