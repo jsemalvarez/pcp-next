@@ -70,8 +70,10 @@ export default async function EventosPage() {
                       <tr key={event.id} className="border-t border-gray-100 hover:bg-white transition-colors">
                         <td className="p-4">
                           <p className="font-bold text-gray-800">{event.title}</p>
-                          {event.artists && (
-                            <p className="text-xs text-gray-500 mt-0.5">{event.artists}</p>
+                          {event.organizers && event.organizers.length > 0 && (
+                            <p className="text-xs text-brand-primary font-medium mt-0.5">
+                              {event.organizers.map((eo: any) => eo.organizer.name).join(', ')}
+                            </p>
                           )}
                         </td>
                         <td className="p-4 text-sm text-gray-600">

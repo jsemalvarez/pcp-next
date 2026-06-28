@@ -39,8 +39,7 @@ export const CalendarClient = ({events, places}:Props) => {
         return events.filter((event) => {
             const matchesSearchTitle = term.length <= 1 || event.title.toLowerCase().includes(term);
             const matchesSearchDescription = term.length <= 1 || (event.description?.toLowerCase().includes(term) ?? false);
-            const matchesSearchArtists = term.length <= 1 || event.artists?.toLowerCase().includes(term);
-            const matchesSearch = matchesSearchTitle || matchesSearchDescription || matchesSearchArtists;
+            const matchesSearch = matchesSearchTitle || matchesSearchDescription;
             
             // Lógica de intersección de edad:
             // El evento tiene un rango de edad [event.ageMin, event.ageMax ?? Infinity]

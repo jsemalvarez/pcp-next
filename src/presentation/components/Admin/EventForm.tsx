@@ -14,6 +14,7 @@ import Link from "next/link";
 import dayjs from "dayjs";
 import 'dayjs/locale/es';
 import { SearchablePlaceSelect } from "./SearchablePlaceSelect";
+import { SearchableOrganizerSelect } from "./SearchableOrganizerSelect";
 dayjs.locale('es');
 
 // ─────────────────────────────────────────────
@@ -48,9 +49,20 @@ interface OccurrenceRow {
   placeId: string;
 }
 
+interface Organizer {
+  id: string;
+  name: string;
+  type: {
+    name: string;
+  };
+}
+
 interface Props {
   places: Place[];
-  initialData?: EventWithOccurrences;
+  organizers?: Organizer[];
+  initialData?: EventWithOccurrences & {
+    organizers?: { organizerId: string }[];
+  };
 }
 
 // ─────────────────────────────────────────────
@@ -111,7 +123,7 @@ function generateOccurrences(
 // Main Component
 // ─────────────────────────────────────────────
 
-export function EventForm({ places, initialData }: Props) {
+export function EventForm({ places, organizers = [], initialData }: Props) {
   const router = useRouter();
   const isEditing = !!initialData;
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -123,6 +135,9 @@ export function EventForm({ places, initialData }: Props) {
   const [ageMax, setAgeMax] = useState<number | null>(initialData?.ageMax ?? null);
   const [priceType, setPriceType] = useState<PriceType>(initialData?.priceType ?? 'FREE_ENTRY');
   const [selectedColor, setSelectedColor] = useState<string>(initialData?.bgColor ?? '#9575CD');
+  const [selectedOrganizerIds, setSelectedOrganizerIds] = useState<string[]>(
+    initialData?.organizers?.map((o) => o.organizerId) ?? []
+  );
 
   // ── Datos de imagen ──
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -254,7 +269,6 @@ export function EventForm({ places, initialData }: Props) {
       const data: CreateEventInput = {
         title: formData.get('title') as string,
         description: formData.get('description') as string || undefined,
-        artists: formData.get('artists') as string || undefined,
         photoId: uploadedPhotoId || undefined,
         bgColor: formData.get('bgColor') as string || undefined,
         priceType,
@@ -268,6 +282,7 @@ export function EventForm({ places, initialData }: Props) {
           timeEnd: o.timeEnd || undefined,
           placeId: o.placeId,
         })),
+        organizerIds: selectedOrganizerIds,
       };
 
       if (isEditing && initialData) {
@@ -322,16 +337,18 @@ export function EventForm({ places, initialData }: Props) {
             />
           </div>
 
-          {/* Artistas solo en fila completa o mitad */}
-          <div>
-            <InputLabel>Artistas / Elenco</InputLabel>
-            <input
-              name="artists"
-              type="text"
-              defaultValue={initialData?.artists ?? ''}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none"
-              placeholder="Ej. Los Hermanos Pérez"
-            />
+
+
+          {/* Organizadores/Artistas Registrados (Perfiles) */}
+          <div className="md:col-span-2 border-t border-gray-100 pt-4">
+            <InputLabel>Organizadores / Artistas Vinculados</InputLabel>
+            <div className="mt-2">
+              <SearchableOrganizerSelect
+                organizers={organizers}
+                value={selectedOrganizerIds}
+                onChange={setSelectedOrganizerIds}
+              />
+            </div>
           </div>
         </div>
       </FormSection>

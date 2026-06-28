@@ -1,5 +1,6 @@
 import { getEventById } from "@/actions/events";
 import { getPlaces } from "@/actions/places";
+import { getOrganizers } from "@/actions/organizers";
 import { notFound } from "next/navigation";
 import { EventForm } from "@/presentation/components/Admin/EventForm";
 
@@ -9,7 +10,11 @@ interface Props {
 
 export default async function EditarEventoPage({ params }: Props) {
   const { id } = await params;
-  const [event, places] = await Promise.all([getEventById(id), getPlaces()]);
+  const [event, places, organizers] = await Promise.all([
+    getEventById(id),
+    getPlaces(),
+    getOrganizers(),
+  ]);
 
   if (!event) notFound();
 
@@ -23,7 +28,7 @@ export default async function EditarEventoPage({ params }: Props) {
           </p>
         </header>
 
-        <EventForm places={places} initialData={event} />
+        <EventForm places={places} organizers={organizers} initialData={event} />
       </div>
     </div>
   );

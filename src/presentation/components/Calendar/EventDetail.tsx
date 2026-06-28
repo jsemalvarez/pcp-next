@@ -81,12 +81,6 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
                     </p>
                 )}
 
-                {eventDetail.artists && (
-                    <p className="mt-4 font-semibold text-gray-800 leading-relaxed">
-                        {eventDetail.artists}
-                    </p>
-                )}
-
                 {/* Botones para Entradas y Reservas */}
                 {(eventDetail.ticketUrl || eventDetail.bookingWhatsapp) && (
                     <div className="flex flex-col gap-2 pt-3 border-t border-gray-200 mt-4">

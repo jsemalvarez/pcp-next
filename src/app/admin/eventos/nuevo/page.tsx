@@ -1,8 +1,9 @@
 import { getPlaces } from "@/actions/places";
+import { getOrganizers } from "@/actions/organizers";
 import { EventForm } from "@/presentation/components/Admin/EventForm";
 
 export default async function NuevoEventoPage() {
-  const places = await getPlaces();
+  const [places, organizers] = await Promise.all([getPlaces(), getOrganizers()]);
 
   return (
     <div className="min-h-screen p-8">
@@ -14,7 +15,7 @@ export default async function NuevoEventoPage() {
           </p>
         </header>
 
-        <EventForm places={places} />
+        <EventForm places={places} organizers={organizers} />
       </div>
     </div>
   );

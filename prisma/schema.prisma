@@ -123,7 +123,6 @@ model Event {
   // Contenido
   title         String
   description   String?
-  artists       String?
   photoId       String?           // Cloudinary public_id
   bgColor       String?
 
@@ -143,8 +142,74 @@ model Event {
   // Ocurrencias (borrar el evento borra todas sus fechas)
   occurrences   EventOccurrence[]
 
+  // Relación con Organizadores/Artistas
+  organizers    EventOrganizer[]
+
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// ORGANIZER TYPE (Especialidades / Categorías)
+// ─────────────────────────────────────────────
+model OrganizerType {
+  id          String      @id @default(uuid())
+  name        String      @unique // Ej. "Músico", "Payaso", "Nutricionista"
+  
+  // El slug se usará en el futuro para filtros en URL amigables (ej: /perfiles?tipo=musico)
+  // No se requiere implementar la vista de filtrado inmediatamente.
+  slug        String      @unique // Ej. "musico", "payaso", "nutricionista"
+  
+  organizers  Organizer[]
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// ORGANIZER / ARTISTA / PROVEEDOR
+// ─────────────────────────────────────────────
+model Organizer {
+  id          String            @id @default(uuid())
+  name        String
+  slug        String            @unique // Ej. "pepe-el-mago" para URL amigable (/perfil/pepe-el-mago)
+  description String?
+  photoId     String?           // ID de Cloudinary
+  
+  // Especialidad / Tipo
+  typeId      String
+  type        OrganizerType     @relation(fields: [typeId], references: [id], onDelete: Restrict)
+
+  // Contacto y Redes
+  phone       String?
+  whatsapp    String?
+  instagram   String?
+  facebook    String?
+  youtube     String?
+  spotify     String?
+  tiktok      String?
+  web         String?
+  email       String?
+
+  // Relación con Eventos
+  events      EventOrganizer[]
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// RELACIÓN MUCHOS A MUCHOS (EVENTO - ORGANIZADOR)
+// ─────────────────────────────────────────────
+model EventOrganizer {
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  organizerId String
+  organizer   Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, organizerId])
+  @@index([eventId])
+  @@index([organizerId])
 }
 
 // ─────────────────────────────────────────────

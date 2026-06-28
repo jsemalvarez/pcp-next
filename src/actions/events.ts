@@ -11,7 +11,6 @@ import { ActivityType, PriceType } from "@prisma/client";
 export type CreateEventInput = {
   title: string;
   description?: string;
-  artists?: string;
   photoId?: string;
   bgColor?: string;
   ticketUrl?: string;
@@ -22,6 +21,7 @@ export type CreateEventInput = {
   ageMax?: number | null;
   isFeatured?: boolean;
   occurrences: CreateOccurrenceInput[];
+  organizerIds?: string[];
 };
 
 export type CreateOccurrenceInput = {
@@ -31,7 +31,9 @@ export type CreateOccurrenceInput = {
   placeId: string;
 };
 
-export type UpdateEventInput = Partial<Omit<CreateEventInput, "occurrences">>;
+export type UpdateEventInput = Partial<Omit<CreateEventInput, "occurrences">> & {
+  organizerIds?: string[];
+};
 
 // ─────────────────────────────────────────────
 // READ
@@ -44,6 +46,11 @@ export async function getEvents() {
         occurrences: {
           include: { place: true },
           orderBy: [{ date: "asc" }, { timeStart: "asc" }],
+        },
+        organizers: {
+          include: {
+            organizer: true,
+          },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -64,6 +71,7 @@ export async function getEventById(id: string) {
           include: { place: true },
           orderBy: [{ date: "asc" }, { timeStart: "asc" }],
         },
+        organizers: true,
       },
     });
   } catch (error) {
@@ -107,7 +115,7 @@ export async function getOccurrencesByMonth(year: number, month: number) {
  */
 export async function createEvent(data: CreateEventInput) {
   try {
-    const { occurrences, ...eventData } = data;
+    const { occurrences, organizerIds, ...eventData } = data;
 
     const event = await prisma.$transaction(async (tx) => {
       const newEvent = await tx.event.create({
@@ -124,8 +132,13 @@ export async function createEvent(data: CreateEventInput) {
               })),
             },
           },
+          organizers: organizerIds && organizerIds.length > 0 ? {
+            create: organizerIds.map((id) => ({
+              organizerId: id
+            }))
+          } : undefined
         },
-        include: { occurrences: true },
+        include: { occurrences: true, organizers: true },
       });
       return newEvent;
     });
@@ -145,10 +158,20 @@ export async function createEvent(data: CreateEventInput) {
 
 export async function updateEvent(id: string, data: UpdateEventInput) {
   try {
+    const { organizerIds, ...eventData } = data;
+
     const event = await prisma.event.update({
       where: { id },
-      data,
-      include: { occurrences: { include: { place: true } } },
+      data: {
+        ...eventData,
+        organizers: organizerIds ? {
+          deleteMany: {},
+          create: organizerIds.map((orgId) => ({
+            organizerId: orgId
+          }))
+        } : undefined
+      },
+      include: { occurrences: { include: { place: true } }, organizers: true },
     });
     revalidatePath("/");
     revalidatePath("/admin/eventos");

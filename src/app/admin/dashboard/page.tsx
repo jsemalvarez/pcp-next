@@ -37,14 +37,24 @@ export default async function DashboardPage() {
 
         {/* Contenido del Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-colors">
-            <h2 className="text-2xl font-black text-brand-primary">Eventos</h2>
-            <p className="text-gray-600 font-medium text-sm mt-2">Pronto gestionaremos el calendario aquí.</p>
-          </div>
+          <Link href="/admin/eventos" className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-all hover:scale-[1.02] block group">
+            <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Eventos</h2>
+            <p className="text-gray-600 font-medium text-sm mt-2">Gestionar el calendario y programación.</p>
+          </Link>
           
           <Link href="/admin/lugares" className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-all hover:scale-[1.02] block group">
             <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Lugares</h2>
             <p className="text-gray-600 font-medium text-sm mt-2">Gestionar el directorio de lugares.</p>
+          </Link>
+
+          <Link href="/admin/organizers" className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-all hover:scale-[1.02] block group">
+            <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Organizadores y Artistas</h2>
+            <p className="text-gray-600 font-medium text-sm mt-2">Gestionar perfiles, redes y contacto.</p>
+          </Link>
+
+          <Link href="/admin/organizer-types" className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/50 hover:bg-white/90 transition-all hover:scale-[1.02] block group">
+            <h2 className="text-2xl font-black text-brand-primary group-hover:text-brand-primary/80 transition-colors">Especialidades</h2>
+            <p className="text-gray-600 font-medium text-sm mt-2">Gestionar las especialidades/categorías.</p>
           </Link>
         </div>
       </div>

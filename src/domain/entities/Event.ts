@@ -5,7 +5,6 @@ export interface Event {
     id: string;
     title: string;
     description?: string | null;
-    artists?: string | null;
     photoId?: string | null;
     bgColor?: string | null;
     ticketUrl?: string | null;
@@ -47,7 +46,6 @@ export interface CalendarEvent {
     // Contenido (del evento padre)
     title: string;
     description?: string | null;
-    artists?: string | null;
     photoId?: string | null;
     bgColor?: string | null;
     ticketUrl?: string | null;
