@@ -1,5 +1,5 @@
 
-import { Event } from '@/domain/entities/Event';
+import { CalendarEvent } from '@/domain/entities/Event';
 import { groupEventsByDate } from '@/presentation/utils/groupEventsByDate';
 import { Dayjs } from 'dayjs';
 
@@ -7,10 +7,10 @@ import { JSX } from "react";
 import { CalendarDay } from './CalendarDay';
 
 interface Props {
-    events: Event[];
+    events: CalendarEvent[];
     currentDate: Dayjs;
-    setSelectedEvent: (event: Event | null) => void;
-    handleCalendarDayAside: (event: Event[] | null) => void;
+    setSelectedEvent: (event: CalendarEvent | null) => void;
+    handleCalendarDayAside: (event: CalendarEvent[] | null) => void;
 }
 
 export const CalendarGrid = ({ events, currentDate, setSelectedEvent, handleCalendarDayAside }: Props) => {

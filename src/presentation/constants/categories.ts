@@ -1,26 +1,27 @@
-export const CATEGORIES = {
-    ALL_DAY:'all_day',
-    CULTURE:'culture',
-    ENTERTIME:'entertime',
-    FOOD:'food',
-    OUTDOORS:'outdoors',
-    SUPERVISION:'supervision',
-}
+import { PlaceCategory } from "@prisma/client";
 
-export const CATEGORIES_TRANSLATE = {
-    [CATEGORIES.ALL_DAY]: 'Todo el día',
-    [CATEGORIES.CULTURE]: 'Cultura',
-    [CATEGORIES.ENTERTIME]: 'Entretenimiento',
-    [CATEGORIES.FOOD]: 'Gastronomía',
-    [CATEGORIES.OUTDOORS]: 'Al aire libre',
-    [CATEGORIES.SUPERVISION]: 'Con profe',
-}
+export const CATEGORIES: Record<string, PlaceCategory> = {
+    ALL_DAY:      'ALL_DAY',
+    CULTURE:      'CULTURE',
+    ENTERTAINMENT:'ENTERTAINMENT',
+    FOOD:         'FOOD',
+    OUTDOORS:     'OUTDOORS',
+    SUPERVISION:  'SUPERVISION',
+};
 
-export const COLORS_BY_CATEGORIES = {
-  // ALL_DAY:'all_day',
-  CULTURE:'#9575CD',
-  ENTERTIME:'#FFA500',
-  FOOD:'#8BC34A',
-  OUTDOORS:'#00BCD4',
-  SUPERVISION:'#F48FB1',
-}
+export const CATEGORIES_TRANSLATE: Record<PlaceCategory, string> = {
+    ALL_DAY:      'Todo el día',
+    CULTURE:      'Cultura',
+    ENTERTAINMENT:'Entretenimiento',
+    FOOD:         'Gastronomía',
+    OUTDOORS:     'Al aire libre',
+    SUPERVISION:  'Con profe',
+};
+
+export const COLORS_BY_CATEGORIES: Partial<Record<PlaceCategory, string>> = {
+    CULTURE:      '#9575CD',
+    ENTERTAINMENT:'#FFA500',
+    FOOD:         '#8BC34A',
+    OUTDOORS:     '#00BCD4',
+    SUPERVISION:  '#F48FB1',
+};

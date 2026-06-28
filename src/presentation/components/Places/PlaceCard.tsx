@@ -70,7 +70,7 @@ export const PlaceCard = ({place}:Props) => {
                                     <span className='text-primary'>Direccion: </span>
                                     {place.address}
                                 </p>
-                                <ViewOnMapButton position={ place.position } />
+                                <ViewOnMapButton position={{ lat: place.lat, lng: place.lng }} />
                             </>
                         )
                     }

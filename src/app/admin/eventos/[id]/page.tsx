@@ -1,30 +1,29 @@
-import { PlaceForm } from "@/presentation/components/Admin/PlaceForm";
-import { getPlaceById } from "@/actions/places";
+import { getEventById } from "@/actions/events";
+import { getPlaces } from "@/actions/places";
 import { notFound } from "next/navigation";
+import { EventForm } from "@/presentation/components/Admin/EventForm";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditarLugarPage({ params }: Props) {
+export default async function EditarEventoPage({ params }: Props) {
   const { id } = await params;
-  const place = await getPlaceById(id);
+  const [event, places] = await Promise.all([getEventById(id), getPlaces()]);
 
-  if (!place) {
-    notFound();
-  }
+  if (!event) notFound();
 
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl shadow-brand-primary/20 border border-white/50">
-          <h1 className="text-3xl font-black text-brand-primary">Editar Lugar</h1>
+          <h1 className="text-3xl font-black text-brand-primary">Editar Evento</h1>
           <p className="text-sm font-bold text-gray-600 mt-1 uppercase tracking-widest">
-            Modificando: {place.name}
+            {event.title}
           </p>
         </header>
 
-        <PlaceForm initialData={place} />
+        <EventForm places={places} initialData={event} />
       </div>
     </div>
   );

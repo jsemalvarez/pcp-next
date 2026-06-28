@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,6 +9,46 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum PriceType {
+  FREE_ENTRY        // Gratuita
+  PAID_TICKET       // Con ticket
+  DONATION_BASED    // A la gorra
+  WITH_CONSUMPTION  // Con consumición
+}
+
+enum ActivityType {
+  CIRCUS            // Circo
+  MUSIC             // Música
+  WORKSHOP          // Talleres
+  THEATER           // Teatro
+  ENTERTAINMENT     // Entretenimiento
+  FOOD              // Con algo rico
+}
+
+
+
+enum PlaceCategory {
+  ALL_DAY           // Todo el día
+  CULTURE           // Cultura
+  ENTERTAINMENT     // Entretenimiento
+  FOOD              // Gastronomía
+  OUTDOORS          // Al aire libre
+  SUPERVISION       // Con profe
+}
+
+// ─────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────
 
 model User {
   id        String   @id @default(uuid())
@@ -23,40 +60,118 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-enum Role {
-  ADMIN
-  EDITOR
-}
+// ─────────────────────────────────────────────
+// PLACE
+// ─────────────────────────────────────────────
 
 model Place {
-  id             String   @id @default(uuid())
+  id             String          @id @default(uuid())
   name           String
   address        String
-  isActive       Boolean  @default(true)
-  isShowInMap    Boolean  @default(true)
-  hasCustomIcon  Boolean  @default(false)
-  customIconName String?
   lat            Float
   lng            Float
+
+  // Visibilidad
+  isActive       Boolean         @default(true)
+  isShowInMap    Boolean         @default(true)
+  isFeatured     Boolean         @default(false)
+
+  // Contenido
+  description    String?
   schedules      String?
+  photoUrl       String?
+  bgColor        String?
+
+  // Ícono del mapa
+  hasCustomIcon  Boolean         @default(false)
+  customIconName String?
+  iconType       String?
+
+  // Contacto y redes
   phone          String?
   whatsapp       String?
-  photoUrl       String?
   web            String?
   instagram      String?
   facebook       String?
   videoLink      String?
-  hasFood        Boolean  @default(false)
-  hasShow        Boolean  @default(false)
-  hasGames       Boolean  @default(false)
-  hasSupervision Boolean  @default(false)
-  categories     String[]
-  ageRanges      String[]
-  description    String?
-  iconType       String?
-  bgColor        String?
-  isFeatured     Boolean  @default(false)
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+
+  // Características
+  hasFood        Boolean         @default(false)
+  hasShow        Boolean         @default(false)
+  hasGames       Boolean         @default(false)
+  hasSupervision Boolean         @default(false)
+
+  // Clasificación tipada con enums
+  categories     PlaceCategory[]
+  ageMin         Float           @default(0)
+  ageMax         Float?
+
+  // Relaciones
+  occurrences    EventOccurrence[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// EVENT — datos compartidos entre ocurrencias
+// ─────────────────────────────────────────────
+
+model Event {
+  id            String            @id @default(uuid())
+
+  // Contenido
+  title         String
+  description   String?
+  artists       String?
+  photoId       String?           // Cloudinary public_id
+  bgColor       String?
+
+  // Contacto y Reservas / Entradas
+  ticketUrl       String?
+  bookingWhatsapp String?
+
+  // Clasificación
+  priceType     PriceType         @default(FREE_ENTRY)
+  activityTypes ActivityType[]
+  ageMin        Float             @default(0)
+  ageMax        Float?
+
+  // Visibilidad
+  isFeatured    Boolean           @default(false)
+
+  // Ocurrencias (borrar el evento borra todas sus fechas)
+  occurrences   EventOccurrence[]
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// EVENT OCCURRENCE — cada instancia en el calendario
+// ─────────────────────────────────────────────
+
+model EventOccurrence {
+  id        String   @id @default(uuid())
+
+  // Evento padre
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String
+
+  // Cuándo
+  date      DateTime // Fecha normalizada a medianoche UTC
+  timeStart String   // "18:00"
+  timeEnd   String?  // "20:00" (opcional)
+
+  // Dónde — siempre un Place registrado
+  // Si el lugar no existe, se crea inline desde el formulario antes de guardar
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  placeId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([date])
+  @@index([placeId])
 }

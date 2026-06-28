@@ -1,5 +1,5 @@
-import { Event } from "../entities/Event";
+import { CalendarEvent } from "../entities/Event";
 
-export interface EventRepository{
-    getEvents():Promise<Event[]>
+export interface EventRepository {
+    getEvents(): Promise<CalendarEvent[]>;
 }

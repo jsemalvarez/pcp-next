@@ -45,8 +45,8 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
 
             <figure className="w-full mb-2">
                 <CloudinaryImage
-                    imageName={ placeDetail?.photoUrl }
-                    alt={ placeDetail?.name } 
+                    imageName={ placeDetail?.photoUrl ?? undefined }
+                    alt={ placeDetail?.name ?? undefined } 
                     className="mx-auto object-cover w-[200px] h-[200px] rounded-full" 
                 />
             </figure>
@@ -88,7 +88,7 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
                                 <span className='text-gray-500'>Direccion: </span>
                                 {placeDetail.address}
                             </p>
-                            <ViewOnMapButton position={ placeDetail.position } />
+                            <ViewOnMapButton position={{ lat: placeDetail.lat, lng: placeDetail.lng }} />
                         </>
                     )
                 }

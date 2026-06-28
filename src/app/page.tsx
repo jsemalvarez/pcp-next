@@ -2,7 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import BannerCarousel from "@/presentation/components/BannerCarousel";
-import { Facebook, Instagram, MessageCircle, Newspaper, Calendar, MapPin, User } from "lucide-react";
+import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User } from "lucide-react";
+// Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
+const Facebook = Share2;
+const Instagram = Camera;
 
 export default function Home() {
   const news = [

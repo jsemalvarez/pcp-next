@@ -74,7 +74,7 @@ export default function FeaturedPlaces({ places, setSelectedPlace }: Props) {
                         >
                             <div className="bg-gradient-to-b from-primary to-gray-100 shadow-lg shadow-cyan-500/50 p-[2px] flex justify-center items-center rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 snap-start">
                                 <CloudinaryImage 
-                                    imageName={ place.photoUrl }
+                                    imageName={ place.photoUrl ?? undefined }
                                     alt={ place.name }
                                     className="h-[160px] object-cover rounded-xl "
                                 />

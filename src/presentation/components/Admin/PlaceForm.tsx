@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createPlace, updatePlace } from "@/actions/places";
+import { PlaceCategory } from "@prisma/client";
 import { Place } from "@/domain/entities/Place";
 import { Save, ArrowLeft, Search, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -100,9 +101,10 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
     }
   };
 
-  // Parse categories/ageRanges properly or handle them as simple comma-separated strings for this MVP
+  // Parse categories properly
   const [categoriesText, setCategoriesText] = useState(initialData?.categories?.join(", ") || "");
-  const [ageRangesText, setAgeRangesText] = useState(initialData?.ageRanges?.join(", ") || "");
+  const [ageMin, setAgeMin] = useState<number>(initialData?.ageMin ?? 0);
+  const [ageMax, setAgeMax] = useState<number | null>(initialData?.ageMax ?? null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -111,7 +113,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
 
     const formData = new FormData(e.currentTarget);
     
-    const data: Omit<Place, "id"> = {
+    const data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'> = {
       name: formData.get("name") as string,
       address: formData.get("address") as string,
       lat: parseFloat(formData.get("lat") as string) || 0,
@@ -136,8 +138,9 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
       description: formData.get("description") as string,
       iconType: formData.get("iconType") as string,
       bgColor: formData.get("bgColor") as string,
-      categories: categoriesText.split(",").map(c => c.trim()).filter(Boolean),
-      ageRanges: ageRangesText.split(",").map(a => a.trim()).filter(Boolean),
+      categories: categoriesText.split(",").map(c => c.trim()).filter(Boolean) as PlaceCategory[],
+      ageMin: Number(formData.get("ageMin")) || 0,
+      ageMax: formData.get("ageMax") ? Number(formData.get("ageMax")) : null,
     };
 
     try {
@@ -175,7 +178,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
         
         <div className="md:col-span-2">
           <InputLabel>Descripción Corta</InputLabel>
-          <textarea defaultValue={initialData?.description} name="description" rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Breve descripción del lugar..." />
+          <textarea defaultValue={initialData?.description ?? undefined} name="description" rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Breve descripción del lugar..." />
         </div>
 
         <div>
@@ -183,9 +186,33 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
           <input value={categoriesText} onChange={e => setCategoriesText(e.target.value)} type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. Parque, Comida, Juegos" />
         </div>
 
-        <div>
-          <InputLabel>Edades Recomendadas (separadas por coma)</InputLabel>
-          <input value={ageRangesText} onChange={e => setAgeRangesText(e.target.value)} type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. 0-3 años, 4-7 años" />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <InputLabel>Edad Mínima</InputLabel>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              name="ageMin"
+              value={ageMin}
+              onChange={e => setAgeMin(Number(e.target.value))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none"
+              placeholder="Ej. 0.5 para 6 meses"
+            />
+          </div>
+          <div>
+            <InputLabel>Edad Máxima</InputLabel>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              name="ageMax"
+              value={ageMax ?? ""}
+              onChange={e => setAgeMax(e.target.value ? Number(e.target.value) : null)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none"
+              placeholder="Vacio para sin límite"
+            />
+          </div>
         </div>
 
         <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
@@ -279,31 +306,31 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
       <FormSection title="Contacto y Redes">
         <div>
           <InputLabel>Horarios</InputLabel>
-          <input defaultValue={initialData?.schedules} name="schedules" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. Lun a Vie 9:00 - 18:00" />
+          <input defaultValue={initialData?.schedules ?? undefined} name="schedules" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. Lun a Vie 9:00 - 18:00" />
         </div>
         <div>
           <InputLabel>Teléfono</InputLabel>
-          <input defaultValue={initialData?.phone} name="phone" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
+          <input defaultValue={initialData?.phone ?? undefined} name="phone" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
         </div>
         <div>
           <InputLabel>WhatsApp</InputLabel>
-          <input defaultValue={initialData?.whatsapp} name="whatsapp" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
+          <input defaultValue={initialData?.whatsapp ?? undefined} name="whatsapp" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
         </div>
         <div>
           <InputLabel>Sitio Web</InputLabel>
-          <input defaultValue={initialData?.web} name="web" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
+          <input defaultValue={initialData?.web ?? undefined} name="web" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
         </div>
         <div>
           <InputLabel>Instagram</InputLabel>
-          <input defaultValue={initialData?.instagram} name="instagram" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
+          <input defaultValue={initialData?.instagram ?? undefined} name="instagram" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
         </div>
         <div>
           <InputLabel>Facebook</InputLabel>
-          <input defaultValue={initialData?.facebook} name="facebook" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
+          <input defaultValue={initialData?.facebook ?? undefined} name="facebook" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" />
         </div>
         <div>
           <InputLabel>Link a nuestro Reel (Instagram)</InputLabel>
-          <input defaultValue={initialData?.videoLink} name="videoLink" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="https://www.instagram.com/reel/..." />
+          <input defaultValue={initialData?.videoLink ?? undefined} name="videoLink" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="https://www.instagram.com/reel/..." />
         </div>
       </FormSection>
 
@@ -311,12 +338,12 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
       <FormSection title="Diseño Visual y Mapa">
         <div>
           <InputLabel>URL de Foto Principal</InputLabel>
-          <input defaultValue={initialData?.photoUrl} name="photoUrl" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="https://..." />
+          <input defaultValue={initialData?.photoUrl ?? undefined} name="photoUrl" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="https://..." />
         </div>
         
         <div>
           <InputLabel>Categoría / Color del Pin</InputLabel>
-          <select defaultValue={initialData?.bgColor} name="bgColor" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
+          <select defaultValue={initialData?.bgColor ?? undefined} name="bgColor" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
             <option value="">Seleccionar color / categoría...</option>
             <option value="#F59E0B">Gastronomía (Naranja)</option>
             <option value="#06B6D4">Aire Libre / Paseos (Celeste)</option>
@@ -329,7 +356,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
 
         <div>
           <InputLabel>Tipo de Icono</InputLabel>
-          <select defaultValue={initialData?.iconType} name="iconType" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
+          <select defaultValue={initialData?.iconType ?? undefined} name="iconType" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
             <option value="">Seleccionar icono...</option>
             <option value="fork-knife">Tenedor y Cuchillo (Restaurante)</option>
             <option value="coffee">Taza (Cafetería / Merienda)</option>
@@ -357,7 +384,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
 
           <div className="md:col-span-2 mt-2">
             <InputLabel>Nombre de Icono Personalizado (si está marcado arriba)</InputLabel>
-            <input defaultValue={initialData?.customIconName} name="customIconName" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. logo_mr_fly" />
+            <input defaultValue={initialData?.customIconName ?? undefined} name="customIconName" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. logo_mr_fly" />
           </div>
         </div>
       </FormSection>

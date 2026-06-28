@@ -28,7 +28,7 @@ export async function getPlaceById(id: string) {
   }
 }
 
-export async function createPlace(data: Omit<Place, "id">) {
+export async function createPlace(data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
     const place = await prisma.place.create({
       data,
@@ -42,7 +42,7 @@ export async function createPlace(data: Omit<Place, "id">) {
   }
 }
 
-export async function updatePlace(id: string, data: Partial<Place>) {
+export async function updatePlace(id: string, data: Partial<Omit<Place, 'id' | 'createdAt' | 'updatedAt'>>) {
   try {
     const place = await prisma.place.update({
       where: { id },
