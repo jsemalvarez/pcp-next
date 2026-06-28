@@ -45,6 +45,8 @@ export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
+import { FavoritesProvider } from "@/presentation/contexts/FavoritesContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,10 +57,12 @@ export default function RootLayout({
       <body
         className={`${nunito.variable} ${baloo2.variable} antialiased text-gray-900`}
       >
-        <main className="min-h-screen pt-safe">
-          {children}
-        </main>
-        <BottomNav />
+        <FavoritesProvider>
+          <main className="min-h-screen pt-safe">
+            {children}
+          </main>
+          <BottomNav />
+        </FavoritesProvider>
       </body>
     </html>
   );

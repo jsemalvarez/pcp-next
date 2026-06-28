@@ -12,7 +12,6 @@ export default function BottomNav() {
     { name: 'Noticias', href: '/noticias', icon: Newspaper },
     { name: 'Eventos', href: '/calendario', icon: Calendar },
     { name: 'Mapa', href: '/map', icon: MapIcon },
-    { name: 'Lugares', href: '/places', icon: MapPin },
     { name: 'Favoritos', href: '/favorites', icon: Heart },
   ];
 
@@ -44,7 +43,9 @@ export default function BottomNav() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 active:scale-95 transition-transform duration-100 ${isActive ? 'text-brand-primary dark:text-brand-accent' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 active:scale-95 transition-transform duration-100 ${
+                  item.name === 'Favoritos' ? 'md:hidden' : ''
+                } ${isActive ? 'text-brand-primary dark:text-brand-accent' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart } from 'lucide-react';
+import { useFavorites } from '@/presentation/contexts/FavoritesContext';
 import Link from 'next/link';
 import { getOccurrencesByMonth } from "@/actions/events";
 import { PriceType, ActivityType } from "@prisma/client";
@@ -40,6 +41,7 @@ export default function CalendarPage() {
 }
 
 function CalendarContent() {
+    const { isFavoriteEvent, toggleFavoriteEvent } = useFavorites();
     const [mounted, setMounted] = useState(false);
     const [viewType, setViewType] = useState<ViewType>('day');
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -576,6 +578,14 @@ function CalendarContent() {
                 <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
                     <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto">
                         <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 opacity-50" />
+
+                        <button
+                            onClick={() => toggleFavoriteEvent(selectedEventOccurrence.event.id)}
+                            className="absolute top-6 right-16 p-2 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-450 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110]"
+                            aria-label={isFavoriteEvent(selectedEventOccurrence.event.id) ? "Quitar de favoritos" : "Guardar en favoritos"}
+                        >
+                            <Heart size={20} className={isFavoriteEvent(selectedEventOccurrence.event.id) ? "fill-rose-500 text-rose-500" : "text-gray-500"} />
+                        </button>
 
                         <button
                             onClick={handleCloseModal}

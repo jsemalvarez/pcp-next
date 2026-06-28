@@ -8,6 +8,9 @@ import { ClockIcon } from "../common/icons/ClockIcon";
 import { Place } from "@/domain/entities/Place";
 import { fortmatDate } from "@/presentation/utils/formatDate";
 
+import { useFavorites } from "@/presentation/contexts/FavoritesContext";
+import { Heart } from "lucide-react";
+
 interface Props {
     eventDetail: CalendarEvent | null;
     setSelectedEvent: (event: CalendarEvent | null) => void;
@@ -15,6 +18,7 @@ interface Props {
 }
 
 export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById }: Props) => {
+    const { isFavoriteEvent, toggleFavoriteEvent } = useFavorites();
 
     if (eventDetail == null) {
         return;
@@ -22,6 +26,7 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
 
     const place = handleFindPlaceById(eventDetail.placeId);
     const isEventDetailOpen = eventDetail != null;
+    const isFav = isFavoriteEvent(eventDetail.id);
 
     const handleCloseEventDetail = () => {
         setSelectedEvent(null);
@@ -32,7 +37,13 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
             className={`${isEventDetailOpen ? 'flex' : 'hidden'} top-0 w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-100 text-primary z-1700 transition-all`}
         >
             <div className="flex justify-between items-center px-6 py-1">
-                <h2 className="font-medium text-xl"></h2>
+                <button
+                    onClick={() => toggleFavoriteEvent(eventDetail.id)}
+                    className="p-2 text-gray-600 hover:text-rose-500 transition-colors active:scale-95"
+                    aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                >
+                    <Heart size={20} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-600"} />
+                </button>
                 <span
                     className='cursor-pointer text-gray-600 hover:text-red-500 text-lg font-bold'
                     onClick={() => handleCloseEventDetail()}

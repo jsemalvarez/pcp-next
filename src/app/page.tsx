@@ -4,6 +4,7 @@ import Link from "next/link";
 import BannerCarousel from "@/presentation/components/BannerCarousel";
 import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User } from "lucide-react";
 import { getActiveNews } from "@/actions/news";
+import { FavoriteHeartButton } from "@/presentation/components/common/FavoriteHeartButton";
 
 import prisma from "@/data/prisma/db";
 
@@ -70,6 +71,18 @@ export default async function Home() {
       ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_300,q_auto,f_auto/v1749595725/pcp-images/${occ.event.photoId}`
       : "/images/evento_dia.png",
   }));
+
+  // Fetch recommended places from the database
+  const dbPlaces = await prisma.place.findMany({
+    where: {
+      isActive: true,
+    },
+    orderBy: [
+      { isFeatured: "desc" },
+      { createdAt: "desc" },
+    ],
+    take: 3,
+  });
 
 
   return (
@@ -143,7 +156,7 @@ export default async function Home() {
           </Link>
 
           {/* Lugares */}
-          <div className="w-[150%] z-10 -mt-[135%] animate-slide-in-left will-change-transform" style={{ animationDelay: '1s' }}>
+          <Link href="/map" className="w-[150%] z-10 -mt-[135%] animate-slide-in-left will-change-transform block" style={{ animationDelay: '1s' }}>
             <div className="group relative block w-full aspect-square active:scale-[0.98] transition-transform">
               <div className="absolute inset-0 bg-white/60 dark:bg-gray-300/60 shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
                 <div className="flex items-center gap-4">
@@ -155,7 +168,7 @@ export default async function Home() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -212,25 +225,31 @@ export default async function Home() {
               </div>
             ) : (
               events.map((event) => (
-                <Link 
-                  key={event.id} 
-                  href={`/calendario?event=${event.eventId}`}
-                  className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block"
-                >
-                  <div className="w-20 h-20 relative rounded-xl overflow-hidden flex-none bg-gray-150 dark:bg-gray-700">
-                    <Image
-                      src={event.image}
-                      alt={event.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{event.title}</h3>
-                    <p className="text-xs text-brand-primary font-black uppercase tracking-wider">{event.time}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{event.location}</p>
-                  </div>
-                </Link>
+                <div key={event.id} className="relative group">
+                  <Link 
+                    href={`/calendario?event=${event.eventId}`}
+                    className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block pr-12"
+                  >
+                    <div className="w-20 h-20 relative rounded-xl overflow-hidden flex-none bg-gray-150 dark:bg-gray-700">
+                      <Image
+                        src={event.image}
+                        alt={event.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{event.title}</h3>
+                      <p className="text-xs text-brand-primary font-black uppercase tracking-wider">{event.time}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{event.location}</p>
+                    </div>
+                  </Link>
+                  <FavoriteHeartButton 
+                    id={event.eventId} 
+                    type="event" 
+                    className="absolute top-1/2 -translate-y-1/2 right-3 z-10 bg-gray-50 dark:bg-gray-750 shadow-sm border border-gray-100 dark:border-gray-700" 
+                  />
+                </div>
               ))
             )}
           </div>
@@ -243,27 +262,41 @@ export default async function Home() {
             <Link href="/map" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Explorar más</Link>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="w-24 h-24 relative rounded-xl overflow-hidden flex-none">
-                  <Image
-                    src="/images/lugar_recomendado.png"
-                    alt={`Lugar recomendado ${i}`}
-                    fill
-                    className="object-cover"
+            {dbPlaces.length === 0 ? (
+              <div className="p-6 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-bold">No hay lugares cargados todavía.</p>
+              </div>
+            ) : (
+              dbPlaces.map((place) => (
+                <div key={place.id} className="relative group">
+                  <Link
+                    href={`/map?place=${place.id}`}
+                    className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block pr-12"
+                  >
+                    <div className="w-24 h-24 relative rounded-xl overflow-hidden flex-none bg-gray-100 dark:bg-gray-700">
+                      <Image
+                        src={place.photoUrl || "/images/lugar_recomendado.png"}
+                        alt={place.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center flex-1">
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{place.name}</h3>
+                      {place.description && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">{place.description}</p>
+                      )}
+                      <p className="text-xs text-brand-primary font-bold mt-1">{place.address}</p>
+                    </div>
+                  </Link>
+                  <FavoriteHeartButton 
+                    id={place.id} 
+                    type="place" 
+                    className="absolute top-1/2 -translate-y-1/2 right-3 z-10 bg-gray-50 dark:bg-gray-750 shadow-sm border border-gray-100 dark:border-gray-700" 
                   />
                 </div>
-                <div className="flex flex-col justify-center flex-1">
-                  <h3 className="font-bold text-gray-900 dark:text-gray-100">The Nest Family Cafe</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">Un lugar acogedor con zona de juegos para niños.</p>
-                  <div className="flex gap-1 mt-1">
-                    {[1, 2, 3, 4, 5].map(s => (
-                      <div key={s} className="w-3 h-3 bg-yellow-400 dark:bg-yellow-500 rounded-full" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
       </div>
