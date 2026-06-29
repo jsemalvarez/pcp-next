@@ -31,10 +31,10 @@ export default function BottomNav() {
   return (
     <>
       {/* Elemento "fantasma" que empuja el contenido naturalmente al final de la página */}
-      <div className="h-16 pb-safe" aria-hidden="true" />
+      <div className="h-16 pb-safe md:hidden" aria-hidden="true" />
       
       {/* Navegación fijada */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 pb-safe shadow-[0_-1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_-1px_3px_rgba(0,0,0,0.3)] transition-colors duration-300">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 pb-safe shadow-[0_-1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_-1px_3px_rgba(0,0,0,0.3)] transition-colors duration-300">
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
