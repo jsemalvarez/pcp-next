@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "test": "echo 'No tests yet' && exit 0",
-    "build": "next build --webpack",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
