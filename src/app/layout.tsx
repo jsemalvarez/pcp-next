@@ -46,6 +46,7 @@ export const viewport: Viewport = {
 };
 
 import { FavoritesProvider } from "@/presentation/contexts/FavoritesContext";
+import { PWAInstallPrompt } from "@/presentation/components/PWAInstallPrompt";
 
 export default function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default function RootLayout({
             {children}
           </main>
           <BottomNav />
+          <PWAInstallPrompt />
         </FavoritesProvider>
       </body>
     </html>

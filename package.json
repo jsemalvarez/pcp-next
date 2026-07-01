@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "test": "echo 'No tests yet' && exit 0",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@khmyznikov/pwa-install": "^0.6.4",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
     "dayjs": "^1.11.19",
