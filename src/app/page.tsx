@@ -15,32 +15,15 @@ const Instagram = Camera;
 
 export default async function Home() {
   const dbNews = await getActiveNews();
-  const news = dbNews.length > 0
-    ? dbNews.slice(0, 2).map((item) => ({
-      id: item.id,
-      title: item.title,
-      description: item.subtitle || item.content.substring(0, 150),
-      image: item.photoId
-        ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/${item.photoId}`
-        : "/images/noticia_preview.png",
-      slug: item.slug,
-    }))
-    : [
-      {
-        id: "mock-1",
-        title: "¡Gran Apertura del Harmony Family Park!",
-        description: "Descubre las nuevas instalaciones diseñadas para que los niños disfruten al máximo este fin de semana.",
-        image: "/images/noticia_preview.png",
-        slug: "",
-      },
-      {
-        id: "mock-2",
-        title: "Taller de Pintura Creativa",
-        description: "Un espacio para que los más pequeños exploren su lado artístico con colores y mucha diversión.",
-        image: "/images/noticia_preview_2.png",
-        slug: "",
-      }
-    ];
+  const news = dbNews.slice(0, 2).map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.subtitle || item.content.substring(0, 150),
+    image: item.photoId
+      ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/${item.photoId}`
+      : "/images/noticia_preview.png",
+    slug: item.slug,
+  }));
 
   // Calculate today's date at midnight UTC adjusted for UTC-3 (Argentina)
   const today = new Date();
@@ -309,32 +292,38 @@ export default async function Home() {
             <Link href="/noticias" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Ver todas</Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {news.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-300">
-                <div className="relative aspect-video w-full">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-4 bg-white dark:bg-gray-800">
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                    {item.slug ? (
-                      <Link href={`/noticias/${item.slug}`} className="hover:text-brand-primary transition-colors">
-                        {item.title}
-                      </Link>
-                    ) : (
-                      item.title
-                    )}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                    {item.description}
-                  </p>
-                </div>
+            {news.length === 0 ? (
+              <div className="p-6 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 col-span-full">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-bold">No hay noticias publicadas todavía.</p>
               </div>
-            ))}
+            ) : (
+              news.map((item) => (
+                <div key={item.id} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-300">
+                  <div className="relative aspect-video w-full">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4 bg-white dark:bg-gray-800">
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                      {item.slug ? (
+                        <Link href={`/noticias/${item.slug}`} className="hover:text-brand-primary transition-colors">
+                          {item.title}
+                        </Link>
+                      ) : (
+                        item.title
+                      )}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
