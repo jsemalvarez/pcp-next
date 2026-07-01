@@ -153,7 +153,7 @@ export default async function Home() {
           </div>
 
           {/* Navigation Squares - Rotated 35deg */}
-          <div className="relative z-10 w-full flex-1 flex flex-col items-center pb-20 -mt-165 -translate-x-[10%]">
+          <div className="relative z-10 w-full flex-1 flex flex-col items-center pb-20 -mt-165 -translate-x-[45px]">
             {/* Noticias */}
             <Link href="/noticias" className="group relative block w-[150%] aspect-square active:scale-[0.98] transition-transform z-30">
               <div className="absolute inset-0 bg-brand-accent shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
