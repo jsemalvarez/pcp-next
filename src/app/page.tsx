@@ -17,30 +17,30 @@ export default async function Home() {
   const dbNews = await getActiveNews();
   const news = dbNews.length > 0
     ? dbNews.slice(0, 2).map((item) => ({
-        id: item.id,
-        title: item.title,
-        description: item.subtitle || item.content.substring(0, 150),
-        image: item.photoId
-          ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/${item.photoId}`
-          : "/images/noticia_preview.png",
-        slug: item.slug,
-      }))
+      id: item.id,
+      title: item.title,
+      description: item.subtitle || item.content.substring(0, 150),
+      image: item.photoId
+        ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/${item.photoId}`
+        : "/images/noticia_preview.png",
+      slug: item.slug,
+    }))
     : [
-        {
-          id: "mock-1",
-          title: "¡Gran Apertura del Harmony Family Park!",
-          description: "Descubre las nuevas instalaciones diseñadas para que los niños disfruten al máximo este fin de semana.",
-          image: "/images/noticia_preview.png",
-          slug: "",
-        },
-        {
-          id: "mock-2",
-          title: "Taller de Pintura Creativa",
-          description: "Un espacio para que los más pequeños exploren su lado artístico con colores y mucha diversión.",
-          image: "/images/noticia_preview_2.png",
-          slug: "",
-        }
-      ];
+      {
+        id: "mock-1",
+        title: "¡Gran Apertura del Harmony Family Park!",
+        description: "Descubre las nuevas instalaciones diseñadas para que los niños disfruten al máximo este fin de semana.",
+        image: "/images/noticia_preview.png",
+        slug: "",
+      },
+      {
+        id: "mock-2",
+        title: "Taller de Pintura Creativa",
+        description: "Un espacio para que los más pequeños exploren su lado artístico con colores y mucha diversión.",
+        image: "/images/noticia_preview_2.png",
+        slug: "",
+      }
+    ];
 
   // Calculate today's date at midnight UTC adjusted for UTC-3 (Argentina)
   const today = new Date();
@@ -97,7 +97,7 @@ export default async function Home() {
               Guía cultural para familias
             </p>
           </div>
-          
+
           {/* Desktop/Tablet Navigation Icons in Header */}
           <div className="hidden md:flex items-center gap-6 text-white/90">
             <Link href="/" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
@@ -139,7 +139,7 @@ export default async function Home() {
           {/* Background image */}
           <div className="absolute inset-0 z-0 opacity-80">
             <Image
-              src="/images/hero-bg.png"
+              src="/images/img-rambla.webp"
               alt="Hero background"
               fill
               className="object-cover"
@@ -153,9 +153,9 @@ export default async function Home() {
           </div>
 
           {/* Navigation Squares - Rotated 35deg */}
-          <div className="relative z-10 w-full flex-1 flex flex-col items-center pb-20 -mt-165 -translate-x-[45px]">
+          <div className="relative z-10 w-full flex-1 flex flex-col items-center pb-20 -mt-165 -translate-x-[10%]">
             {/* Noticias */}
-            <Link href="/noticias" className="group relative block w-[150%] aspect-square active:scale-[0.98] transition-transform z-30">
+            <Link href="/noticias" className="group relative block w-[750px] aspect-square active:scale-[0.98] transition-transform z-30">
               <div className="absolute inset-0 bg-brand-accent shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
                 <div className="flex items-center gap-4 animate-slide-in-left">
                   <Newspaper className="w-10 h-10 text-white flex-shrink-0" strokeWidth={2.5} />
@@ -168,7 +168,7 @@ export default async function Home() {
             </Link>
 
             {/* Eventos */}
-            <Link href="/calendario" className="w-[150%] z-20 -mt-[135%] animate-slide-in-left will-change-transform block" style={{ animationDelay: '0.5s' }}>
+            <Link href="/calendario" className="w-[750px] z-20 -mt-[650px] animate-slide-in-left will-change-transform block" style={{ animationDelay: '0.5s' }}>
               <div className="group relative block w-full aspect-square active:scale-[0.98] transition-transform">
                 <div className="absolute inset-0 bg-brand-primary/80 shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
                   <div className="flex items-center gap-4">
@@ -183,7 +183,7 @@ export default async function Home() {
             </Link>
 
             {/* Lugares */}
-            <Link href="/map" className="w-[150%] z-10 -mt-[135%] animate-slide-in-left will-change-transform block" style={{ animationDelay: '1s' }}>
+            <Link href="/map" className="w-[750px] z-10 -mt-[650px] animate-slide-in-left will-change-transform block" style={{ animationDelay: '1s' }}>
               <div className="group relative block w-full aspect-square active:scale-[0.98] transition-transform">
                 <div className="absolute inset-0 bg-white/60 dark:bg-gray-300/60 shadow-2xl rotate-[20deg] rounded-[40px] flex items-end justify-end p-3 pr-12">
                   <div className="flex items-center gap-4">
@@ -204,42 +204,42 @@ export default async function Home() {
       <div className="hidden md:flex flex-col justify-between min-h-[calc(100vh-68px)] relative w-full">
         {/* Slanted Background Images */}
         <div className="absolute inset-0 z-0 flex">
-          {/* Left Image (Noticias) */}
-          <div 
-            className="absolute inset-0 bg-gray-900 transition-all duration-500" 
-            style={{ clipPath: 'polygon(0 0, 38% 0, 28% 100%, 0 100%)' }}
+          {/* Left Image (Noticias) - Spans from 0% to 40% of screen width */}
+          <div
+            className="absolute top-0 left-0 w-[40%] h-full bg-gray-900 transition-all duration-500"
+            style={{ clipPath: 'polygon(0 0, 95% 0, 70% 100%, 0 100%)' }}
           >
-            <Image 
-              src="/images/noticia_preview.png" 
-              alt="Noticias BG" 
-              fill 
-              className="object-cover opacity-40 hover:opacity-50 transition-opacity duration-300" 
+            <Image
+              src="/images/img-rambla.webp"
+              alt="Noticias BG"
+              fill
+              className="object-cover opacity-40 hover:opacity-50 transition-opacity duration-300"
               priority
             />
           </div>
-          {/* Middle Image (Eventos) */}
-          <div 
-            className="absolute inset-0 bg-gray-900 transition-all duration-500" 
-            style={{ clipPath: 'polygon(38% 0, 72% 0, 62% 100%, 28% 100%)' }}
+          {/* Middle Image (Eventos) - Spans from 25% to 75% of screen width */}
+          <div
+            className="absolute top-0 left-[25%] w-[50%] h-full bg-gray-900 transition-all duration-500"
+            style={{ clipPath: 'polygon(26% 0, 94% 0, 74% 100%, 6% 100%)' }}
           >
-            <Image 
-              src="/images/hero-bg.png" 
-              alt="Eventos BG" 
-              fill 
-              className="object-cover opacity-45 hover:opacity-55 transition-opacity duration-300" 
+            <Image
+              src="/images/img-puerto.webp"
+              alt="Eventos BG"
+              fill
+              className="object-cover opacity-45 hover:opacity-55 transition-opacity duration-300"
               priority
             />
           </div>
-          {/* Right Image (Lugares) */}
-          <div 
-            className="absolute inset-0 bg-gray-900 transition-all duration-500" 
-            style={{ clipPath: 'polygon(72% 0, 100% 0, 100% 100%, 62% 100%)' }}
+          {/* Right Image (Lugares) - Spans from 60% to 100% of screen width */}
+          <div
+            className="absolute top-0 right-0 w-[40%] h-full bg-gray-900 transition-all duration-500"
+            style={{ clipPath: 'polygon(30% 0, 100% 0, 100% 100%, 5% 100%)' }}
           >
-            <Image 
-              src="/images/lugar_recomendado.png" 
-              alt="Lugares BG" 
-              fill 
-              className="object-cover opacity-40 hover:opacity-50 transition-opacity duration-300" 
+            <Image
+              src="/images/img-molinos.webp"
+              alt="Lugares BG"
+              fill
+              className="object-cover opacity-40 hover:opacity-50 transition-opacity duration-300"
               priority
             />
           </div>
@@ -247,61 +247,61 @@ export default async function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 z-10 pointer-events-none" />
         </div>
 
-          {/* Center Banner Carousel */}
-          <div className="relative z-20 flex-1 flex items-start justify-center max-w-4xl mx-auto w-full px-6 pt-16 pb-12">
-            <div className="w-full bg-gray-950/40 backdrop-blur-md p-5 rounded-[32px] border border-white/10 shadow-2xl">
-              <BannerCarousel />
-            </div>
-          </div>
-
-          {/* Bottom Navigation Tabs */}
-          <div className="relative z-20 w-full">
-            <div className="w-full grid grid-cols-8">
-              {/* Left Empty Tab */}
-              <div className="col-span-1 border-t border-white/15 bg-black/40 backdrop-blur-md" />
-
-              {/* Noticias Tab */}
-              <Link href="/noticias" className="col-span-2 group px-4 lg:px-8 py-5 flex items-center justify-start gap-4 bg-brand-accent/90 hover:bg-brand-accent transition-all duration-300 border-t border-white/15">
-                <div className="p-2.5 bg-white/20 rounded-xl flex-shrink-0">
-                  <Newspaper className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
-                </div>
-                <div className="flex flex-col items-start min-w-0">
-                  <span className="text-white font-black text-base lg:text-lg tracking-wider uppercase leading-none truncate w-full">Noticias</span>
-                  <span className="text-white/85 text-[11px] lg:text-xs font-bold tracking-wide mt-1 hidden md:inline truncate w-full">Novedades de la ciudad</span>
-                </div>
-              </Link>
-
-              {/* Eventos Tab */}
-              <Link href="/calendario" className="col-span-2 group px-4 lg:px-8 py-5 flex items-center justify-start gap-4 bg-brand-primary/95 hover:bg-brand-primary transition-all duration-300 border-t border-white/15">
-                <div className="p-2.5 bg-white/20 rounded-xl flex-shrink-0">
-                  <Calendar className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
-                </div>
-                <div className="flex flex-col items-start min-w-0">
-                  <span className="text-white font-black text-base lg:text-lg tracking-wider uppercase leading-none truncate w-full">Eventos</span>
-                  <span className="text-white/85 text-[11px] lg:text-xs font-bold tracking-wide mt-1 hidden md:inline truncate w-full">Nuestro Calendario</span>
-                </div>
-              </Link>
-
-              {/* Lugares Tab */}
-              <Link href="/map" className="col-span-2 group px-4 lg:px-8 py-5 flex items-center justify-start gap-4 bg-white/95 dark:bg-gray-850/95 hover:bg-white dark:hover:bg-gray-850 transition-all duration-300 border-t border-white/15">
-                <div className="p-2.5 bg-brand-primary/10 dark:bg-brand-primary/20 rounded-xl flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-brand-primary dark:text-brand-accent group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
-                </div>
-                <div className="flex flex-col items-start min-w-0">
-                  <span className="text-brand-primary dark:text-white font-black text-base lg:text-lg tracking-wider uppercase leading-none truncate w-full">Lugares</span>
-                  <span className="text-brand-primary/85 dark:text-gray-300 text-[11px] lg:text-xs font-bold tracking-wide mt-1 hidden md:inline truncate w-full">Mapa Interactivo</span>
-                </div>
-              </Link>
-
-              {/* Right Empty Tab */}
-              <div className="col-span-1 border-t border-white/15 bg-black/40 backdrop-blur-md" />
-            </div>
+        {/* Center Banner Carousel */}
+        <div className="relative z-20 flex-1 flex items-start justify-center max-w-4xl mx-auto w-full px-6 pt-16 pb-12">
+          <div className="w-full bg-gray-950/40 backdrop-blur-md p-5 rounded-[32px] border border-white/10 shadow-2xl">
+            <BannerCarousel />
           </div>
         </div>
 
+        {/* Bottom Navigation Tabs */}
+        <div className="relative z-20 w-full">
+          <div className="w-full grid grid-cols-8">
+            {/* Left Empty Tab */}
+            <div className="col-span-1 border-t border-white/15 bg-black/40 backdrop-blur-md" />
+
+            {/* Noticias Tab */}
+            <Link href="/noticias" className="col-span-2 group px-4 lg:px-8 py-5 flex items-center justify-start gap-4 bg-brand-accent/90 hover:bg-brand-accent transition-all duration-300 border-t border-white/15">
+              <div className="p-2.5 bg-white/20 rounded-xl flex-shrink-0">
+                <Newspaper className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+              </div>
+              <div className="flex flex-col items-start min-w-0">
+                <span className="text-white font-black text-base lg:text-lg tracking-wider uppercase leading-none truncate w-full">Noticias</span>
+                <span className="text-white/85 text-[11px] lg:text-xs font-bold tracking-wide mt-1 hidden md:inline truncate w-full">Novedades de la ciudad</span>
+              </div>
+            </Link>
+
+            {/* Eventos Tab */}
+            <Link href="/calendario" className="col-span-2 group px-4 lg:px-8 py-5 flex items-center justify-start gap-4 bg-brand-primary/95 hover:bg-brand-primary transition-all duration-300 border-t border-white/15">
+              <div className="p-2.5 bg-white/20 rounded-xl flex-shrink-0">
+                <Calendar className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+              </div>
+              <div className="flex flex-col items-start min-w-0">
+                <span className="text-white font-black text-base lg:text-lg tracking-wider uppercase leading-none truncate w-full">Eventos</span>
+                <span className="text-white/85 text-[11px] lg:text-xs font-bold tracking-wide mt-1 hidden md:inline truncate w-full">Nuestro Calendario</span>
+              </div>
+            </Link>
+
+            {/* Lugares Tab */}
+            <Link href="/map" className="col-span-2 group px-4 lg:px-8 py-5 flex items-center justify-start gap-4 bg-white/95 dark:bg-gray-850/95 hover:bg-white dark:hover:bg-gray-850 transition-all duration-300 border-t border-white/15">
+              <div className="p-2.5 bg-brand-primary/10 dark:bg-brand-primary/20 rounded-xl flex-shrink-0">
+                <MapPin className="w-6 h-6 text-brand-primary dark:text-brand-accent group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+              </div>
+              <div className="flex flex-col items-start min-w-0">
+                <span className="text-brand-primary dark:text-white font-black text-base lg:text-lg tracking-wider uppercase leading-none truncate w-full">Lugares</span>
+                <span className="text-brand-primary/85 dark:text-gray-300 text-[11px] lg:text-xs font-bold tracking-wide mt-1 hidden md:inline truncate w-full">Mapa Interactivo</span>
+              </div>
+            </Link>
+
+            {/* Right Empty Tab */}
+            <div className="col-span-1 border-t border-white/15 bg-black/40 backdrop-blur-md" />
+          </div>
+        </div>
+      </div>
+
       {/* Unified Content Sections (Below the Hero, visible on all viewports) */}
       <div className="w-full max-w-6xl mx-auto p-4 md:p-8 space-y-12 pb-24 relative z-10">
-        
+
         {/* Noticias section */}
         <section className="space-y-4">
           <div className="flex justify-between items-center">
@@ -353,7 +353,7 @@ export default async function Home() {
             ) : (
               events.map((event) => (
                 <div key={event.id} className="relative group">
-                  <Link 
+                  <Link
                     href={`/calendario?event=${event.eventId}`}
                     className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block pr-12 h-full"
                   >
@@ -371,10 +371,10 @@ export default async function Home() {
                       <p className="text-sm text-gray-500 dark:text-gray-400">{event.location}</p>
                     </div>
                   </Link>
-                  <FavoriteHeartButton 
-                    id={event.eventId} 
-                    type="event" 
-                    className="absolute top-1/2 -translate-y-1/2 right-3 z-10 bg-gray-50 dark:bg-gray-750 shadow-sm border border-gray-100 dark:border-gray-700" 
+                  <FavoriteHeartButton
+                    id={event.eventId}
+                    type="event"
+                    className="absolute top-1/2 -translate-y-1/2 right-3 z-10 bg-gray-50 dark:bg-gray-750 shadow-sm border border-gray-100 dark:border-gray-700"
                   />
                 </div>
               ))
@@ -416,10 +416,10 @@ export default async function Home() {
                       <p className="text-xs text-brand-primary font-bold mt-1">{place.address}</p>
                     </div>
                   </Link>
-                  <FavoriteHeartButton 
-                    id={place.id} 
-                    type="place" 
-                    className="absolute top-1/2 -translate-y-1/2 right-3 z-10 bg-gray-50 dark:bg-gray-750 shadow-sm border border-gray-100 dark:border-gray-700" 
+                  <FavoriteHeartButton
+                    id={place.id}
+                    type="place"
+                    className="absolute top-1/2 -translate-y-1/2 right-3 z-10 bg-gray-50 dark:bg-gray-750 shadow-sm border border-gray-100 dark:border-gray-700"
                   />
                 </div>
               ))
