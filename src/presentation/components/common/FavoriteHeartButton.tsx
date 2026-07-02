@@ -23,7 +23,7 @@ export const FavoriteHeartButton = ({ id, type, size = 20, className = "" }: Pro
         e.stopPropagation(); // Prevent opening modals/detail views
         toggle(id);
       }}
-      className={`p-2 rounded-full active:scale-90 transition-all ${className}`}
+      className={`p-2 rounded-full active:scale-90 transition-all md:hidden ${className}`}
       aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
     >
       <Heart 

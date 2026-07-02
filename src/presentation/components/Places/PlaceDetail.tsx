@@ -43,7 +43,7 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
             <div className="flex justify-between items-center px-6 py-1 mb-2">
                 <button
                     onClick={() => toggleFavoritePlace(placeDetail.id)}
-                    className="p-2 text-gray-600 hover:text-rose-500 transition-colors active:scale-95"
+                    className="p-2 text-gray-600 hover:text-rose-500 transition-colors active:scale-95 md:hidden"
                     aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
                 >
                     <Heart size={20} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-600"} />

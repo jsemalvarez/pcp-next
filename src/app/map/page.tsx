@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import { Search, MapPin, Navigation, Filter, X, Clock, Info, Share2, Check, Globe, Heart } from 'lucide-react';
+import { Search, MapPin, Navigation, Filter, X, Clock, Info, Share2, Check, Globe, Heart, Home as HomeIcon, Newspaper, Calendar as CalendarIcon, User } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Place } from '@/domain/entities/Place';
 import { getPlaces } from '@/actions/places';
 import { getCategoryLabel } from '@/presentation/utils/category';
@@ -141,9 +142,43 @@ function MapContent() {
 
     return (
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 relative overflow-hidden">
+            {/* Desktop Navbar */}
+            <header className="hidden md:block bg-brand-accent dark:bg-brand-accent/90 backdrop-blur-lg pt-safe border-b border-white/10 z-50">
+                <div className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto w-full">
+                    <div className="flex items-center gap-2">
+                        <Link href="/" className="text-white hover:text-white/80 transition-colors flex items-center gap-2">
+                            <span className="text-lg font-black tracking-tight">Paseos con Peques</span>
+                        </Link>
+                    </div>
+                    {/* Desktop/Tablet Navigation Icons in Header */}
+                    <div className="flex items-center gap-6 text-white/90">
+                        <Link href="/" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+                            <HomeIcon className="w-4 h-4" />
+                            <span>Inicio</span>
+                        </Link>
+                        <Link href="/noticias" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+                            <Newspaper className="w-4 h-4" />
+                            <span>Noticias</span>
+                        </Link>
+                        <Link href="/calendario" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+                            <CalendarIcon className="w-4 h-4" />
+                            <span>Eventos</span>
+                        </Link>
+                        <Link href="/map" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5 text-white">
+                            <MapPin className="w-4 h-4" />
+                            <span>Mapa</span>
+                        </Link>
+                        <div className="h-4 w-px bg-white/20" />
+                        <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
+                            <User className="w-5 h-5" />
+                        </Link>
+                    </div>
+                </div>
+            </header>
+
             {/* Unified Search & Filter Header */}
-            <div className="absolute top-0 left-0 right-0 z-[1000] p-0 pt-safe pointer-events-none">
-                <div className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-xl border-b border-gray-100 dark:border-gray-800 pointer-events-auto overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 md:top-20 md:left-4 md:right-auto z-[1000] p-0 pt-safe md:pt-0 pointer-events-none w-full md:w-96">
+                <div className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-xl border-b md:border border-gray-100 dark:border-gray-800 md:rounded-3xl pointer-events-auto overflow-hidden">
                     <div className="p-1.5 flex flex-col">
                         {/* Search Input */}
                         <div className="flex items-center gap-2 p-1.5">
@@ -230,7 +265,7 @@ function MapContent() {
 
                         <button
                             onClick={() => toggleFavoritePlace(selectedPlace.id)}
-                            className="absolute top-6 right-16 p-2 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110]"
+                            className="absolute top-6 right-16 p-2 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110] md:hidden"
                             aria-label={isFavoritePlace(selectedPlace.id) ? "Quitar de favoritos" : "Guardar en favoritos"}
                         >
                             <Heart size={20} className={isFavoritePlace(selectedPlace.id) ? "fill-rose-500 text-rose-500" : "text-gray-500"} />

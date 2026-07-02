@@ -31,7 +31,7 @@ export const PlaceCard = ({place}:Props) => {
                 {/* Botón de favoritos (corazón) */}
                 <button
                     onClick={() => toggleFavoritePlace(place.id)}
-                    className="absolute top-3 right-3 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white backdrop-blur-sm transition-all duration-200 active:scale-90"
+                    className="absolute top-3 right-3 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white backdrop-blur-sm transition-all duration-200 active:scale-90 md:hidden"
                     aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
                 >
                     <Heart size={18} className={isFav ? "fill-rose-500 text-rose-500" : "text-white"} />

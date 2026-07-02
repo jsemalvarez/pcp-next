@@ -99,10 +99,6 @@ export default async function Home() {
               <MapPin className="w-4 h-4" />
               <span>Mapa</span>
             </Link>
-            <Link href="/favorites" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
-              <Heart className="w-4 h-4" />
-              <span>Favoritos</span>
-            </Link>
             <div className="h-4 w-px bg-white/20" />
             <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
               <User className="w-5 h-5" />

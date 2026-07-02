@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getNewsBySlug } from "@/actions/news";
-import { Calendar, ArrowLeft, Share2 } from "lucide-react";
+import { Calendar, ArrowLeft, Share2, Home as HomeIcon, Newspaper, MapPin, User } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
@@ -56,12 +56,12 @@ export default async function PublicNewsDetailPage({ params }: Props) {
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-brand-accent dark:bg-brand-accent/90 backdrop-blur-lg pt-safe border-b border-white/10">
-        <div className="px-4 py-4 flex items-center justify-between gap-4 max-w-3xl w-full mx-auto">
-          <div className="flex items-center gap-4">
-            <Link href="/noticias" className="text-white hover:text-white/80 transition-colors">
+        <div className="px-4 py-3 flex justify-between items-center max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-4 max-w-xl">
+            <Link href="/noticias" className="text-white hover:text-white/80 transition-colors flex-shrink-0">
               <ArrowLeft className="w-6 h-6" />
             </Link>
-            <div>
+            <div className="min-w-0">
               <span className="text-[10px] font-bold uppercase tracking-widest text-white/70 block">
                 Noticias
               </span>
@@ -70,6 +70,35 @@ export default async function PublicNewsDetailPage({ params }: Props) {
               </span>
             </div>
           </div>
+
+          {/* Desktop/Tablet Navigation Icons in Header */}
+          <div className="hidden md:flex items-center gap-6 text-white/90">
+            <Link href="/" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+              <HomeIcon className="w-4 h-4" />
+              <span>Inicio</span>
+            </Link>
+            <Link href="/noticias" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5 text-white">
+              <Newspaper className="w-4 h-4" />
+              <span>Noticias</span>
+            </Link>
+            <Link href="/calendario" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" />
+              <span>Eventos</span>
+            </Link>
+            <Link href="/map" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+              <MapPin className="w-4 h-4" />
+              <span>Mapa</span>
+            </Link>
+            <div className="h-4 w-px bg-white/20" />
+            <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
+              <User className="w-5 h-5" />
+            </Link>
+          </div>
+
+          {/* Mobile Admin Icon */}
+          <Link href="/admin/login" className="md:hidden p-2 text-white/70 hover:text-white transition-colors">
+            <User className="w-5 h-5" />
+          </Link>
         </div>
       </header>
 

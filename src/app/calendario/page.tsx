@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User } from 'lucide-react';
 import { useFavorites } from '@/presentation/contexts/FavoritesContext';
 import Link from 'next/link';
 import { getOccurrencesByMonth } from "@/actions/events";
@@ -267,7 +267,41 @@ function CalendarContent() {
 
     return (
         <div className="min-h-screen pb-24 bg-gray-50 dark:bg-gray-900 transition-colors duration-300 relative">
-            <header className="bg-white dark:bg-gray-850 p-4 pb-4 sticky top-0 z-10 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
+            {/* Desktop Navbar */}
+            <header className="hidden md:block bg-brand-accent dark:bg-brand-accent/90 backdrop-blur-lg pt-safe border-b border-white/10 z-50 sticky top-0">
+                <div className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto w-full">
+                    <div className="flex items-center gap-2">
+                        <Link href="/" className="text-white hover:text-white/80 transition-colors flex items-center gap-2">
+                            <span className="text-lg font-black tracking-tight">Paseos con Peques</span>
+                        </Link>
+                    </div>
+                    {/* Desktop/Tablet Navigation Icons in Header */}
+                    <div className="flex items-center gap-6 text-white/90">
+                        <Link href="/" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+                            <HomeIcon className="w-4 h-4" />
+                            <span>Inicio</span>
+                        </Link>
+                        <Link href="/noticias" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+                            <Newspaper className="w-4 h-4" />
+                            <span>Noticias</span>
+                        </Link>
+                        <Link href="/calendario" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5 text-white">
+                            <CalendarIcon className="w-4 h-4" />
+                            <span>Eventos</span>
+                        </Link>
+                        <Link href="/map" className="hover:text-white font-bold text-sm transition-colors flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4" />
+                            <span>Mapa</span>
+                        </Link>
+                        <div className="h-4 w-px bg-white/20" />
+                        <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
+                            <User className="w-5 h-5" />
+                        </Link>
+                    </div>
+                </div>
+            </header>
+
+            <header className="bg-white dark:bg-gray-850 p-4 pb-4 sticky top-0 md:top-[65px] z-10 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
                 <div className="flex justify-between items-end mb-4">
                     <div className="flex flex-col">
                         <h1 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">Agenda</h1>
@@ -581,7 +615,7 @@ function CalendarContent() {
 
                         <button
                             onClick={() => toggleFavoriteEvent(selectedEventOccurrence.event.id)}
-                            className="absolute top-6 right-16 p-2 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-450 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110]"
+                            className="absolute top-6 right-16 p-2 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-450 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110] md:hidden"
                             aria-label={isFavoriteEvent(selectedEventOccurrence.event.id) ? "Quitar de favoritos" : "Guardar en favoritos"}
                         >
                             <Heart size={20} className={isFavoriteEvent(selectedEventOccurrence.event.id) ? "fill-rose-500 text-rose-500" : "text-gray-500"} />
