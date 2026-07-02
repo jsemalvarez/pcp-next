@@ -66,7 +66,7 @@ export default async function AdminBannersPage() {
                       <td className="p-4">
                         {banner.photoId ? (
                           <img
-                            src={`https://res.cloudinary.com/dwhdla1b4/image/upload/w_120,h_80,c_fill,q_auto,f_auto/v1749595725/pcp-images/${banner.photoId}`}
+                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_120,h_80,c_fill,q_auto,f_auto/${banner.photoId}`}
                             alt={banner.title}
                             className="w-16 h-10 rounded-lg object-cover border border-gray-200"
                           />

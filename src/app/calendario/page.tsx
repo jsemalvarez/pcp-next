@@ -647,7 +647,7 @@ function CalendarContent() {
                             {selectedEventOccurrence.event.photoId && (
                                 <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-855 shadow-sm">
                                     <img
-                                        src={`https://res.cloudinary.com/dwhdla1b4/image/upload/w_800,q_auto,f_auto/v1749595725/pcp-images/${selectedEventOccurrence.event.photoId}`}
+                                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_800,q_auto,f_auto/${selectedEventOccurrence.event.photoId}`}
                                         alt={selectedEventOccurrence.event.title}
                                         className="w-full h-full object-cover"
                                     />

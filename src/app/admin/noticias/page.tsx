@@ -65,7 +65,7 @@ export default async function AdminNewsPage() {
                       <td className="p-4">
                         {news.photoId ? (
                           <img
-                            src={`https://res.cloudinary.com/dwhdla1b4/image/upload/w_120,h_80,c_fill,q_auto,f_auto/v1749595725/pcp-images/${news.photoId}`}
+                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_120,h_80,c_fill,q_auto,f_auto/${news.photoId}`}
                             alt={news.title}
                             className="w-16 h-10 rounded-lg object-cover border border-gray-200"
                           />

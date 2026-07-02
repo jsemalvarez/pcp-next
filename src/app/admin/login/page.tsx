@@ -28,7 +28,7 @@ export default function LoginPage() {
         {/* Ilustración */}
         <div className="absolute inset-0 flex items-end justify-center">
           <Image
-            src="/images/hero-bg.webp"
+            src="/images/img-rambla.webp"
             alt="Paseos con Peques"
             fill
             className="object-cover object-center"

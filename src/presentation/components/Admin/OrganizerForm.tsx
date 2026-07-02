@@ -60,10 +60,13 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState(initialData?.typeId || "");
 
   // Image upload state
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dwhdla1b4";
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.photoId
-      ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_300,q_auto,f_auto/v1749595725/pcp-images/${initialData.photoId}`
+      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_300,q_auto,f_auto/${initialData.photoId}`
       : null
   );
 
@@ -98,19 +101,18 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const data = new FormData();
     data.append("file", file);
-    data.append("upload_preset", "pcp_images");
-    data.append("folder", "pcp-images");
+    data.append("upload_preset", uploadPreset);
+    data.append("folder", "organizers");
 
     const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dwhdla1b4/image/upload",
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       { method: "POST", body: data }
     );
     const result = await res.json();
     if (!res.ok) {
       throw new Error("Error al subir la imagen a Cloudinary");
     }
-    const publicId = result.public_id.split("/")[1];
-    return `${publicId}.${result.format}`;
+    return `${result.public_id}.${result.format}`;
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

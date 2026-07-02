@@ -237,7 +237,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
             <div className="space-y-4 animate-fadeIn">
               {favoriteEvents.map(event => {
                 const imageUrl = event.photoId
-                  ? `https://res.cloudinary.com/dwhdla1b4/image/upload/w_300,q_auto,f_auto/v1749595725/pcp-images/${event.photoId}`
+                  ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_300,q_auto,f_auto/${event.photoId}`
                   : "/images/evento_dia.png";
 
                 // Find next upcoming occurrence if any
@@ -463,7 +463,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
               {selectedEvent.photoId && (
                 <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-855 shadow-sm">
                   <img
-                    src={`https://res.cloudinary.com/dwhdla1b4/image/upload/w_800,q_auto,f_auto/v1749595725/pcp-images/${selectedEvent.photoId}`}
+                    src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_800,q_auto,f_auto/${selectedEvent.photoId}`}
                     alt={selectedEvent.title}
                     className="w-full h-full object-cover"
                   />
