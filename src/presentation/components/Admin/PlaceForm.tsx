@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPlace, updatePlace } from "@/actions/places";
 import { PlaceCategory } from "@prisma/client";
 import { Place } from "@/domain/entities/Place";
+import { CATEGORIES_TRANSLATE } from "@/presentation/constants/categories";
 import { Save, ArrowLeft, Search, MapPin } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -102,7 +103,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
   };
 
   // Parse categories properly
-  const [categoriesText, setCategoriesText] = useState(initialData?.categories?.join(", ") || "");
+  const [selectedCategories, setSelectedCategories] = useState<PlaceCategory[]>(initialData?.categories || []);
   const [ageMin, setAgeMin] = useState<number>(initialData?.ageMin ?? 0);
   const [ageMax, setAgeMax] = useState<number | null>(initialData?.ageMax ?? null);
 
@@ -138,7 +139,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
       description: formData.get("description") as string,
       iconType: formData.get("iconType") as string,
       bgColor: formData.get("bgColor") as string,
-      categories: categoriesText.split(",").map(c => c.trim()).filter(Boolean) as PlaceCategory[],
+      categories: selectedCategories,
       ageMin: Number(formData.get("ageMin")) || 0,
       ageMax: formData.get("ageMax") ? Number(formData.get("ageMax")) : null,
     };
@@ -181,9 +182,31 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
           <textarea defaultValue={initialData?.description ?? undefined} name="description" rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Breve descripción del lugar..." />
         </div>
 
-        <div>
-          <InputLabel>Categorías (separadas por coma)</InputLabel>
-          <input value={categoriesText} onChange={e => setCategoriesText(e.target.value)} type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. Parque, Comida, Juegos" />
+        <div className="md:col-span-2">
+          <InputLabel>Categorías</InputLabel>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {(Object.keys(CATEGORIES_TRANSLATE) as PlaceCategory[]).map((categoryKey) => {
+              const label = CATEGORIES_TRANSLATE[categoryKey];
+              const isChecked = selectedCategories.includes(categoryKey);
+              return (
+                <label key={categoryKey} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedCategories([...selectedCategories, categoryKey]);
+                      } else {
+                        setSelectedCategories(selectedCategories.filter(c => c !== categoryKey));
+                      }
+                    }}
+                    className="w-5 h-5 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+                  />
+                  <span className="text-sm font-bold text-gray-700">{label}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
