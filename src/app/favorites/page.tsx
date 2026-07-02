@@ -24,6 +24,11 @@ export default async function FavoritesPage() {
           date: "asc",
         },
       },
+      organizers: {
+        include: {
+          organizer: true,
+        },
+      },
     },
     orderBy: {
       title: "asc",
@@ -42,6 +47,11 @@ export default async function FavoritesPage() {
     ageMax: event.ageMax,
     ticketUrl: event.ticketUrl,
     bookingWhatsapp: event.bookingWhatsapp,
+    organizers: event.organizers.map(eo => ({
+      id: eo.organizer.id,
+      name: eo.organizer.name,
+      slug: eo.organizer.slug,
+    })),
     occurrences: event.occurrences.map(occ => ({
       id: occ.id,
       date: occ.date.toISOString(),
@@ -51,6 +61,8 @@ export default async function FavoritesPage() {
         id: occ.place.id,
         name: occ.place.name,
         address: occ.place.address,
+        phone: occ.place.phone,
+        whatsapp: occ.place.whatsapp,
       },
     })),
   }));

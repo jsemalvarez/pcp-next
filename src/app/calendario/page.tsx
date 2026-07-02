@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User, Ticket, MessageCircle } from 'lucide-react';
 import { useFavorites } from '@/presentation/contexts/FavoritesContext';
 import Link from 'next/link';
 import { getOccurrencesByMonth } from "@/actions/events";
@@ -11,7 +11,7 @@ import { PriceType, ActivityType } from "@prisma/client";
 // Map PriceType enum to friendly Spanish text
 const PRICE_TYPE_LABELS: Record<PriceType, string> = {
   FREE_ENTRY: "Gratuito",
-  PAID_TICKET: "Con Entrada",
+  PAID_TICKET: "Arancelado",
   DONATION_BASED: "A la Gorra",
   WITH_CONSUMPTION: "Con Consumición",
 };
@@ -610,7 +610,7 @@ function CalendarContent() {
             {/* Event Details Modal */}
             {selectedEventOccurrence && (
                 <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-                    <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto no-scrollbar">
                         <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 opacity-50" />
 
                         <button
@@ -655,7 +655,7 @@ function CalendarContent() {
                             )}
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                <div className="flex items-center gap-3 p-3 bg-gray-55 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
                                     <div className="p-2 bg-brand-primary/10 rounded-xl text-brand-primary">
                                         <Clock size={16} />
                                     </div>
@@ -667,7 +667,7 @@ function CalendarContent() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                <div className="flex items-center gap-3 p-3 bg-gray-55 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
                                     <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600 dark:text-purple-400">
                                         <Users size={16} />
                                     </div>
@@ -704,33 +704,93 @@ function CalendarContent() {
                                 </div>
                             )}
 
-                            <div className="pt-4 space-y-3">
-                                {/* Ticket / Booking buttons */}
-                                {selectedEventOccurrence.event.ticketUrl && (
-                                    <a 
-                                        href={selectedEventOccurrence.event.ticketUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full py-3.5 px-4 rounded-xl bg-brand-primary text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] transition-all"
-                                    >
-                                        <Globe size={16} />
-                                        RESERVAR ENTRADAS
-                                    </a>
-                                )}
+                            {/* Organizadores */}
+                            {selectedEventOccurrence.event.organizers && selectedEventOccurrence.event.organizers.length > 0 && (
+                                <div className="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-800/50">
+                                    <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                        <User size={16} className="text-brand-primary" />
+                                        <span className="text-xs font-black uppercase tracking-wider">Organizadores</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {selectedEventOccurrence.event.organizers.map((eo: any) => (
+                                            <Link
+                                                key={eo.organizer.id}
+                                                href={`/perfil/${eo.organizer.slug}`}
+                                                className="inline-block px-2.5 py-1 text-xs font-bold bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 rounded-xl transition-all cursor-pointer"
+                                            >
+                                                {eo.organizer.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                                {selectedEventOccurrence.event.bookingWhatsapp && (
-                                    <a 
-                                        href={`https://wa.me/${selectedEventOccurrence.event.bookingWhatsapp.replace(/[^0-9]/g, '')}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-green-650/20 hover:bg-green-700 active:scale-[0.98] transition-all"
-                                    >
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.94 3.659 1.437 5.634 1.437h.005c6.558 0 11.895-5.335 11.898-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-                                        CONTACTAR POR WHATSAPP
-                                    </a>
-                                )}
+                            {/* Precio */}
+                            <div className="flex items-center gap-3 p-3 bg-gray-55 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+                                    <Ticket size={16} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-bold tracking-wider">Precio</span>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200 font-bold">
+                                        {PRICE_TYPE_LABELS[selectedEventOccurrence.event.priceType as PriceType] || selectedEventOccurrence.event.priceType}
+                                    </span>
+                                </div>
+                            </div>
 
-                                <div className="flex items-center gap-3">
+                            {/* Reservas / Entradas */}
+                            {(selectedEventOccurrence.event.ticketUrl || selectedEventOccurrence.event.bookingWhatsapp || (selectedEventOccurrence.event.priceType === 'PAID_TICKET' && (selectedEventOccurrence.place.whatsapp || selectedEventOccurrence.place.phone))) && (
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-800/50 space-y-3">
+                                    {selectedEventOccurrence.event.ticketUrl ? (
+                                        <a 
+                                            href={selectedEventOccurrence.event.ticketUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-3.5 px-4 rounded-xl bg-brand-primary text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] transition-all"
+                                        >
+                                            <Globe size={16} />
+                                            RESERVAR ENTRADAS
+                                        </a>
+                                    ) : null}
+
+                                    {selectedEventOccurrence.event.bookingWhatsapp ? (
+                                        <a 
+                                            href={`https://wa.me/${selectedEventOccurrence.event.bookingWhatsapp.replace(/[^0-9]/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-green-650/20 hover:bg-green-700 active:scale-[0.98] transition-all"
+                                        >
+                                            <MessageCircle size={16} />
+                                            CONTACTAR POR WHATSAPP
+                                        </a>
+                                    ) : (
+                                        selectedEventOccurrence.event.priceType === 'PAID_TICKET' && (
+                                            <>
+                                                {!selectedEventOccurrence.event.ticketUrl && selectedEventOccurrence.place.whatsapp && (
+                                                    <a 
+                                                        href={`https://wa.me/${selectedEventOccurrence.place.whatsapp.replace(/[^0-9]/g, '')}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-green-650/20 hover:bg-green-700 active:scale-[0.98] transition-all"
+                                                    >
+                                                        💬 RESERVAR POR WHATSAPP
+                                                    </a>
+                                                )}
+                                                {!selectedEventOccurrence.event.ticketUrl && !selectedEventOccurrence.place.whatsapp && selectedEventOccurrence.place.phone && (
+                                                    <a 
+                                                        href={`tel:${selectedEventOccurrence.place.phone}`}
+                                                        className="w-full py-3.5 px-4 rounded-xl bg-brand-primary text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] transition-all"
+                                                    >
+                                                        📞 RESERVAR POR TELÉFONO
+                                                    </a>
+                                                )}
+                                            </>
+                                        )
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-3">
                                     <a
                                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedEventOccurrence.place.name + ", " + selectedEventOccurrence.place.address)}`}
                                         target="_blank"
@@ -761,7 +821,6 @@ function CalendarContent() {
                             </div>
                         </div>
                     </div>
-                </div>
             )}
         </div>
     );

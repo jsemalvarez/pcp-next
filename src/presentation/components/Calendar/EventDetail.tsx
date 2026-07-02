@@ -9,7 +9,14 @@ import { Place } from "@/domain/entities/Place";
 import { fortmatDate } from "@/presentation/utils/formatDate";
 
 import { useFavorites } from "@/presentation/contexts/FavoritesContext";
-import { Heart } from "lucide-react";
+import { Heart, Ticket } from "lucide-react";
+
+const PRICE_TYPE_LABELS: Record<string, string> = {
+    FREE_ENTRY: "Gratuito",
+    PAID_TICKET: "Arancelado",
+    DONATION_BASED: "A la Gorra",
+    WITH_CONSUMPTION: "Con Consumición",
+};
 
 interface Props {
     eventDetail: CalendarEvent | null;
@@ -58,7 +65,7 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
                 />
             </figure>
 
-            <div className="p-6 space-y-3 flex-1 overflow-y-auto">
+            <div className="p-6 space-y-3 flex-1 overflow-y-auto no-scrollbar">
                 <h3 className="text-2xl font-bold text-primary capitalize">{eventDetail.title}</h3>
 
                 <div className="text-sm text-gray-600 space-y-1">
@@ -75,14 +82,20 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
                         <ClockIcon />
                         <span className="font-medium">{eventDetail.timeStart} hs</span>
                     </div>
-                    <div className="text-xs font-bold text-brand-primary bg-brand-primary/10 px-2.5 py-1 rounded-full w-max mt-1">
-                        👦 Edad: {
-                            eventDetail.ageMin === 0.5 ? 'Desde 6 meses' : `Desde los ${eventDetail.ageMin} años`
-                        } {
-                            eventDetail.ageMax 
-                              ? `hasta los ${eventDetail.ageMax} años` 
-                              : 'en adelante'
-                        }
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                        <div className="text-xs font-bold text-brand-primary bg-brand-primary/10 px-2.5 py-1 rounded-full w-max">
+                            👦 Edad: {
+                                eventDetail.ageMin === 0.5 ? 'Desde 6 meses' : `Desde los ${eventDetail.ageMin} años`
+                            } {
+                                eventDetail.ageMax 
+                                  ? `hasta los ${eventDetail.ageMax} años` 
+                                  : 'en adelante'
+                            }
+                        </div>
+                        <div className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:text-emerald-450 dark:bg-emerald-950/30 px-2.5 py-1 rounded-full w-max flex items-center gap-1">
+                            <Ticket size={12} />
+                            {PRICE_TYPE_LABELS[eventDetail.priceType] || eventDetail.priceType}
+                        </div>
                     </div>
                 </div>
 
@@ -93,7 +106,7 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
                 )}
 
                 {/* Botones para Entradas y Reservas */}
-                {(eventDetail.ticketUrl || eventDetail.bookingWhatsapp) && (
+                {(eventDetail.ticketUrl || eventDetail.bookingWhatsapp || (eventDetail.priceType === 'PAID_TICKET' && (place?.whatsapp || place?.phone))) && (
                     <div className="flex flex-col gap-2 pt-3 border-t border-gray-200 mt-4">
                         {eventDetail.ticketUrl && (
                             <a
@@ -105,7 +118,7 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
                                 🎟️ Comprar Entradas
                             </a>
                         )}
-                        {eventDetail.bookingWhatsapp && (
+                        {eventDetail.bookingWhatsapp ? (
                             <a
                                 href={`https://wa.me/${eventDetail.bookingWhatsapp.replace(/[^0-9]/g, '')}`}
                                 target="_blank"
@@ -114,6 +127,29 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
                             >
                                 💬 Reservar por WhatsApp
                             </a>
+                        ) : (
+                            eventDetail.priceType === 'PAID_TICKET' && (
+                                <>
+                                    {!eventDetail.ticketUrl && place?.whatsapp && (
+                                        <a
+                                            href={`https://wa.me/${place.whatsapp.replace(/[^0-9]/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-green-500 text-white font-black rounded-xl hover:bg-green-600 transition-all text-sm shadow-md text-center"
+                                        >
+                                            💬 Reservar por WhatsApp
+                                        </a>
+                                    )}
+                                    {!eventDetail.ticketUrl && !place?.whatsapp && place?.phone && (
+                                        <a
+                                            href={`tel:${place.phone}`}
+                                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-brand-primary text-white font-black rounded-xl hover:bg-brand-primary/90 transition-all text-sm shadow-md text-center"
+                                        >
+                                            📞 Reservar por Teléfono
+                                        </a>
+                                    )}
+                                </>
+                            )
                         )}
                     </div>
                 )}

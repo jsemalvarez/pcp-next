@@ -94,7 +94,15 @@ export async function getOccurrencesByMonth(year: number, month: number) {
         date: { gte: startDate, lte: endDate },
       },
       include: {
-        event: true,
+        event: {
+          include: {
+            organizers: {
+              include: {
+                organizer: true,
+              },
+            },
+          },
+        },
         place: true,
       },
       orderBy: [{ date: "asc" }, { timeStart: "asc" }],

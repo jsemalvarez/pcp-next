@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Heart, MapPin, Calendar, ArrowRight, HeartOff, Clock, X, Info, Share2, Check, Globe, Navigation, Users } from "lucide-react";
+import { Heart, MapPin, Calendar, ArrowRight, HeartOff, Clock, X, Info, Share2, Check, Globe, Navigation, Users, Ticket, User, MessageCircle } from "lucide-react";
 import { useFavorites } from "@/presentation/contexts/FavoritesContext";
 import { fortmatDate } from "@/presentation/utils/formatDate";
+import Link from "next/link";
 
 interface Place {
   id: string;
@@ -36,6 +37,8 @@ interface Occurrence {
     id: string;
     name: string;
     address: string;
+    phone: string | null;
+    whatsapp: string | null;
   };
 }
 
@@ -50,6 +53,7 @@ interface Event {
   ageMax: number | null;
   ticketUrl: string | null;
   bookingWhatsapp: string | null;
+  organizers?: { id: string; name: string; slug: string }[];
   occurrences: Occurrence[];
 }
 
@@ -62,7 +66,7 @@ type TabType = "places" | "events";
 
 const PRICE_TYPE_LABELS: Record<string, string> = {
   FREE_ENTRY: "Gratuito",
-  PAID_TICKET: "Con Entrada",
+  PAID_TICKET: "Arancelado",
   DONATION_BASED: "A la Gorra",
   WITH_CONSUMPTION: "Con Consumición",
 };
@@ -304,7 +308,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
       {/* Place Details Modal */}
       {selectedPlace && (
         <div className="fixed inset-0 z-[10000] flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 opacity-50" />
 
             <button
@@ -428,7 +432,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
       {/* Event Details Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 z-[10000] flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2rem] shadow-2xl p-6 pb-8 relative animate-slide-up border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 opacity-50" />
 
             <button
@@ -471,7 +475,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 p-3 bg-gray-55 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
                   <div className="p-2 bg-brand-primary/10 rounded-xl text-brand-primary">
                     <Clock size={16} />
                   </div>
@@ -483,7 +487,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 p-3 bg-gray-55 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600 dark:text-purple-400">
                     <Users size={16} />
                   </div>
@@ -511,42 +515,104 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
               )}
 
               {selectedEvent.description && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-900 dark:text-white">
-                    <Info size={16} className="text-brand-primary" />
-                    <span className="text-xs font-black uppercase tracking-wider">Acerca del evento</span>
-                  </div>
-                  <p className="text-sm text-gray-650 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-line">
-                    {selectedEvent.description}
-                  </p>
-                </div>
-              )}
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                        <Info size={16} className="text-brand-primary" />
+                                        <span className="text-xs font-black uppercase tracking-wider">Acerca del evento</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-line">
+                                        {selectedEvent.description}
+                                    </p>
+                                </div>
+                            )}
 
-              <div className="pt-4 space-y-3">
-                {selectedEvent.ticketUrl && (
-                  <a
-                    href={selectedEvent.ticketUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3.5 px-4 rounded-xl bg-brand-primary text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] transition-all"
-                  >
-                    <Globe size={16} />
-                    RESERVAR ENTRADAS
-                  </a>
-                )}
+                            {/* Organizadores */}
+                            {selectedEvent.organizers && selectedEvent.organizers.length > 0 && (
+                                <div className="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-800/50">
+                                    <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                        <User size={16} className="text-brand-primary" />
+                                        <span className="text-xs font-black uppercase tracking-wider">Organizadores</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {selectedEvent.organizers.map((eo: any) => (
+                                            <Link
+                                                key={eo.id}
+                                                href={`/perfil/${eo.slug}`}
+                                                className="inline-block px-2.5 py-1 text-xs font-bold bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 rounded-xl transition-all cursor-pointer"
+                                            >
+                                                {eo.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                {selectedEvent.bookingWhatsapp && (
-                  <a
-                    href={`https://wa.me/${selectedEvent.bookingWhatsapp.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-green-650/20 hover:bg-green-700 active:scale-[0.98] transition-all"
-                  >
-                    💬 CONTACTAR POR WHATSAPP
-                  </a>
-                )}
+                            {/* Precio */}
+                            <div className="flex items-center gap-3 p-3 bg-gray-55 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+                                    <Ticket size={16} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-550 uppercase font-bold tracking-wider">Precio</span>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                                        {PRICE_TYPE_LABELS[selectedEvent.priceType] || selectedEvent.priceType}
+                                    </span>
+                                </div>
+                            </div>
 
-                <div className="flex items-center gap-3">
+                            {/* Reservas / Entradas */}
+                            {(selectedEvent.ticketUrl || selectedEvent.bookingWhatsapp || (selectedEvent.priceType === 'PAID_TICKET' && (selectedEvent.occurrences[0]?.place?.whatsapp || selectedEvent.occurrences[0]?.place?.phone))) && (
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-800/50 space-y-3">
+                                    {selectedEvent.ticketUrl ? (
+                                        <a 
+                                            href={selectedEvent.ticketUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-3.5 px-4 rounded-xl bg-brand-primary text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] transition-all"
+                                        >
+                                            <Globe size={16} />
+                                            RESERVAR ENTRADAS
+                                        </a>
+                                    ) : null}
+
+                                    {selectedEvent.bookingWhatsapp ? (
+                                        <a 
+                                            href={`https://wa.me/${selectedEvent.bookingWhatsapp.replace(/[^0-9]/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-green-650/20 hover:bg-green-700 active:scale-[0.98] transition-all"
+                                        >
+                                            <MessageCircle size={16} />
+                                            CONTACTAR POR WHATSAPP
+                                        </a>
+                                    ) : (
+                                        selectedEvent.priceType === 'PAID_TICKET' && (
+                                            <>
+                                                {!selectedEvent.ticketUrl && selectedEvent.occurrences[0]?.place?.whatsapp && (
+                                                    <a 
+                                                        href={`https://wa.me/${selectedEvent.occurrences[0].place.whatsapp.replace(/[^0-9]/g, '')}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-green-650/20 hover:bg-green-700 active:scale-[0.98] transition-all"
+                                                    >
+                                                        💬 RESERVAR POR WHATSAPP
+                                                    </a>
+                                                )}
+                                                {!selectedEvent.ticketUrl && !selectedEvent.occurrences[0]?.place?.whatsapp && selectedEvent.occurrences[0]?.place?.phone && (
+                                                    <a 
+                                                        href={`tel:${selectedEvent.occurrences[0].place.phone}`}
+                                                        className="w-full py-3.5 px-4 rounded-xl bg-brand-primary text-white text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] transition-all"
+                                                    >
+                                                        📞 RESERVAR POR TELÉFONO
+                                                    </a>
+                                                )}
+                                            </>
+                                        )
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-3">
                   {selectedEvent.occurrences[0]?.place && (
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedEvent.occurrences[0].place.name + ", " + selectedEvent.occurrences[0].place.address)}`}
@@ -583,7 +649,6 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
               </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );

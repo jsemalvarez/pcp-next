@@ -298,6 +298,8 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
         description: formData.get('description') as string || undefined,
         photoId: uploadedPhotoId || undefined,
         bgColor: formData.get('bgColor') as string || undefined,
+        ticketUrl: formData.get('ticketUrl') as string || undefined,
+        bookingWhatsapp: formData.get('bookingWhatsapp') as string || undefined,
         priceType,
         activityTypes,
         ageMin: Number(formData.get('ageMin')) || 0,
