@@ -16,9 +16,14 @@ const baloo2 = Baloo_2({
 export const metadata: Metadata = {
   title: 'Paseos con Peques | Guía de actividades en Mar del Plata',
   description: 'Descubrí los mejores lugares, eventos y paseos para disfrutar con niños, chicos o peques. Mapa interactivo y agenda cultural actualizada.',
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/icons/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   openGraph: {
     title: "Paseos con Peques",
@@ -42,7 +47,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#ffffff",
+  themeColor: "#f97316",
 };
 
 import { FavoritesProvider } from "@/presentation/contexts/FavoritesContext";
