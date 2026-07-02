@@ -3,14 +3,14 @@ import { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Paseos con Peques',
-    short_name: 'PaseosPeques',
+    short_name: 'PcP',
     description: 'Descubrí paseos, eventos y lugares para disfrutar con los peques en Mar del Plata.',
     start_url: '/',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#fff7ed',
-    theme_color: '#f97316',
+    background_color: '#353865',
+    theme_color: '#353865',
     categories: ['lifestyle', 'travel', 'kids'],
     icons: [
       {
@@ -53,14 +53,14 @@ export default function manifest(): MetadataRoute.Manifest {
     screenshots: [
       {
         src: '/images/noticia_preview.png',
-        sizes: '1200x800',
+        sizes: '1024x1024',
         type: 'image/png',
         form_factor: 'narrow',
         label: 'Noticias y novedades',
       },
       {
         src: '/images/lugar_recomendado.png',
-        sizes: '1200x800',
+        sizes: '1024x1024',
         type: 'image/png',
         form_factor: 'narrow',
         label: 'Lugares recomendados',
