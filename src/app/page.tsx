@@ -4,6 +4,7 @@ import Link from "next/link";
 import BannerCarousel from "@/presentation/components/BannerCarousel";
 import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User, Home as HomeIcon, Heart } from "lucide-react";
 import { getActiveNews } from "@/actions/news";
+import { getActiveBanners } from "@/actions/banners";
 import { FavoriteHeartButton } from "@/presentation/components/common/FavoriteHeartButton";
 
 import prisma from "@/data/prisma/db";
@@ -15,6 +16,7 @@ const Instagram = Camera;
 
 export default async function Home() {
   const dbNews = await getActiveNews();
+  const banners = await getActiveBanners();
   const news = dbNews.slice(0, 2).map((item) => ({
     id: item.id,
     title: item.title,
@@ -128,7 +130,7 @@ export default async function Home() {
 
           {/* Banner Carousel */}
           <div className="relative z-20 w-full p-2 pt-4">
-            <BannerCarousel />
+            <BannerCarousel banners={banners} />
           </div>
 
           {/* Navigation Squares - Rotated 35deg */}
@@ -229,7 +231,7 @@ export default async function Home() {
         {/* Center Banner Carousel */}
         <div className="relative z-20 flex-1 flex items-start justify-center max-w-4xl mx-auto w-full px-6 pt-16 pb-12">
           <div className="w-full bg-gray-950/40 backdrop-blur-md p-5 rounded-[32px] border border-white/10 shadow-2xl">
-            <BannerCarousel />
+            <BannerCarousel banners={banners} />
           </div>
         </div>
 

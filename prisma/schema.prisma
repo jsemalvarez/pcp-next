@@ -259,3 +259,19 @@ model News {
   updatedAt   DateTime @updatedAt
 }
 
+// ─────────────────────────────────────────────
+// BANNER / PORTADA
+// ─────────────────────────────────────────────
+model Banner {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String?
+  linkUrl     String?  // Enlace destino (interno o externo)
+  photoId     String?  // Cloudinary public_id
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0) // Rango de prioridad para definir el orden
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
