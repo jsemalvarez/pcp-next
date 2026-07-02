@@ -252,7 +252,7 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
 
           <input
             type="file"
-            accept="image/webp"
+            accept=".webp, image/webp"
             onChange={handleImageChange}
             className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 cursor-pointer"
             disabled={isSubmitting}

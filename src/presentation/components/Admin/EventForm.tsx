@@ -396,7 +396,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
                   Elegir Archivo
                   <input
                     type="file"
-                    accept="image/webp, image/*"
+                    accept=".webp, image/webp"
                     onChange={handleImageChange}
                     className="hidden"
                   />
