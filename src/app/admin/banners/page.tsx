@@ -71,7 +71,7 @@ export default async function AdminBannersPage() {
                             className="w-16 h-10 rounded-lg object-cover border border-gray-200"
                           />
                         ) : (
-                          <div className="w-16 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-[10px] font-bold border border-gray-200" style={{ backgroundColor: banner.bgColor || undefined }}>
+                          <div className="w-16 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-[10px] font-bold border border-gray-200">
                             Sin Foto
                           </div>
                         )}
