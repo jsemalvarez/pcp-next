@@ -4,6 +4,8 @@ import { getOrganizers } from "@/actions/organizers";
 import { notFound } from "next/navigation";
 import { EventForm } from "@/presentation/components/Admin/EventForm";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ id: string }>;
 }

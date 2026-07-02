@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getBannerById } from "@/actions/banners";
 import { BannerForm } from "@/presentation/components/Admin/BannerForm";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{
     id: string;

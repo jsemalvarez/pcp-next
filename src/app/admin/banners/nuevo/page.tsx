@@ -1,6 +1,8 @@
 import React from "react";
 import { BannerForm } from "@/presentation/components/Admin/BannerForm";
 
+export const dynamic = "force-dynamic";
+
 export default function NewBannerPage() {
   return (
     <div className="min-h-screen p-8">

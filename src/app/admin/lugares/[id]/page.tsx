@@ -2,6 +2,8 @@ import { PlaceForm } from "@/presentation/components/Admin/PlaceForm";
 import { getPlaceById } from "@/actions/places";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ id: string }>;
 }

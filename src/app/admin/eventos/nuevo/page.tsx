@@ -2,6 +2,8 @@ import { getPlaces } from "@/actions/places";
 import { getOrganizers } from "@/actions/organizers";
 import { EventForm } from "@/presentation/components/Admin/EventForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function NuevoEventoPage() {
   const [places, organizers] = await Promise.all([getPlaces(), getOrganizers()]);
 

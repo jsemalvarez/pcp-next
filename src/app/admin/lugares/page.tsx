@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Plus, Edit2 } from "lucide-react";
 import { DeletePlaceButton } from "@/presentation/components/Admin/DeletePlaceButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function LugaresPage() {
   const places = await getPlaces();
 

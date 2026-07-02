@@ -7,6 +7,8 @@ import dayjs from "dayjs";
 import 'dayjs/locale/es';
 dayjs.locale('es');
 
+export const dynamic = "force-dynamic";
+
 export default async function EventosPage() {
   const [events, places] = await Promise.all([getEvents(), getPlaces()]);
 

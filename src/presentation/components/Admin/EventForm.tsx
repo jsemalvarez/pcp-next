@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Place } from "@/domain/entities/Place";
 import { createEvent, updateEvent, CreateEventInput } from "@/actions/events";
 import { Prisma } from "@prisma/client";
+import { getPlaces } from "@/actions/places";
+import { getOrganizers } from "@/actions/organizers";
 
 type EventWithOccurrences = Prisma.EventGetPayload<{ include: { occurrences: { include: { place: true } } } }>;
 import { EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
@@ -128,6 +130,28 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
   const isEditing = !!initialData;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [currentPlaces, setCurrentPlaces] = useState<Place[]>(places);
+  const [currentOrganizers, setCurrentOrganizers] = useState<Organizer[]>(organizers);
+
+  useEffect(() => {
+    async function syncData() {
+      try {
+        const [updatedPlaces, updatedOrganizers] = await Promise.all([
+          getPlaces(),
+          getOrganizers(),
+        ]);
+        setCurrentPlaces(updatedPlaces);
+        setCurrentOrganizers(updatedOrganizers as Organizer[]);
+      } catch (err) {
+        console.error("Error al sincronizar datos de lugares/organizadores:", err);
+      }
+    }
+
+    // Refrescar al enfocar la pestaña
+    window.addEventListener("focus", syncData);
+    return () => window.removeEventListener("focus", syncData);
+  }, []);
 
   // ── Datos generales ──
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>(initialData?.activityTypes ?? []);
@@ -347,7 +371,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
             <InputLabel>Organizadores / Artistas Vinculados</InputLabel>
             <div className="mt-2">
               <SearchableOrganizerSelect
-                organizers={organizers}
+                organizers={currentOrganizers}
                 value={selectedOrganizerIds}
                 onChange={setSelectedOrganizerIds}
               />
@@ -718,7 +742,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
             <div className="md:col-span-2">
               <InputLabel isRequired>Lugar</InputLabel>
               <SearchablePlaceSelect
-                places={places}
+                places={currentPlaces}
                 value={selectedPlaceId}
                 onChange={(val) => { setSelectedPlaceId(val); setPreviewGenerated(false); }}
               />
@@ -824,7 +848,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
                       className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-brand-primary outline-none"
                     />
                     <SearchablePlaceSelect
-                      places={places}
+                      places={currentPlaces}
                       value={o.placeId}
                       onChange={(val) => handleUpdateOccurrence(o.key, 'placeId', val)}
                       placeholder="— Lugar —"

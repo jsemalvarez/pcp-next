@@ -1,5 +1,7 @@
 import { PlaceForm } from "@/presentation/components/Admin/PlaceForm";
 
+export const dynamic = "force-dynamic";
+
 export default function NuevoLugarPage() {
   return (
     <div className="min-h-screen p-8">
