@@ -1,6 +1,6 @@
 'use client'
 
-import { Event } from "@/domain/entities/Event";
+import { CalendarEvent } from "@/domain/entities/Event";
 import { useRef } from "react";
 import { CloudinaryImage } from "../common/CloudinaryImage";
 import { ChevronRightIcon } from "../common/icons";
@@ -8,8 +8,8 @@ import { ChevronLeftIcon } from "../common/icons/ChevronLeftIcon";
 
 
 interface Props{
-    events: Event[];
-    setSelectedEvent: (event: Event | null) => void;
+    events: CalendarEvent[];
+    setSelectedEvent: (event: CalendarEvent | null) => void;
 }
 
 export const FeaturedEvents = ({ events, setSelectedEvent }: Props) => {
@@ -32,10 +32,8 @@ export const FeaturedEvents = ({ events, setSelectedEvent }: Props) => {
      *  Pero si hacés T00:00:00Z, ahí sí sería UTC y volvería a restar el día.
      */
     const upcomingEvents = events.filter((event) => {
-        const eventDate = new Date(`${event.date}T00:00:00`);
-        const isUpcoming = eventDate >= todayStart;
+        const isUpcoming = event.date >= todayStart;
         const isFeatured = event.isFeatured;
-
         return isUpcoming && isFeatured;
     });
 
@@ -83,7 +81,7 @@ export const FeaturedEvents = ({ events, setSelectedEvent }: Props) => {
                         >
                             <div className="bg-gradient-to-b from-primary to-gray-100 shadow-lg shadow-cyan-500/50 p-[2px] flex justify-center items-center rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 snap-start">
                                 <CloudinaryImage 
-                                    imageName={ event.photoId }
+                                    imageName={ event.photoId ?? undefined }
                                     alt={ event.title }
                                     className="h-[320px] object-cover rounded-xl "
                                 />

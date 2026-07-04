@@ -1,10 +1,10 @@
-import { Event } from "../entities/Event";
+import { CalendarEvent } from "../entities/Event";
 import { EventRepository } from "../repositories/EventRepository";
 
-export class GetEventsUseCase{
-    constructor(private repository: EventRepository){}
+export class GetEventsUseCase {
+    constructor(private repository: EventRepository) {}
 
-    async execute(): Promise<Event[]> {
-        return this.repository.getEvents()
+    async execute(): Promise<CalendarEvent[]> {
+        return this.repository.getEvents();
     }
 }

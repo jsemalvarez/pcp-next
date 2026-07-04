@@ -7,9 +7,8 @@ import "leaflet/dist/leaflet.css";
 import { useMemo, useState } from "react";
 import { Place } from "@/domain/entities/Place"
 import { CATEGORIES, CATEGORIES_TRANSLATE } from '@/presentation/constants/categories';
-import { AGE_RANGES } from '@/presentation/constants/event-filters';
-import { BtnFilterMap } from '../common/buttons/BtnFilterMap';
 import { PlaceDetail } from './PlaceDetail';
+import { BtnFilterMap } from '../common/buttons/BtnFilterMap';
 // import { FeaturedPlaces } from './FeaturedPlaces';
 const MapView = dynamic(() => import('./components/MapView'), {
   ssr: false,
@@ -38,8 +37,24 @@ export const PlacesMapClient = ({places}:Props) => {
 
     const filteredPlaces = useMemo(() =>{
         return places.filter( place => {
-            const hasPlaceCategory = category === 'all'||  place.categories.length == 0 || place.categories.includes(category);
-            const hasPlaceAgeRange = selectedAgeRanges.length === 0 || place.ageRanges.some((range) => selectedAgeRanges.includes(range))
+            const hasPlaceCategory = category === 'all' || place.categories.length == 0 || place.categories.includes(category as import('@prisma/client').PlaceCategory);
+            
+            const placeMin = place.ageMin;
+            const placeMax = place.ageMax ?? Infinity;
+            
+            const hasPlaceAgeRange = selectedAgeRanges.length === 0 || selectedAgeRanges.some((range) => {
+                if (range === 'RANGE_0_2') {
+                    return placeMin <= 2 && placeMax >= 0;
+                }
+                if (range === 'RANGE_3_7') {
+                    return placeMin <= 7 && placeMax >= 3;
+                }
+                if (range === 'RANGE_8_PLUS') {
+                    return placeMax >= 8;
+                }
+                return false;
+            });
+            
             return hasPlaceCategory && hasPlaceAgeRange;
         })
     },[category, selectedAgeRanges, places])
@@ -85,7 +100,11 @@ export const PlacesMapClient = ({places}:Props) => {
 
                 <div className="flex justify-center items-center bg-secondary">
                     <div className="w-full max-w-md flex flex-wrap justify-center items-center flex-row gap-2 p-2">
-                        {AGE_RANGES.map(({ id, label }) => (
+                        {[
+                            { id: 'RANGE_0_2', label: '0 a 2 años' },
+                            { id: 'RANGE_3_7', label: '3 a 7 años' },
+                            { id: 'RANGE_8_PLUS', label: '8 o más' },
+                        ].map(({ id, label }) => (
                             <label key={id} className="flex items-center justify-center grow-1 gap-2 text-sm px-2 py-1 bg-primary rounded-md">
                                 <input
                                     type="checkbox"

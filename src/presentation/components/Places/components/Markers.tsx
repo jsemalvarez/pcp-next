@@ -35,15 +35,15 @@ export default function Markers({ places, setSetselectedPlace }:Props){
             const placeType = place.iconType || ICONS_TYPES.PLAY_ROOM;
             const svgIconType = ICONS_TYPES[ placeType as keyof typeof ICONS_TYPES ];
 
-            const bgColor = place.bgColor || COLORS_BY_CATEGORIES.ENTERTIME; 
+            const bgColor = place.bgColor ?? COLORS_BY_CATEGORIES.ENTERTAINMENT ?? '#FFA500';
             const icon = (place.hasCustomIcon)
-              ?getCustomSvgIcon({imageId: place.photoUrl})
-              :createSvgIcon({ bgColor, svgIconType })
+              ? getCustomSvgIcon({ imageId: place.photoUrl ?? '' })
+              : createSvgIcon({ bgColor, svgIconType: svgIconType ?? '' })
 
             return (
               < Marker 
                 key={place.id} 
-                position={place.position} 
+              position={[place.lat, place.lng]}
                 icon={icon}
                 eventHandlers={eventHandler(place)}
               />                

@@ -1,33 +1,45 @@
-import { FirebaseDB } from "@/config/firebase";
-import { Event } from "@/domain/entities/Event";
+import prisma from "@/data/prisma/db";
+import { CalendarEvent } from "@/domain/entities/Event";
 import { EventRepository } from "@/domain/repositories/EventRepository";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
-const COLLECTION_NAME = 'events';
+export class EventRepositoryImpl implements EventRepository {
 
-export class EventRepositoryImpl implements EventRepository{
-
-    async getEvents(): Promise<Event[]> {
+    async getEvents(): Promise<CalendarEvent[]> {
         try {
+            const occurrences = await prisma.eventOccurrence.findMany({
+                include: {
+                    event: true,
+                    place: true,
+                },
+                orderBy: [
+                    { date: "asc" },
+                    { timeStart: "asc" },
+                ],
+            });
 
-            const eventsRef = collection(FirebaseDB, COLLECTION_NAME);
-            const q = query(
-                eventsRef, 
-                orderBy("date", "asc"),
-                orderBy("timeStart", "asc"),
-                orderBy("timeEnd", "asc")
-            );
-
-            const querySnapshot = await getDocs(q);
-
-            return querySnapshot.docs.map(doc => ({
-                id: doc.id, // ID del documento
-                ...doc.data(), // Datos
-            })) as Event[]
+            // Proyección plana compatible con el CalendarGrid existente
+            return occurrences.map((o) => ({
+                id:           o.id,
+                eventId:      o.eventId,
+                title:        o.event.title,
+                description:  o.event.description,
+                photoId:      o.event.photoId,
+                bgColor:      o.event.bgColor,
+                ticketUrl:    o.event.ticketUrl,
+                bookingWhatsapp: o.event.bookingWhatsapp,
+                isFeatured:   o.event.isFeatured,
+                priceType:    o.event.priceType,
+                activityTypes: o.event.activityTypes,
+                ageMin:       o.event.ageMin,
+                ageMax:       o.event.ageMax,
+                date:         o.date,
+                timeStart:    o.timeStart,
+                timeEnd:      o.timeEnd,
+                placeId:      o.placeId,
+            }));
 
         } catch (error) {
             console.error("[EventRepositoryImpl] Error fetching events:", error);
-            console.log(error)
             throw new Error("Failed to fetch events");
         }
     }

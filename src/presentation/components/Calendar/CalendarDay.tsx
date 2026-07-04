@@ -1,11 +1,11 @@
-import { Event } from "@/domain/entities/Event";
+import { CalendarEvent } from "@/domain/entities/Event";
 
 interface Props {
   day: number;
   dateKey: string;
-  events: Event[];
-  setSelectedEvent: (event: Event | null) => void;
-  handleCalendarDayAside: (event: Event[] | null) => void;
+  events: CalendarEvent[];
+  setSelectedEvent: (event: CalendarEvent | null) => void;
+  handleCalendarDayAside: (event: CalendarEvent[] | null) => void;
 }
 
 export const CalendarDay = ({ day, dateKey, events, setSelectedEvent, handleCalendarDayAside }: Props) => {

@@ -4,19 +4,19 @@ import { useMemo, useState } from "react";
 
 import dayjs from "dayjs";
 import 'dayjs/locale/es'; // importa el idioma
-import { Event } from "@/domain/entities/Event";
+import { CalendarEvent } from "@/domain/entities/Event";
 import { ChevronRightIcon, ChevronLeftIcon } from "../common/icons";
 import { FeaturedEvents } from "./FeaturedEvents";
 import { CalendarGrid } from "./CalendarGrid";
 import { FilterEventByTag } from "./FilterEventByTag";
-import { AGE_RANGES, EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
+import { EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
 import { EventDetail } from "./EventDetail";
 import { Place } from "@/domain/entities/Place";
 import { CalendarDayAside } from "./CalendarDayAside";
 dayjs.locale('es'); // lo setea como predeterminado
 
 interface Props{
-    events: Event[];
+    events: CalendarEvent[];
     places: Place[]
 }
 
@@ -27,25 +27,47 @@ export const CalendarClient = ({events, places}:Props) => {
     const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
     const [selectedPriceEvent, setSelectedPriceEvent] = useState<string[]>([]);
     const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
-    const [selectedEvent, setSelectedEvent] = useState<null | Event>(null);
-    const [calendarDayEvents, setCalendarDayEvents] = useState<Event[] | null>(null);
+    const [selectedEvent, setSelectedEvent] = useState<null | CalendarEvent>(null);
+    const [calendarDayEvents, setCalendarDayEvents] = useState<CalendarEvent[] | null>(null);
 
+    // Definimos las categorías de filtro de edad de manera lógica:
+    // - "RANGE_0_2": bebés y niños pequeños (edad del evento intersecta con [0, 2])
+    // - "RANGE_3_7": niños medianos (edad del evento intersecta con [3, 7])
+    // - "RANGE_8_PLUS": niños más grandes (edad del evento intersecta con [8, 99])
     const filteredEvents = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
-        // return events.filter((event) =>
-        // event.title.toLowerCase().includes(term)
         return events.filter((event) => {
             const matchesSearchTitle = term.length <= 1 || event.title.toLowerCase().includes(term);
-            const matchesSearchDescription = term.length <= 1 || event.description.toLowerCase().includes(term);
-            const matchesSearchArtists = term.length <= 1 || event.artists?.toLowerCase().includes(term);
-            const matchesSearch = matchesSearchTitle || matchesSearchDescription || matchesSearchArtists;
-            const matchesAge = selectedAgeRanges.length === 0 || event.ageRanges?.some((range) => selectedAgeRanges.includes(range));
+            const matchesSearchDescription = term.length <= 1 || (event.description?.toLowerCase().includes(term) ?? false);
+            const matchesSearch = matchesSearchTitle || matchesSearchDescription;
+            
+            // Lógica de intersección de edad:
+            // El evento tiene un rango de edad [event.ageMin, event.ageMax ?? Infinity]
+            const eventMin = event.ageMin;
+            const eventMax = event.ageMax ?? Infinity;
+            
+            const matchesAge = selectedAgeRanges.length === 0 || selectedAgeRanges.some((range) => {
+                if (range === 'RANGE_0_2') {
+                    // Intersecta con el rango 0 a 2
+                    return eventMin <= 2 && eventMax >= 0;
+                }
+                if (range === 'RANGE_3_7') {
+                    // Intersecta con el rango 3 a 7
+                    return eventMin <= 7 && eventMax >= 3;
+                }
+                if (range === 'RANGE_8_PLUS') {
+                    // Intersecta con el rango 8 en adelante
+                    return eventMax >= 8;
+                }
+                return false;
+            });
+
             const matchesEventType = selectedEventType.length === 0 || event.activityTypes?.some((activityType) => selectedEventType.includes(activityType));
             const matchesPriceEvent = selectedPriceEvent.length === 0 || selectedPriceEvent.includes(event.priceType);            
-        return matchesSearch 
-            && matchesAge 
-            && matchesPriceEvent 
-            && matchesEventType;
+            return matchesSearch 
+                && matchesAge 
+                && matchesPriceEvent 
+                && matchesEventType;
         });        
     }, [searchTerm, events, selectedAgeRanges, selectedPriceEvent, selectedEventType]);
 
@@ -106,18 +128,22 @@ export const CalendarClient = ({events, places}:Props) => {
 
             <div className="flex flex-col justify-center items-center gap-1 mt-6">
                 <input
-                    type="text"
-                    placeholder="Buscar evento..."
-                    value={searchTerm}
-                    onChange={(e) => handleFilterEvents(e.target.value)}
-                    className="w-full max-w-md mx-6 bg-primary p-2 border-cian border-2 shadow-lg shadow-primary p-2 rounded-lg focus:outline-hidden"
+                  type="text"
+                  placeholder="Buscar evento..."
+                  value={searchTerm}
+                  onChange={(e) => handleFilterEvents(e.target.value)}
+                  className="w-full max-w-md mx-6 bg-primary p-2 border-cian border-2 shadow-lg shadow-primary p-2 rounded-lg focus:outline-hidden"
                 />
 
                 <FilterEventByTag
-                    labelTag='Edad recomendada:'
-                    elementsTag={ AGE_RANGES }
-                    selectedTag={selectedAgeRanges}
-                    setSelectedTag={setSelectedAgeRanges}
+                  labelTag='Edad recomendada:'
+                  elementsTag={[
+                    { id: 'RANGE_0_2', label: '0 a 2 años' },
+                    { id: 'RANGE_3_7', label: '3 a 7 años' },
+                    { id: 'RANGE_8_PLUS', label: '8 o más' },
+                  ]}
+                  selectedTag={selectedAgeRanges}
+                  setSelectedTag={setSelectedAgeRanges}
                 />
                 <FilterEventByTag
                     labelTag='Tipo de entrada:'

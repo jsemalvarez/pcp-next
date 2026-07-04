@@ -1,14 +1,17 @@
-import { Event } from "@/domain/entities/Event";
+import { CalendarEvent } from "@/domain/entities/Event";
+import dayjs from "dayjs";
 
-export const groupEventsByDate = (events: Event[]) => {
-    const eventsByDay: Record<string, Event[]> = {};
+export const groupEventsByDate = (events: CalendarEvent[]): Record<string, CalendarEvent[]> => {
+    const eventsByDay: Record<string, CalendarEvent[]> = {};
 
     events.forEach(event => {
-        if (!eventsByDay[event.date]) {
-          eventsByDay[event.date] = [];
+        // date is now a Date object — normalize to 'YYYY-MM-DD' key
+        const dateKey = dayjs(event.date).format('YYYY-MM-DD');
+        if (!eventsByDay[dateKey]) {
+            eventsByDay[dateKey] = [];
         }
-        eventsByDay[event.date].push(event);
-      });
+        eventsByDay[dateKey].push(event);
+    });
 
     return eventsByDay;
-}
+};

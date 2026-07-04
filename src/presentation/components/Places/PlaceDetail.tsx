@@ -5,18 +5,23 @@ import { ViewOnMapButton, WhatsAppButton } from "../common/buttons";
 import { FacebookIcon, InstagramIcon, WebIcon } from "../common/icons";
 import { VideoIcon } from "../common/icons/VideoIcon";
 
+import { useFavorites } from "@/presentation/contexts/FavoritesContext";
+import { Heart } from "lucide-react";
+
 interface Props{
     placeDetail: Place | null;
     setSetselectedPlace: (place:Place | null) => void
 }
 
 export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
+    const { isFavoritePlace, toggleFavoritePlace } = useFavorites();
     
     if(placeDetail == null){
         return
     }
 
     const isPlaceDetailOpen = placeDetail != null;
+    const isFav = isFavoritePlace(placeDetail.id);
 
     const servicesToString = [
         placeDetail.hasGames && "Juegos",
@@ -36,7 +41,13 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
             className={`${ isPlaceDetailOpen? 'flex' : 'hidden'} top-0 w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-100 text-primary z-50 transition-all z-1600`}
         >
             <div className="flex justify-between items-center px-6 py-1 mb-2">
-                <h2 className="font-medium text-xl"></h2>
+                <button
+                    onClick={() => toggleFavoritePlace(placeDetail.id)}
+                    className="p-2 text-gray-600 hover:text-rose-500 transition-colors active:scale-95 md:hidden"
+                    aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                >
+                    <Heart size={20} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-600"} />
+                </button>
                 <span
                     className='cursor-pointer text-gray-600 text-lg font-bold' 
                     onClick={ () => handleClosePlaceDetail() }
@@ -45,8 +56,8 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
 
             <figure className="w-full mb-2">
                 <CloudinaryImage
-                    imageName={ placeDetail?.photoUrl }
-                    alt={ placeDetail?.name } 
+                    imageName={ placeDetail?.photoUrl ?? undefined }
+                    alt={ placeDetail?.name ?? undefined } 
                     className="mx-auto object-cover w-[200px] h-[200px] rounded-full" 
                 />
             </figure>
@@ -88,7 +99,7 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
                                 <span className='text-gray-500'>Direccion: </span>
                                 {placeDetail.address}
                             </p>
-                            <ViewOnMapButton position={ placeDetail.position } />
+                            <ViewOnMapButton position={{ lat: placeDetail.lat, lng: placeDetail.lng }} />
                         </>
                     )
                 }

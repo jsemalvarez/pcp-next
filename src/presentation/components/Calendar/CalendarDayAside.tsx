@@ -1,12 +1,12 @@
-import { Event } from "@/domain/entities/Event"
+import { CalendarEvent } from "@/domain/entities/Event"
 import { ClockIcon } from "../common/icons/ClockIcon"
 import { XMarkIcon } from "../common/icons/XMarkIcon"
 import { fortmatDate } from "@/presentation/utils/formatDate";
 
 interface Props{
-    calendarDayEvents: Event[] | null;
-    handleOpenEventDetail: (event:Event | null) => void;
-    handleCalendarDayAside: (event:Event[] | null) => void
+    calendarDayEvents: CalendarEvent[] | null;
+    handleOpenEventDetail: (event:CalendarEvent | null) => void;
+    handleCalendarDayAside: (event:CalendarEvent[] | null) => void
 }
 
 export const CalendarDayAside = ({calendarDayEvents, handleOpenEventDetail, handleCalendarDayAside}:Props) => {
@@ -26,7 +26,7 @@ export const CalendarDayAside = ({calendarDayEvents, handleOpenEventDetail, hand
         >
             <div className="flex justify-between items-center p-6">
                 <h2 className="font-extrabold text-xl">
-                    Eventos:  { fortmatDate(calendarDayEvents[0]?.date) }
+                    Eventos:  { fortmatDate(calendarDayEvents[0]?.date?.toISOString?.() ?? '') }
                 </h2>
                 <span
                     className='cursor-pointer text-gray-600 hover:text-red-500 text-lg font-bold' 

@@ -1,4 +1,4 @@
-import { Event } from "@/domain/entities/Event"
+import { CalendarEvent } from "@/domain/entities/Event"
 import { SubtitleSection } from "../common/SubtitleSection"
 import { TitleSection } from "../common/TitleSection"
 import { CalendarClient } from "./CalendarClient"
@@ -6,7 +6,7 @@ import { Place } from "@/domain/entities/Place"
 
 
 interface Props{
-    events: Event[];
+    events: CalendarEvent[];
     places: Place[];
 }
 

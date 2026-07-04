@@ -11,14 +11,17 @@ export const CloudinaryImage = ({
   alt = "",
   className = "",
 }: Props) => {
-  const baseUrl = "https://res.cloudinary.com/dwhdla1b4/image/upload";
-  const folder = "v1749595725/pcp-images";
-  const fallbackImage = `${baseUrl}/w_600,q_auto,f_auto/${folder}/logo_pcp_mppj0w.webp`;
-  const photoUrl = `${baseUrl}/w_600,q_auto,f_auto/${folder}/${imageName}`
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
+  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
+  
+  // Si no hay imagen, usamos una imagen por defecto local
+  const fallbackImage = "/images/img-molinos.webp";
+  
+  // Dado que el photoId guardado ya contiene la subcarpeta (ej. 'events/nombre.jpg'), 
+  // solo lo concatenamos directamente a la URL base.
+  const photoUrl = `${baseUrl}/w_600,q_auto,f_auto/${imageName}`;
 
-  const imageUrl = imageName
-    ? photoUrl
-    : fallbackImage;
+  const imageUrl = imageName ? photoUrl : fallbackImage;
 
   return (
     <Image
