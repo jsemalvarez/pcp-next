@@ -19,7 +19,8 @@ export const CloudinaryImage = ({
   
   // Dado que el photoId guardado ya contiene la subcarpeta (ej. 'events/nombre.jpg'), 
   // solo lo concatenamos directamente a la URL base.
-  const photoUrl = `${baseUrl}/w_600,q_auto,f_auto/${imageName}`;
+  const formattedImageName = imageName?.includes('/') ? imageName : `events/${imageName}`;
+  const photoUrl = `${baseUrl}/w_600,q_auto,f_auto/${formattedImageName}`;
 
   const imageUrl = imageName ? photoUrl : fallbackImage;
 

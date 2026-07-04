@@ -170,7 +170,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.photoId
-      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_300,q_auto,f_auto/${initialData.photoId}`
+      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_300,q_auto,f_auto/${initialData.photoId.includes('/') ? initialData.photoId : 'events/' + initialData.photoId}`
       : null
   );
 
@@ -211,7 +211,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
     if (!res.ok) {
       throw new Error('Error al subir la imagen a Cloudinary');
     }
-    const publicId = result.public_id.split('/')[1];
+    const publicId = result.public_id;
     return `${publicId}.${result.format}`;
   };
 

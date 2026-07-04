@@ -22,7 +22,7 @@ export default async function Home() {
     title: item.title,
     description: item.subtitle || item.content.substring(0, 150),
     image: item.photoId
-      ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${item.photoId}`
+      ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${item.photoId.includes('/') ? item.photoId : 'events/' + item.photoId}`
       : "/images/noticia_preview.png",
     slug: item.slug,
   }));
@@ -53,7 +53,7 @@ export default async function Home() {
     time: `Hoy • ${occ.timeStart} hs`,
     location: occ.place.name,
     image: occ.event.photoId
-      ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${occ.event.photoId}`
+      ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`
       : "/images/evento_dia.png",
   }));
 
