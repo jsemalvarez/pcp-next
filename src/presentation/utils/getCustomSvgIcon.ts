@@ -7,19 +7,19 @@ interface Props{
 
 export const getCustomSvgIcon = ({ imageId, alt = ""}:Props) => {
 
-  const baseUrl = 'https://res.cloudinary.com/dwhdla1b4/image/upload';
-  const folder = 'v1749595725/pcp-images';
-  const fallbackImage = `${baseUrl}/w_600,q_auto,f_auto/${folder}/logo_pcp_mppj0w.webp`;
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
+  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
+  const fallbackImage = `${baseUrl}/w_600,q_auto,f_auto/logo_pcp_mppj0w.webp`;
         
   const svg = `
     <div class="custom-marker">
       <img
-        src="${baseUrl}/w_600,q_auto,f_auto/${folder}/${imageId}"
+        src="${baseUrl}/w_600,q_auto,f_auto/${imageId}"
         srcSet="
-          ${baseUrl}/w_300,q_auto,f_auto/${folder}/${imageId} 300w,
-          ${baseUrl}/w_600,q_auto,f_auto/${folder}/${imageId} 600w,
-          ${baseUrl}/w_1000,q_auto,f_auto/${folder}/${imageId} 1000w,
-          ${baseUrl}/w_1600,q_auto,f_auto/${folder}/${imageId} 1600w"
+          ${baseUrl}/w_300,q_auto,f_auto/${imageId} 300w,
+          ${baseUrl}/w_600,q_auto,f_auto/${imageId} 600w,
+          ${baseUrl}/w_1000,q_auto,f_auto/${imageId} 1000w,
+          ${baseUrl}/w_1600,q_auto,f_auto/${imageId} 1600w"
         sizes="(max-width: 600px) 300px,
                 (max-width: 1024px) 600px,
                 (max-width: 1600px) 1000px,

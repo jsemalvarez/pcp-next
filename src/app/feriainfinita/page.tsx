@@ -1,12 +1,13 @@
 import { LocationPartner } from "@/presentation/components/Partner/LocationPartner";
 import Image from "next/image";
 
-const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/feriainfinita/';
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
+const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${cloudName}/image/upload/w_600,q_auto,f_auto/feriainfinita/`;
 
 const partner = {
     name: "Feria Infinita",
     category: "Tienda de Ropa - Moda circular",
-    coverImage:"https://res.cloudinary.com/dwhdla1b4/image/upload/v1764105596/pcp-images/feriainfinita/banner_feriainfinita_le7plk.webp",
+    coverImage:`https://res.cloudinary.com/${cloudName}/image/upload/feriainfinita/banner_feriainfinita_le7plk.webp`,
     mision:"La ropa es mucho más que ropa y cómo te vestís importa. En Feria Infinita creemos en una moda más consciente, accesible y circular. Queremos que cada persona pueda renovar su estilo disfrutando de un espacio donde la moda y los buenos precios conviven en armonía. Por eso seleccionamos cada prenda con dedicación, dándole una segunda vida y asegurando siempre calidad.",
     description:'',
     services: [

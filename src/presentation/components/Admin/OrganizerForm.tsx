@@ -60,7 +60,7 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState(initialData?.typeId || "");
 
   // Image upload state
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dwhdla1b4";
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
 
   const [imageFile, setImageFile] = useState<File | null>(null);

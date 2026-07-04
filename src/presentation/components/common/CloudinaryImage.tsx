@@ -11,7 +11,7 @@ export const CloudinaryImage = ({
   alt = "",
   className = "",
 }: Props) => {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dwhdla1b4";
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
   const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
   
   // Si no hay imagen, usamos una imagen por defecto local

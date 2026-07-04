@@ -74,7 +74,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
               {/* Background image or colored fallback */}
               {banner.photoId ? (
                 <img
-                  src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_1200,q_auto,f_auto/${banner.photoId}`}
+                  src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1200,q_auto,f_auto/${banner.photoId}`}
                   alt={banner.title}
                   className="w-full h-full object-cover"
                 />

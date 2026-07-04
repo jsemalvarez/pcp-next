@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     locale: "es_ES",
     images: [
       {
-        url: "https://res.cloudinary.com/dwhdla1b4/image/upload/w_300,q_auto,f_auto/v1744900287/pcp-images/logo_pcp_mppj0w.webp",
+        url: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/logo_pcp_mppj0w.webp`,
         width: 300,
         height: 300,
         alt: "Paseos con Peques",

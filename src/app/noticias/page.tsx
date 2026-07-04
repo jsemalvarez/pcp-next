@@ -81,7 +81,7 @@ export default async function PublicNewsPage() {
                 <div className="relative aspect-video w-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                   {news.photoId ? (
                     <img
-                      src={`https://res.cloudinary.com/dwhdla1b4/image/upload/w_600,q_auto,f_auto/v1749595725/pcp-images/${news.photoId}`}
+                      src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${news.photoId}`}
                       alt={news.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: newsItem.photoId
         ? [
             {
-              url: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_1200,h_630,c_fill,q_auto,f_auto/${newsItem.photoId}`,
+              url: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1200,h_630,c_fill,q_auto,f_auto/${newsItem.photoId}`,
               width: 1200,
               height: 630,
               alt: newsItem.title,
@@ -134,7 +134,7 @@ export default async function PublicNewsDetailPage({ params }: Props) {
           {newsItem.photoId && (
             <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700">
               <img
-                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_1000,q_auto,f_auto/${newsItem.photoId}`}
+                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1000,q_auto,f_auto/${newsItem.photoId}`}
                 alt={newsItem.title}
                 className="w-full h-full object-cover"
               />

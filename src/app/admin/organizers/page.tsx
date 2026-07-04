@@ -65,7 +65,7 @@ export default async function AdminOrganizersPage() {
                       <td className="p-4">
                         {org.photoId ? (
                           <img
-                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwhdla1b4'}/image/upload/w_100,h_100,c_fill,q_auto,f_auto/${org.photoId}`}
+                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_100,h_100,c_fill,q_auto,f_auto/${org.photoId}`}
                             alt={org.name}
                             className="w-10 h-10 rounded-full object-cover border border-gray-200"
                           />
