@@ -6,6 +6,8 @@ export interface Event {
     title: string;
     description?: string | null;
     photoId?: string | null;
+    photoWidth?: number | null;
+    photoHeight?: number | null;
     bgColor?: string | null;
     ticketUrl?: string | null;
     bookingWhatsapp?: string | null;
@@ -47,6 +49,8 @@ export interface CalendarEvent {
     title: string;
     description?: string | null;
     photoId?: string | null;
+    photoWidth?: number | null;
+    photoHeight?: number | null;
     bgColor?: string | null;
     ticketUrl?: string | null;
     bookingWhatsapp?: string | null;

@@ -25,6 +25,8 @@ export default async function Home() {
       ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${item.photoId.includes('/') ? item.photoId : 'events/' + item.photoId}`
       : "/images/noticia_preview.png",
     slug: item.slug,
+    photoWidth: item.photoWidth,
+    photoHeight: item.photoHeight,
   }));
 
   // Calculate today's date at midnight UTC adjusted for UTC-3 (Argentina)
@@ -297,7 +299,14 @@ export default async function Home() {
             ) : (
               news.map((item) => (
                 <div key={item.id} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-300">
-                  <div className="relative aspect-video w-full">
+                  <div 
+                    className="relative w-full"
+                    style={{
+                      aspectRatio: (item.photoWidth && item.photoHeight) 
+                        ? `${item.photoWidth} / ${item.photoHeight}` 
+                        : '16 / 9'
+                    }}
+                  >
                     <Image
                       src={item.image}
                       alt={item.title}

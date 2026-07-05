@@ -645,7 +645,14 @@ function CalendarContent() {
 
                             {/* Cloudinary Image if present */}
                             {selectedEventOccurrence.event.photoId && (
-                                <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-855 shadow-sm">
+                                <div 
+                                    className="relative w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-855 shadow-sm"
+                                    style={{
+                                        aspectRatio: (selectedEventOccurrence.event.photoWidth && selectedEventOccurrence.event.photoHeight) 
+                                            ? `${selectedEventOccurrence.event.photoWidth} / ${selectedEventOccurrence.event.photoHeight}` 
+                                            : '16 / 9'
+                                    }}
+                                >
                                     <img
                                         src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_800,q_auto,f_auto/${selectedEventOccurrence.event.photoId.includes('/') ? selectedEventOccurrence.event.photoId : 'events/' + selectedEventOccurrence.event.photoId}`}
                                         alt={selectedEventOccurrence.event.title}
