@@ -249,7 +249,7 @@ export default async function PerfilOrganizadorPage({ params }: Props) {
                         {event.photoId && (
                           <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
                             <img
-                              src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,h_200,c_fill,q_auto,f_auto/${event.photoId}`}
+                              src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,h_200,c_fill,q_auto,f_auto/${event.photoId.includes('/') ? event.photoId : 'events/' + event.photoId}`}
                               alt={event.title}
                               className="w-full h-full object-cover"
                             />
