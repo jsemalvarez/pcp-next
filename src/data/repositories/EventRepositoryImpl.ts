@@ -24,6 +24,8 @@ export class EventRepositoryImpl implements EventRepository {
                 title:        o.event.title,
                 description:  o.event.description,
                 photoId:      o.event.photoId,
+                photoWidth:   o.event.photoWidth,
+                photoHeight:  o.event.photoHeight,
                 bgColor:      o.event.bgColor,
                 ticketUrl:    o.event.ticketUrl,
                 bookingWhatsapp: o.event.bookingWhatsapp,

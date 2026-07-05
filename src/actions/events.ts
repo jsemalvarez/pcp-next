@@ -12,6 +12,8 @@ export type CreateEventInput = {
   title: string;
   description?: string;
   photoId?: string;
+  photoWidth?: number;
+  photoHeight?: number;
   bgColor?: string;
   ticketUrl?: string;
   bookingWhatsapp?: string;

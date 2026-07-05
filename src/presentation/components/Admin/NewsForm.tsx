@@ -13,6 +13,8 @@ interface News {
   subtitle: string | null;
   content: string;
   photoId: string | null;
+  photoWidth?: number | null;
+  photoHeight?: number | null;
   isActive: boolean;
   isFeatured: boolean;
   publishedAt: Date;
@@ -69,6 +71,8 @@ export function NewsForm({ initialData }: Props) {
       ? `https://res.cloudinary.com/${cloudName}/image/upload/w_400,q_auto,f_auto/${initialData.photoId}`
       : null
   );
+  const [photoWidth, setPhotoWidth] = useState<number | undefined>(initialData?.photoWidth ?? undefined);
+  const [photoHeight, setPhotoHeight] = useState<number | undefined>(initialData?.photoHeight ?? undefined);
 
   const slugify = (text: string) => {
     return text
@@ -98,7 +102,7 @@ export function NewsForm({ initialData }: Props) {
     setIsSlugCustomized(true);
   };
 
-  const uploadToCloudinary = async (file: File): Promise<string> => {
+  const uploadToCloudinary = async (file: File): Promise<{ id: string; width: number; height: number }> => {
     const data = new FormData();
     data.append("file", file);
     data.append("upload_preset", uploadPreset);
@@ -112,7 +116,7 @@ export function NewsForm({ initialData }: Props) {
     if (!res.ok) {
       throw new Error("Error al subir la imagen a Cloudinary");
     }
-    return `${result.public_id}.${result.format}`;
+    return { id: `${result.public_id}.${result.format}`, width: result.width, height: result.height };
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,9 +136,14 @@ export function NewsForm({ initialData }: Props) {
 
     try {
       let uploadedPhotoId = initialData?.photoId || null;
+      let currentPhotoWidth = photoWidth ?? null;
+      let currentPhotoHeight = photoHeight ?? null;
 
       if (imageFile) {
-        uploadedPhotoId = await uploadToCloudinary(imageFile);
+        const uploadResult = await uploadToCloudinary(imageFile);
+        uploadedPhotoId = uploadResult.id;
+        currentPhotoWidth = uploadResult.width;
+        currentPhotoHeight = uploadResult.height;
       }
 
       const data = {
@@ -143,6 +152,8 @@ export function NewsForm({ initialData }: Props) {
         slug: (formData.get("slug") as string) || null,
         content: formData.get("content") as string,
         photoId: uploadedPhotoId,
+        photoWidth: currentPhotoWidth,
+        photoHeight: currentPhotoHeight,
         isActive,
         isFeatured,
         publishedAt: new Date(publishedAt),

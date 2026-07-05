@@ -83,6 +83,8 @@ export const FeaturedEvents = ({ events, setSelectedEvent }: Props) => {
                                 <CloudinaryImage 
                                     imageName={ event.photoId ?? undefined }
                                     alt={ event.title }
+                                    actualWidth={ event.photoWidth }
+                                    actualHeight={ event.photoHeight }
                                     className="h-[320px] object-cover rounded-xl "
                                 />
                             </div>

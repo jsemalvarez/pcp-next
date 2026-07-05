@@ -5,6 +5,8 @@ export interface News {
   subtitle?: string | null;
   content: string;
   photoId?: string | null;
+  photoWidth?: number | null;
+  photoHeight?: number | null;
   isActive: boolean;
   isFeatured: boolean;
   publishedAt: Date;

@@ -4,12 +4,16 @@ interface Props {
   imageName?: string;
   alt?: string;
   className?: string;
+  actualWidth?: number | null;
+  actualHeight?: number | null;
 }
 
 export const CloudinaryImage = ({
   imageName,
   alt = "",
   className = "",
+  actualWidth,
+  actualHeight,
 }: Props) => {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
   const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
@@ -24,12 +28,15 @@ export const CloudinaryImage = ({
 
   const imageUrl = imageName ? photoUrl : fallbackImage;
 
+  const width = actualWidth || 600;
+  const height = actualHeight || 400;
+
   return (
     <Image
       src={imageUrl}
       alt={alt}
-      width={600}
-      height={400}
+      width={width}
+      height={height}
       className={className}
       loading="lazy"
       unoptimized={true}

@@ -132,7 +132,10 @@ export default async function PublicNewsDetailPage({ params }: Props) {
 
           {/* Image */}
           {newsItem.photoId && (
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700">
+            <div 
+              className="relative w-full rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700"
+              style={{ aspectRatio: newsItem.photoWidth && newsItem.photoHeight ? `${newsItem.photoWidth}/${newsItem.photoHeight}` : '16/9' }}
+            >
               <img
                 src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1000,q_auto,f_auto/${newsItem.photoId}`}
                 alt={newsItem.title}

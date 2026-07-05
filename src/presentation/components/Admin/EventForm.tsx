@@ -173,6 +173,8 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
       ? `https://res.cloudinary.com/${cloudName}/image/upload/w_300,q_auto,f_auto/${initialData.photoId.includes('/') ? initialData.photoId : 'events/' + initialData.photoId}`
       : null
   );
+  const [photoWidth, setPhotoWidth] = useState<number | undefined>(initialData?.photoWidth ?? undefined);
+  const [photoHeight, setPhotoHeight] = useState<number | undefined>(initialData?.photoHeight ?? undefined);
 
   // ── Generador de ocurrencias ──
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('once');
@@ -197,7 +199,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
   const [previewGenerated, setPreviewGenerated] = useState(isEditing);
 
   // ── Upload helper ──
-  const uploadToCloudinary = async (file: File): Promise<string> => {
+  const uploadToCloudinary = async (file: File): Promise<{ id: string; width: number; height: number }> => {
     const data = new FormData();
     data.append('file', file);
     data.append('upload_preset', uploadPreset);
@@ -212,7 +214,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
       throw new Error('Error al subir la imagen a Cloudinary');
     }
     const publicId = result.public_id;
-    return `${publicId}.${result.format}`;
+    return { id: `${publicId}.${result.format}`, width: result.width, height: result.height };
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -287,16 +289,23 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
 
     try {
       let uploadedPhotoId = initialData?.photoId || '';
+      let currentPhotoWidth = photoWidth;
+      let currentPhotoHeight = photoHeight;
 
       // Si se cargó una nueva imagen local, se sube primero
       if (imageFile) {
-        uploadedPhotoId = await uploadToCloudinary(imageFile);
+        const uploadResult = await uploadToCloudinary(imageFile);
+        uploadedPhotoId = uploadResult.id;
+        currentPhotoWidth = uploadResult.width;
+        currentPhotoHeight = uploadResult.height;
       }
 
       const data: CreateEventInput = {
         title: formData.get('title') as string,
         description: formData.get('description') as string || undefined,
         photoId: uploadedPhotoId || undefined,
+        photoWidth: currentPhotoWidth,
+        photoHeight: currentPhotoHeight,
         bgColor: formData.get('bgColor') as string || undefined,
         ticketUrl: formData.get('ticketUrl') as string || undefined,
         bookingWhatsapp: formData.get('bookingWhatsapp') as string || undefined,
