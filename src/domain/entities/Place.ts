@@ -22,7 +22,6 @@ export interface Place {
 
     // Ícono del mapa
     hasCustomIcon: boolean;
-    customIconName?: string | null;
     iconType?: string | null;
 
     // Contacto y redes

@@ -29,7 +29,16 @@ export function usePWAInstall() {
       return;
     }
 
-    // Verifica si el usuario ya rechazó recientemente
+    // Detecta si es un dispositivo móvil (ignorar desktop)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+    if (!isMobile) {
+      return;
+    }
+
+    // Verifica si el usuario ya rechazó recientemente al montar
     const dismissedUntil = localStorage.getItem(DISMISSED_KEY);
     if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) {
       return;
@@ -54,8 +63,19 @@ export function usePWAInstall() {
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault(); // Suprime el mini-infobar automático de Chrome
+      
+      // Verifica de nuevo por si se rechazó recientemente pero el listener sigue activo
+      const currentDismissedUntil = localStorage.getItem(DISMISSED_KEY);
+      if (currentDismissedUntil && Date.now() < parseInt(currentDismissedUntil)) {
+        return;
+      }
+
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Muestra el banner después de 3 segundos de navegación
+      
+      // Limpia cualquier timer previo por si el evento se dispara múltiples veces
+      if (bannerTimer) clearTimeout(bannerTimer);
+      
+      // Muestra el banner después de 3 segundos
       bannerTimer = setTimeout(() => setShowBanner(true), 3000);
     };
 
@@ -71,7 +91,7 @@ export function usePWAInstall() {
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      clearTimeout(bannerTimer);
+      if (bannerTimer) clearTimeout(bannerTimer);
       window.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt
@@ -98,7 +118,7 @@ export function usePWAInstall() {
     setShowBanner(false);
   }, [deferredPrompt]);
 
-  // Cierra el banner y no vuelve a mostrar por 7 días
+  // Cierra el banner y no vuelve a mostrar por 7 días (ajustado a 1 día según el código)
   const dismissBanner = useCallback(() => {
     setShowBanner(false);
     localStorage.setItem(
@@ -118,7 +138,8 @@ export function usePWAInstall() {
     showBanner,
     /** Llama al Richer Install UI nativo de Chrome */
     promptInstall,
-    /** Cierra el banner (recuerda la decisión por 7 días) */
+    /** Cierra el banner (recuerda la decisión) */
     dismissBanner,
   };
 }
+

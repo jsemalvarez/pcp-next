@@ -6,7 +6,7 @@ import { createPlace, updatePlace } from "@/actions/places";
 import { PlaceCategory } from "@prisma/client";
 import { Place } from "@/domain/entities/Place";
 import { CATEGORIES_TRANSLATE } from "@/presentation/constants/categories";
-import { Save, ArrowLeft, Search, MapPin } from "lucide-react";
+import { Save, ArrowLeft, Search, MapPin, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -39,6 +39,41 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Image upload state
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    initialData?.photoUrl
+      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_600,q_auto,f_auto/${initialData.photoUrl}`
+      : null
+  );
+
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", uploadPreset);
+    data.append("folder", "places");
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: "POST", body: data }
+    );
+    const result = await res.json();
+    if (!res.ok) {
+      throw new Error("Error al subir la imagen a Cloudinary");
+    }
+    return `${result.public_id}.${result.format}`;
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const [isGeocoding, setIsGeocoding] = useState(false);
   const addressRef = useRef<HTMLInputElement>(null);
@@ -112,39 +147,44 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
     setIsSubmitting(true);
     setError(null);
 
+    // Capturar el FormData de forma síncrona antes del await
     const formData = new FormData(e.currentTarget);
-    
-    const data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'> = {
-      name: formData.get("name") as string,
-      address: formData.get("address") as string,
-      lat: parseFloat(formData.get("lat") as string) || 0,
-      lng: parseFloat(formData.get("lng") as string) || 0,
-      isActive: formData.get("isActive") === "on",
-      isShowInMap: formData.get("isShowInMap") === "on",
-      hasCustomIcon: formData.get("hasCustomIcon") === "on",
-      customIconName: formData.get("customIconName") as string,
-      schedules: formData.get("schedules") as string,
-      phone: formData.get("phone") as string,
-      whatsapp: formData.get("whatsapp") as string,
-      photoUrl: formData.get("photoUrl") as string,
-      web: formData.get("web") as string,
-      instagram: formData.get("instagram") as string,
-      facebook: formData.get("facebook") as string,
-      videoLink: formData.get("videoLink") as string,
-      hasFood: formData.get("hasFood") === "on",
-      hasShow: formData.get("hasShow") === "on",
-      hasGames: formData.get("hasGames") === "on",
-      hasSupervision: formData.get("hasSupervision") === "on",
-      isFeatured: formData.get("isFeatured") === "on",
-      description: formData.get("description") as string,
-      iconType: formData.get("iconType") as string,
-      bgColor: formData.get("bgColor") as string,
-      categories: selectedCategories,
-      ageMin: Number(formData.get("ageMin")) || 0,
-      ageMax: formData.get("ageMax") ? Number(formData.get("ageMax")) : null,
-    };
 
     try {
+      let uploadedPhotoId = initialData?.photoUrl || null;
+      if (imageFile) {
+        uploadedPhotoId = await uploadToCloudinary(imageFile);
+      }
+      
+      const data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'> = {
+        name: formData.get("name") as string,
+        address: formData.get("address") as string,
+        lat: parseFloat(formData.get("lat") as string) || 0,
+        lng: parseFloat(formData.get("lng") as string) || 0,
+        isActive: formData.get("isActive") === "on",
+        isShowInMap: formData.get("isShowInMap") === "on",
+        hasCustomIcon: formData.get("hasCustomIcon") === "on",
+        schedules: formData.get("schedules") as string,
+        phone: formData.get("phone") as string,
+        whatsapp: formData.get("whatsapp") as string,
+        photoUrl: uploadedPhotoId as string,
+        web: formData.get("web") as string,
+        instagram: formData.get("instagram") as string,
+        facebook: formData.get("facebook") as string,
+        videoLink: formData.get("videoLink") as string,
+        hasFood: formData.get("hasFood") === "on",
+        hasShow: formData.get("hasShow") === "on",
+        hasGames: formData.get("hasGames") === "on",
+        hasSupervision: formData.get("hasSupervision") === "on",
+        isFeatured: formData.get("isFeatured") === "on",
+        description: formData.get("description") as string,
+        iconType: formData.get("iconType") as string,
+        bgColor: formData.get("bgColor") as string,
+        categories: selectedCategories,
+        ageMin: Number(formData.get("ageMin")) || 0,
+        ageMax: formData.get("ageMax") ? Number(formData.get("ageMax")) : null,
+      };
+
       if (initialData?.id) {
         const res = await updatePlace(initialData.id, data);
         if (!res.success) throw new Error(res.error);
@@ -359,39 +399,78 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
 
       {/* Diseño y Mapa */}
       <FormSection title="Diseño Visual y Mapa">
-        <div>
-          <InputLabel>URL de Foto Principal</InputLabel>
-          <input defaultValue={initialData?.photoUrl ?? undefined} name="photoUrl" type="url" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="https://..." />
+        <div className="flex flex-col items-center justify-center p-6 border border-dashed border-gray-300 rounded-2xl bg-gray-50/50">
+          <InputLabel>Imagen Principal del Lugar</InputLabel>
+
+          {imagePreview ? (
+            <div className="relative w-full max-w-[200px] aspect-square rounded-xl overflow-hidden border-2 border-brand-primary mb-4 shadow-md">
+              <img src={imagePreview} alt="Vista previa" className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-full max-w-[200px] aspect-square rounded-xl bg-gray-100 flex flex-col items-center justify-center text-gray-400 mb-4 border-2 border-dashed border-gray-300 p-4">
+              <ImageIcon className="w-12 h-12 mb-2 text-gray-300" />
+              <span className="text-sm font-bold text-center">Sin Imagen<br/><span className="text-[10px] font-normal">Subir foto en formato WEBP (recomendado)</span></span>
+            </div>
+          )}
+
+          <label className="cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary font-bold text-xs rounded-xl border border-brand-primary/20 transition-all">
+            Elegir Archivo WEBP
+            <input
+              type="file"
+              accept=".webp, image/webp"
+              onChange={handleImageChange}
+              className="hidden"
+              disabled={isSubmitting}
+            />
+          </label>
+          <p className="text-xs text-gray-500 mt-3 text-center">
+            ¿Querés optimizar la imagen?{' '}
+            <a
+              href="https://squoosh.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-primary font-bold hover:underline"
+            >
+              Transformar o convertir imagen ↗
+            </a>
+          </p>
         </div>
         
-        <div>
-          <InputLabel>Categoría / Color del Pin</InputLabel>
-          <select defaultValue={initialData?.bgColor ?? undefined} name="bgColor" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
-            <option value="">Seleccionar color / categoría...</option>
-            <option value="#F59E0B">Gastronomía (Naranja)</option>
-            <option value="#06B6D4">Aire Libre / Paseos (Celeste)</option>
-            <option value="#8B5CF6">Cultura / Interior (Morado)</option>
-            <option value="#EC4899">Eventos Especiales (Rosa)</option>
-            <option value="#10B981">Naturaleza / Parques (Verde)</option>
-          </select>
-          <p className="text-xs text-gray-500 mt-2">El color de fondo define la característica general del lugar.</p>
-        </div>
+        <div className="flex flex-col gap-6">
+          <div>
+            <InputLabel>Categoría / Color del Pin</InputLabel>
+            <select defaultValue={initialData?.bgColor ?? undefined} name="bgColor" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
+              <option value="">Seleccionar color / categoría...</option>
+              <option value="#FFA500">Entretenimiento (Naranja)</option>
+              <option value="#8BC34A">Gastronomía (Verde Claro)</option>
+              <option value="#00BCD4">Aire Libre / Paseos (Celeste)</option>
+              <option value="#9575CD">Cultura / Interior (Morado)</option>
+              <option value="#F48FB1">Supervisión / Especiales (Rosa)</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-2">El color de fondo define la característica general del lugar.</p>
+          </div>
 
-        <div>
-          <InputLabel>Tipo de Icono</InputLabel>
-          <select defaultValue={initialData?.iconType ?? undefined} name="iconType" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
-            <option value="">Seleccionar icono...</option>
-            <option value="fork-knife">Tenedor y Cuchillo (Restaurante)</option>
-            <option value="coffee">Taza (Cafetería / Merienda)</option>
-            <option value="camera">Cámara (Selfie point / Visual)</option>
-            <option value="museum">Edificio Clásico (Museo / Cultura)</option>
-            <option value="castle">Castillo (Juegos Infantiles)</option>
-            <option value="food-truck">Camión (Food Truck)</option>
-            <option value="tree">Árbol (Plaza / Parque)</option>
-            <option value="door">Puerta (Ingreso)</option>
-            <option value="custom">Sin icono (Usar Logo Personalizado)</option>
-          </select>
-          <p className="text-xs text-gray-500 mt-2">El icono central define el tipo específico de actividad.</p>
+          <div>
+            <InputLabel>Tipo de Icono</InputLabel>
+            <select defaultValue={initialData?.iconType ?? undefined} name="iconType" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none bg-white">
+              <option value="">Seleccionar icono...</option>
+              <option value="FOOD">Tenedor y Cuchillo (Restaurante / Comida)</option>
+              <option value="CAFE">Taza (Cafetería / Merienda)</option>
+              <option value="FOOD_TRUCK">Camión (Food Truck)</option>
+              <option value="THEATER">Máscaras (Teatro)</option>
+              <option value="CIRCUS">Carpa (Circo)</option>
+              <option value="ART">Paleta (Arte)</option>
+              <option value="MUSEUM">Edificio Clásico (Museo / Cultura)</option>
+              <option value="PLAY_ROOM">Castillo (Juegos Infantiles / Playroom)</option>
+              <option value="NATURE">Árbol (Plaza / Parque / Naturaleza)</option>
+              <option value="ZOO">Huella (Zoológico / Animales)</option>
+              <option value="GOLF">Banderín (Golf / Deportes)</option>
+              <option value="SELFIE_POINT">Cámara (Selfie point / Visual)</option>
+              <option value="SCAPE_ROOM">Puerta (Escape Room / Ingreso)</option>
+              <option value="MAIL_BOX">Buzón (Correo / Mensajes)</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-2">El icono central define el tipo específico de actividad.</p>
+          </div>
         </div>
 
         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 border-t border-gray-100 pt-6">
@@ -405,10 +484,6 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
             <span className="text-sm font-bold text-gray-700">Usar Icono Personalizado (Logo)</span>
           </label>
 
-          <div className="md:col-span-2 mt-2">
-            <InputLabel>Nombre de Icono Personalizado (si está marcado arriba)</InputLabel>
-            <input defaultValue={initialData?.customIconName ?? undefined} name="customIconName" type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none" placeholder="Ej. logo_mr_fly" />
-          </div>
         </div>
       </FormSection>
 
