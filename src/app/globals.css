@@ -113,6 +113,54 @@ body::before {
   scrollbar-width: none;
 }
 
+.custom-marker {
+  position: relative;
+  /* display: inline-block; */
+  width: 46px;
+  height: 46px;
+  /* background: #1b134f;  */
+  border-radius: 50%;
+  /* border: 2px solid #1b134f; */
+}
+
+.custom-marker img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #1b134f;
+  background: #1b134f;
+}
+
+/* Triángulo del marcador */
+.custom-marker::after {
+  content: "";
+  position: absolute;
+  bottom: -19px;
+  right: -11px;
+  transform: rotate(-30deg);
+  width: 0;
+  height: 0;
+  border-left: 21px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 35px solid #1b134f; 
+  z-index: -2;
+}
+
+.custom-marker::before {
+  content: "";
+  position: absolute;
+  bottom: -17px;
+  right: -10px;
+  transform: rotate(-30deg);
+  width: 0;
+  height: 0;
+  border-left: 21px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 35px solid #ff637e; 
+  z-index: -1;
+}
+
 @layer utilities {
   .animate-slide-up {
     animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);

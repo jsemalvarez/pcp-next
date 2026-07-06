@@ -85,7 +85,6 @@ model Place {
 
   // Ícono del mapa
   hasCustomIcon  Boolean         @default(false)
-  customIconName String?
   iconType       String?
 
   // Contacto y redes

@@ -6,7 +6,10 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect } from 'react';
 import { Place, PlaceCategory } from '@/domain/entities/Place';
 import { getCategoryLabel } from '@/presentation/utils/category';
-
+import { ICONS_TYPES } from '@/presentation/constants/icons-types';
+import { COLORS_BY_CATEGORIES } from '@/presentation/constants/categories';
+import { getCustomSvgIcon } from '@/presentation/utils/getCustomSvgIcon';
+import { createSvgIcon } from '@/presentation/utils/createSvgIcon';
 // Fix for default marker icons in Leaflet + Next.js
 const DefaultIcon = L.icon({
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -57,15 +60,26 @@ export default function SimpleMap({ places, onSelectPlace, selectedPlace }: MapP
 
             <MapController selectedPlace={selectedPlace} />
 
-            {validPlaces.map((place) => (
-                <Marker
-                    key={place.id}
-                    position={[place.lat, place.lng]}
-                    eventHandlers={{
-                        click: () => onSelectPlace(place)
-                    }}
-                />
-            ))}
+            {validPlaces.map((place) => {
+                const placeType = place.iconType || 'PLAY_ROOM';
+                const svgIconType = ICONS_TYPES[ placeType as keyof typeof ICONS_TYPES ];
+                
+                const bgColor = place.bgColor ?? COLORS_BY_CATEGORIES.ENTERTAINMENT ?? '#FFA500';
+                const icon = (place.hasCustomIcon)
+                    ? getCustomSvgIcon({ imageId: place.photoUrl ?? '' })
+                    : createSvgIcon({ bgColor, svgIconType: svgIconType ?? '' });
+
+                return (
+                    <Marker
+                        key={place.id}
+                        position={[place.lat, place.lng]}
+                        icon={icon}
+                        eventHandlers={{
+                            click: () => onSelectPlace(place)
+                        }}
+                    />
+                );
+            })}
         </MapContainer>
     );
 }

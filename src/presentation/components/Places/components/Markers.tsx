@@ -32,7 +32,7 @@ export default function Markers({ places, setSetselectedPlace }:Props){
 
           if(place.isShowInMap){
 
-            const placeType = place.iconType || ICONS_TYPES.PLAY_ROOM;
+            const placeType = place.iconType || 'PLAY_ROOM';
             const svgIconType = ICONS_TYPES[ placeType as keyof typeof ICONS_TYPES ];
 
             const bgColor = place.bgColor ?? COLORS_BY_CATEGORIES.ENTERTAINMENT ?? '#FFA500';
