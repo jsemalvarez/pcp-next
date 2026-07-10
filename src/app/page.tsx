@@ -423,6 +423,67 @@ export default async function Home() {
           </div>
         </section>
       </div>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-gray-150/20 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md py-8 px-4 text-center mt-auto pb-24 md:pb-8 relative z-10">
+        <div className="max-w-6xl mx-auto flex flex-col items-center gap-6">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/favicon.svg"
+              alt="Paseos con Peques"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+            />
+            <div className="text-left">
+              <span className="block font-black text-lg text-brand-primary dark:text-white leading-none">
+                Paseos con Peques
+              </span>
+              <span className="block text-[9px] font-bold uppercase tracking-widest text-brand-accent mt-0.5">
+                Guía cultural para familias
+              </span>
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-bold text-gray-650 dark:text-gray-300">
+            <Link href="/" className="hover:text-brand-accent transition-colors">
+              Inicio
+            </Link>
+            <Link href="/noticias" className="hover:text-brand-accent transition-colors">
+              Noticias
+            </Link>
+            <Link href="/calendario" className="hover:text-brand-accent transition-colors">
+              Eventos
+            </Link>
+            <Link href="/map" className="hover:text-brand-accent transition-colors">
+              Mapa
+            </Link>
+            <Link href="/favorites" className="hover:text-brand-accent transition-colors">
+              Favoritos
+            </Link>
+          </div>
+
+          {/* Copyright & Credits */}
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              © {new Date().getFullYear()} Paseos con Peques. Todos los derechos reservados.
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Desarrollado y potenciado por{" "}
+              <Link
+                href="https://origenmdp.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-accent hover:underline font-extrabold"
+              >
+                Origen MdP - Costa Tech
+              </Link>
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
