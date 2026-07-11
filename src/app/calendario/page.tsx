@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User, Ticket, MessageCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User, Ticket, MessageCircle, Star } from 'lucide-react';
 import { useFavorites } from '@/presentation/contexts/FavoritesContext';
 import Link from 'next/link';
 import { getOccurrencesByMonth } from "@/actions/events";
@@ -56,6 +56,25 @@ function CalendarContent() {
     const router = useRouter();
     const pathname = usePathname();
     const [copyFeedback, setCopyFeedback] = useState(false);
+
+    const [activeMobileTab, setActiveMobileTab] = useState<'featured' | 'all'>('featured');
+
+    // Helper to format occurrence date and time in Spanish (e.g., Sáb 12 jul · 17:00)
+    const formatOccurrenceDateTime = (dateVal: string | Date, timeStart: string) => {
+        const d = new Date(dateVal);
+        const weekdays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        
+        const dayName = weekdays[d.getUTCDay()];
+        const dayNum = d.getUTCDate();
+        const monthName = months[d.getUTCMonth()];
+        
+        return `${dayName} ${dayNum} ${monthName} · ${timeStart}`;
+    };
+
+    const featuredOccurrences = useMemo(() => {
+        return occurrences.filter(occ => occ.event.isFeatured);
+    }, [occurrences]);
 
     // Fetch occurrences from database whenever the viewed month changes
     useEffect(() => {
@@ -301,11 +320,45 @@ function CalendarContent() {
                 </div>
             </header>
 
-            <header className="bg-white dark:bg-gray-850 p-4 pb-4 sticky top-0 md:top-[65px] z-10 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
+            {/* Mobile Header controls */}
+            <header className="bg-white dark:bg-gray-855 p-4 pb-4 sticky top-0 md:top-[65px] z-10 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300 lg:hidden">
                 <div className="flex justify-between items-end mb-4">
                     <div className="flex flex-col">
-                        <h1 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">Agenda</h1>
-                        <div className="flex items-center gap-3 text-brand-primary mt-1">
+                        <h1 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">
+                            Agenda
+                        </h1>
+                    </div>
+                </div>
+
+                {/* Mobile Tab Switcher (Featured / Calendar) */}
+                <div className="flex gap-2 mb-3 bg-gray-50 dark:bg-gray-900/10 p-1.5 rounded-full border border-gray-100 dark:border-gray-800">
+                    <button
+                        onClick={() => setActiveMobileTab('featured')}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-black rounded-full transition-all duration-300 ${
+                            activeMobileTab === 'featured'
+                                ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20 scale-105'
+                                : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        <Star size={12} className={activeMobileTab === 'featured' ? 'fill-white text-white' : 'text-gray-550'} />
+                        Destacados
+                    </button>
+                    <button
+                        onClick={() => setActiveMobileTab('all')}
+                        className={`flex-1 py-2 px-4 text-xs font-black rounded-full transition-all duration-300 ${
+                            activeMobileTab === 'all'
+                                ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20 scale-105'
+                                : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        Todos
+                    </button>
+                </div>
+
+                {/* Month Selector and HOY button below tabs (only in 'all' tab) */}
+                {activeMobileTab === 'all' && (
+                    <div className="flex justify-between items-center mb-3 animate-fadeIn">
+                        <div className="flex items-center gap-3 text-brand-primary">
                             <button
                                 onClick={() => changeMonth(-1)}
                                 className="p-1 hover:bg-brand-primary/10 rounded-full transition-colors text-brand-primary"
@@ -329,114 +382,323 @@ function CalendarContent() {
                                 <ChevronRight size={20} strokeWidth={3} />
                             </button>
                         </div>
-                    </div>
-
-                    <button
-                        onClick={goToToday}
-                        className="px-4 py-1.5 text-xs font-black rounded-full bg-brand-primary text-white shadow-lg shadow-brand-primary/20 active:scale-95 transition-all"
-                    >
-                        HOY
-                    </button>
-                </div>
-
-                {/* View Switcher (Tabs) */}
-                <div className="grid grid-cols-3 gap-1 bg-gray-100 dark:bg-gray-900/40 p-1 rounded-2xl mb-3">
-                    {(['day', 'week', 'month'] as ViewType[]).map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setViewType(type)}
-                            className={`py-2 text-xs font-black rounded-xl transition-all uppercase tracking-wider ${
-                                viewType === type
-                                    ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm'
-                                    : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                            }`}
-                        >
-                            {type === 'day' ? 'Día' : type === 'week' ? 'Semana' : 'Mes'}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Day View Strip Navigation */}
-                {viewType === 'day' && (
-                    <div className="flex items-center gap-1 bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl p-1 animate-fadeIn">
-                        <button
-                            onClick={() => changeDay(-1)}
-                            className="flex-none p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-brand-primary active:scale-95 transition-all border border-gray-100 dark:border-gray-700"
-                            aria-label="Día anterior"
-                        >
-                            <ChevronLeft size={20} strokeWidth={3} />
-                        </button>
-
-                        <div
-                            ref={scrollRef}
-                            className="flex-1 flex gap-3 overflow-x-auto no-scrollbar py-2 items-center"
-                        >
-                            {weekDays.map((date) => {
-                                const isSelected = isSameDay(date, selectedDate);
-                                const isToday = isSameDay(date, new Date());
-
-                                return (
-                                    <button
-                                        key={date.toISOString()}
-                                        ref={isSelected ? selectedRef : null}
-                                        onClick={() => {
-                                            setSelectedDate(date);
-                                            if (date.getMonth() !== viewDate.getMonth()) {
-                                                setViewDate(date);
-                                            }
-                                        }}
-                                        className={`flex flex-col items-center p-2.5 rounded-2xl min-w-[3.5rem] transition-all duration-300 relative ${isSelected
-                                            ? 'bg-brand-accent text-white shadow-lg shadow-brand-accent/20 transform scale-110 z-10'
-                                            : 'text-gray-550 dark:text-gray-400 bg-white dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent'
-                                            }`}
-                                    >
-                                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${isSelected ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'}`}>
-                                            {date.toLocaleString('es-ES', { weekday: 'short' }).replace('.', '')}
-                                        </span>
-                                        <span className="text-lg font-black leading-none mt-1">{date.getDate()}</span>
-                                        {isToday && !isSelected && (
-                                            <div className="absolute -bottom-1 w-1 h-1 bg-brand-accent rounded-full" />
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
 
                         <button
-                            onClick={() => changeDay(1)}
-                            className="flex-none p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-brand-primary active:scale-95 transition-all border border-gray-100 dark:border-gray-700"
-                            aria-label="Día siguiente"
+                            onClick={goToToday}
+                            className="px-4 py-1.5 text-xs font-black rounded-full bg-brand-primary text-white shadow-lg shadow-brand-primary/20 active:scale-95 transition-all"
                         >
-                            <ChevronRight size={20} strokeWidth={3} />
+                            HOY
                         </button>
                     </div>
                 )}
+
+                {/* View Switcher and strip for mobile (Calendar Tab Only) */}
+                {activeMobileTab === 'all' && (
+                    <>
+                        {/* View Switcher (Tabs) */}
+                        <div className="grid grid-cols-3 gap-1 bg-gray-100 dark:bg-gray-900/40 p-1 rounded-2xl mb-3">
+                            {(['day', 'week', 'month'] as ViewType[]).map((type) => (
+                                <button
+                                    key={type}
+                                    onClick={() => setViewType(type)}
+                                    className={`py-2 text-xs font-black rounded-xl transition-all uppercase tracking-wider ${
+                                        viewType === type
+                                            ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm'
+                                            : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                    }`}
+                                >
+                                    {type === 'day' ? 'Día' : type === 'week' ? 'Semana' : 'Mes'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Day View Strip Navigation */}
+                        {viewType === 'day' && (
+                            <div className="flex items-center gap-1 bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl p-1 animate-fadeIn">
+                                <button
+                                    onClick={() => changeDay(-1)}
+                                    className="flex-none p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-brand-primary active:scale-95 transition-all border border-gray-100 dark:border-gray-700"
+                                    aria-label="Día anterior"
+                                >
+                                    <ChevronLeft size={20} strokeWidth={3} />
+                                </button>
+
+                                <div
+                                    ref={scrollRef}
+                                    className="flex-1 flex gap-3 overflow-x-auto no-scrollbar py-2 items-center"
+                                >
+                                    {weekDays.map((date) => {
+                                        const isSelected = isSameDay(date, selectedDate);
+                                        const isToday = isSameDay(date, new Date());
+
+                                        return (
+                                            <button
+                                                key={date.toISOString()}
+                                                ref={isSelected ? selectedRef : null}
+                                                onClick={() => {
+                                                    setSelectedDate(date);
+                                                    if (date.getMonth() !== viewDate.getMonth()) {
+                                                        setViewDate(date);
+                                                    }
+                                                }}
+                                                className={`flex flex-col items-center p-2.5 rounded-2xl min-w-[3.5rem] transition-all duration-300 relative ${isSelected
+                                                    ? 'bg-brand-accent text-white shadow-lg shadow-brand-accent/20 transform scale-110 z-10'
+                                                    : 'text-gray-550 dark:text-gray-400 bg-white dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent'
+                                                    }`}
+                                            >
+                                                <span className={`text-[10px] font-bold uppercase tracking-tighter ${isSelected ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'}`}>
+                                                    {date.toLocaleString('es-ES', { weekday: 'short' }).replace('.', '')}
+                                                </span>
+                                                <span className="text-lg font-black leading-none mt-1">{date.getDate()}</span>
+                                                {isToday && !isSelected && (
+                                                    <div className="absolute -bottom-1 w-1 h-1 bg-brand-accent rounded-full" />
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <button
+                                    onClick={() => changeDay(1)}
+                                    className="flex-none p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-brand-primary active:scale-95 transition-all border border-gray-100 dark:border-gray-700"
+                                    aria-label="Día siguiente"
+                                >
+                                    <ChevronRight size={20} strokeWidth={3} />
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
             </header>
 
-            <div className="p-4 space-y-6 max-w-2xl mx-auto">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
                 {loading ? (
                     <div className="flex justify-center py-20">
                         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-brand-primary"></div>
                     </div>
                 ) : (
-                    <>
-                        {/* 1. DAY VIEW */}
-                        {viewType === 'day' && (
-                            <div className="animate-fadeIn">
-                                <h2 className="font-black text-gray-400 dark:text-gray-550 text-xs uppercase tracking-[0.2em] mb-4">
-                                    {isSameDay(selectedDate, new Date()) ? 'Hoy, ' : ''}
-                                    {selectedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
-                                </h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        {/* LEFT COLUMN: FEATURED EVENTS */}
+                        <div className={`${activeMobileTab === 'featured' ? 'block' : 'hidden'} lg:block lg:col-span-5 xl:col-span-4 space-y-6 animate-fadeIn`}>
+                            {/* Column Header for Desktop */}
+                            <div className="hidden lg:block">
+                                <h1 className="text-3xl font-black text-gray-900 dark:text-white transition-colors">Agenda</h1>
+                            </div>
 
-                                {filteredOccurrences.length === 0 ? (
-                                    <div className="bg-white dark:bg-gray-855 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-2">
-                                        <AlertCircle className="w-8 h-8 text-gray-400 mx-auto" />
-                                        <p className="font-bold text-gray-600 dark:text-gray-350">No hay eventos programados para este día.</p>
-                                        <p className="text-xs text-gray-400">¡Explorá otras fechas en el calendario!</p>
+                            <div className="bg-brand-accent/5 dark:bg-brand-accent/15 p-4 rounded-3xl border border-brand-accent/10">
+                                <p className="text-sm font-bold text-brand-accent leading-relaxed">
+                                    Lo más elegido para llevar a los peques esta semana 💫
+                                </p>
+                            </div>
+
+                            {/* Cards list */}
+                            {featuredOccurrences.length === 0 ? (
+                                <div className="bg-white dark:bg-gray-855 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-2">
+                                    <AlertCircle className="w-8 h-8 text-gray-400 mx-auto" />
+                                    <p className="font-bold text-gray-600 dark:text-gray-350">No hay eventos destacados programados.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {featuredOccurrences.map((occ) => {
+                                        const isFav = isFavoriteEvent(occ.event.id);
+                                        return (
+                                            <div
+                                                key={occ.id}
+                                                onClick={() => handleOpenEvent(occ.event.id)}
+                                                className="bg-white dark:bg-gray-855 rounded-3xl p-4 flex gap-4 border border-gray-100 dark:border-gray-800 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgb(227,123,124,0.08)] dark:shadow-none hover:shadow-[0_8px_30px_rgb(227,123,124,0.15)] hover:border-brand-accent/20 relative group"
+                                            >
+                                                {/* Left side: Square image or placeholder */}
+                                                <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-brand-accent/10">
+                                                    {occ.event.photoId ? (
+                                                        <img
+                                                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`}
+                                                            alt={occ.event.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-brand-accent to-brand-primary/40 flex items-center justify-center">
+                                                            <Star className="text-white w-6 h-6 fill-white opacity-40" />
+                                                        </div>
+                                                    )}
+                                                    {/* Star Badge on Top-Right Corner of image */}
+                                                    <div className="absolute top-1 right-1 bg-brand-accent text-white p-1 rounded-full shadow-md border border-white/20 z-10">
+                                                        <Star size={10} className="fill-white text-white" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Middle side: details */}
+                                                <div className="flex-1 min-w-0 pr-8 flex flex-col justify-between py-0.5">
+                                                    <h3 className="font-extrabold text-[17px] text-gray-900 dark:text-white leading-tight group-hover:text-brand-accent transition-colors truncate">
+                                                        {occ.event.title}
+                                                    </h3>
+                                                    
+                                                    <div className="space-y-1 mt-1">
+                                                        <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
+                                                            <MapPin size={13} className="text-brand-accent" />
+                                                            <span className="text-xs font-bold text-gray-550 dark:text-gray-450 truncate">
+                                                                {occ.place.name}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-550">
+                                                            <Clock size={13} className="text-brand-accent" />
+                                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-450">
+                                                                {formatOccurrenceDateTime(occ.date, occ.timeStart)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right side: Favorite toggle button */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleFavoriteEvent(occ.event.id);
+                                                    }}
+                                                    className="absolute top-4 right-4 p-2 bg-gray-50 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full text-gray-400 dark:text-gray-500 hover:text-rose-500 dark:hover:text-rose-400 transition-all duration-300 z-25"
+                                                    aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                                                >
+                                                    <Heart size={16} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-400"} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* RIGHT COLUMN: CALENDAR */}
+                        <div className={`${activeMobileTab === 'all' ? 'block' : 'hidden'} lg:block lg:col-span-7 xl:col-span-8 space-y-6 animate-fadeIn`}>
+                            {/* Calendar Header for Desktop */}
+                            <div className="hidden lg:block bg-white dark:bg-gray-850 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors duration-300">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex flex-col">
+                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">Agenda</h2>
+                                        <div className="flex items-center gap-3 text-brand-primary mt-1">
+                                            <button
+                                                onClick={() => changeMonth(-1)}
+                                                className="p-1 hover:bg-brand-primary/10 rounded-full transition-colors text-brand-primary cursor-pointer"
+                                                aria-label="Mes anterior"
+                                            >
+                                                <ChevronLeft size={20} strokeWidth={3} />
+                                            </button>
+
+                                            <div className="flex items-center gap-1.5">
+                                                <CalendarIcon size={14} className="opacity-70" />
+                                                <span className="text-sm font-black uppercase tracking-wider capitalize">
+                                                    {formatMonth(viewDate)}
+                                                </span>
+                                            </div>
+
+                                            <button
+                                                onClick={() => changeMonth(1)}
+                                                className="p-1 hover:bg-brand-primary/10 rounded-full transition-colors text-brand-primary cursor-pointer"
+                                                aria-label="Mes siguiente"
+                                            >
+                                                <ChevronRight size={20} strokeWidth={3} />
+                                            </button>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {filteredOccurrences.map((occ) => (
+
+                                    <button
+                                        onClick={goToToday}
+                                        className="px-4 py-1.5 text-xs font-black rounded-full bg-brand-primary text-white shadow-lg shadow-brand-primary/20 active:scale-95 transition-all cursor-pointer"
+                                    >
+                                        HOY
+                                    </button>
+                                </div>
+
+                                {/* View Switcher (Tabs) */}
+                                <div className="grid grid-cols-3 gap-1 bg-gray-100 dark:bg-gray-900/40 p-1 rounded-2xl mb-3">
+                                    {(['day', 'week', 'month'] as ViewType[]).map((type) => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setViewType(type)}
+                                            className={`py-2 text-xs font-black rounded-xl transition-all uppercase tracking-wider cursor-pointer ${
+                                                viewType === type
+                                                    ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm'
+                                                    : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                            }`}
+                                        >
+                                            {type === 'day' ? 'Día' : type === 'week' ? 'Semana' : 'Mes'}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Day View Strip Navigation */}
+                                {viewType === 'day' && (
+                                    <div className="flex items-center gap-1 bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl p-1 animate-fadeIn">
+                                        <button
+                                            onClick={() => changeDay(-1)}
+                                            className="flex-none p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-brand-primary active:scale-95 transition-all border border-gray-100 dark:border-gray-700 cursor-pointer"
+                                            aria-label="Día anterior"
+                                        >
+                                            <ChevronLeft size={20} strokeWidth={3} />
+                                        </button>
+
+                                        <div
+                                            ref={scrollRef}
+                                            className="flex-1 flex gap-3 overflow-x-auto no-scrollbar py-2 items-center"
+                                        >
+                                            {weekDays.map((date) => {
+                                                const isSelected = isSameDay(date, selectedDate);
+                                                const isToday = isSameDay(date, new Date());
+
+                                                return (
+                                                    <button
+                                                        key={date.toISOString()}
+                                                        ref={isSelected ? selectedRef : null}
+                                                        onClick={() => {
+                                                            setSelectedDate(date);
+                                                            if (date.getMonth() !== viewDate.getMonth()) {
+                                                                setViewDate(date);
+                                                            }
+                                                        }}
+                                                        className={`flex flex-col items-center p-2.5 rounded-2xl min-w-[3.5rem] transition-all duration-300 relative cursor-pointer ${isSelected
+                                                            ? 'bg-brand-accent text-white shadow-lg shadow-brand-accent/20 transform scale-110 z-10'
+                                                            : 'text-gray-550 dark:text-gray-400 bg-white dark:bg-gray-855 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent'
+                                                            }`}
+                                                    >
+                                                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${isSelected ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'}`}>
+                                                            {date.toLocaleString('es-ES', { weekday: 'short' }).replace('.', '')}
+                                                        </span>
+                                                        <span className="text-lg font-black leading-none mt-1">{date.getDate()}</span>
+                                                        {isToday && !isSelected && (
+                                                            <div className="absolute -bottom-1 w-1 h-1 bg-brand-accent rounded-full" />
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <button
+                                            onClick={() => changeDay(1)}
+                                            className="flex-none p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-brand-primary active:scale-95 transition-all border border-gray-100 dark:border-gray-700 cursor-pointer"
+                                            aria-label="Día siguiente"
+                                        >
+                                            <ChevronRight size={20} strokeWidth={3} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 1. DAY VIEW */}
+                            {viewType === 'day' && (
+                                <div className="animate-fadeIn">
+                                    <h2 className="font-black text-gray-400 dark:text-gray-550 text-xs uppercase tracking-[0.2em] mb-4">
+                                        {isSameDay(selectedDate, new Date()) ? 'Hoy, ' : ''}
+                                        {selectedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
+                                    </h2>
+
+                                    {filteredOccurrences.length === 0 ? (
+                                        <div className="bg-white dark:bg-gray-855 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-2">
+                                            <AlertCircle className="w-8 h-8 text-gray-400 mx-auto" />
+                                            <p className="font-bold text-gray-600 dark:text-gray-350">No hay eventos programados para este día.</p>
+                                            <p className="text-xs text-gray-400">¡Explorá otras fechas en el calendario!</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {filteredOccurrences.map((occ) => (
                                             <div 
                                                 key={occ.id} 
                                                 className="bg-white dark:bg-gray-855 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 transition-all duration-300 group hover:shadow-md hover:border-brand-primary/20"
@@ -603,9 +865,10 @@ function CalendarContent() {
                                 </div>
                             </div>
                         )}
-                    </>
-                )}
-            </div>
+                    </div>
+                </div>
+            )}
+        </div>
 
             {/* Event Details Modal */}
             {selectedEventOccurrence && (

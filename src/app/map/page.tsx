@@ -1,14 +1,15 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import { Search, MapPin, Navigation, Filter, X, Clock, Info, Share2, Check, Globe, Heart, Home as HomeIcon, Newspaper, Calendar as CalendarIcon, User } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { Search, MapPin, Navigation, Filter, X, Clock, Info, Share2, Check, Globe, Heart, Home as HomeIcon, Newspaper, Calendar as CalendarIcon, User, Star } from 'lucide-react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Place } from '@/domain/entities/Place';
 import { getPlaces } from '@/actions/places';
 import { getCategoryLabel } from '@/presentation/utils/category';
 import { useFavorites } from '@/presentation/contexts/FavoritesContext';
+import { CloudinaryImage } from '@/presentation/components/common/CloudinaryImage';
 
 // Import map component dynamically to avoid SSR issues with Leaflet
 const MapContainer = dynamic(
@@ -46,6 +47,11 @@ function MapContent() {
     const [copyFeedback, setCopyFeedback] = useState(false);
     const categories = ["Todos", "Cultura", "Al Aire Libre", "Entretenimiento", "Gastronomía", "Todo el Día", "Con Profe"];
     const [activeCategory, setActiveCategory] = useState("Todos");
+    const [activeMobileTab, setActiveMobileTab] = useState<'featured' | 'all'>('featured');
+
+    const featuredPlaces = useMemo(() => {
+        return places.filter(place => place.isFeatured);
+    }, [places]);
 
     // Fetch places from database
     useEffect(() => {
@@ -140,6 +146,83 @@ function MapContent() {
         return true;
     });
 
+    const renderPlaceCard = (place: Place) => {
+        const isFav = isFavoritePlace(place.id);
+        return (
+            <div
+                key={place.id}
+                onClick={() => handleSelectPlace(place)}
+                className="bg-white dark:bg-gray-855 rounded-3xl p-4 flex gap-4 border border-gray-100 dark:border-gray-800 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgb(227,123,124,0.08)] dark:shadow-none hover:shadow-[0_8px_30px_rgb(227,123,124,0.15)] hover:border-brand-accent/20 relative group text-left"
+            >
+                {/* Left side: Square image or placeholder */}
+                <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-brand-accent/10">
+                    {place.photoUrl ? (
+                        <CloudinaryImage
+                            imageName={place.photoUrl}
+                            alt={place.name}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-brand-accent to-brand-primary/40 flex items-center justify-center">
+                            <Star className="text-white w-6 h-6 fill-white opacity-40" />
+                        </div>
+                    )}
+                    {/* Star Badge on Top-Right Corner of image if featured */}
+                    {place.isFeatured && (
+                        <div className="absolute top-1 right-1 bg-brand-accent text-white p-1 rounded-full shadow-md border border-white/20 z-10">
+                            <Star size={10} className="fill-white text-white" />
+                        </div>
+                    )}
+                </div>
+
+                {/* Middle side: details */}
+                <div className="flex-1 min-w-0 pr-8 flex flex-col justify-between py-0.5">
+                    <h3 className="font-extrabold text-[17px] text-gray-900 dark:text-white leading-tight group-hover:text-brand-accent transition-colors truncate">
+                        {place.name}
+                    </h3>
+                    
+                    <div className="space-y-1 mt-1">
+                        <div className="flex flex-wrap gap-1 mb-1">
+                            {place.categories.slice(0, 2).map((cat) => (
+                                <span key={cat} className="text-[9px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded font-bold uppercase tracking-wide">
+                                    {getCategoryLabel(cat)}
+                                </span>
+                            ))}
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-550">
+                            <MapPin size={13} className="text-brand-accent" />
+                            <span className="text-xs font-bold text-gray-550 dark:text-gray-450 truncate">
+                                {place.address}
+                            </span>
+                        </div>
+                        
+                        {place.schedules && (
+                            <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-550">
+                                <Clock size={13} className="text-brand-accent" />
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-455 truncate">
+                                    {place.schedules}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right side: Favorite toggle button */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavoritePlace(place.id);
+                    }}
+                    className="absolute top-4 right-4 p-2 bg-gray-50 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full text-gray-400 dark:text-gray-550 hover:text-rose-500 dark:hover:text-rose-400 transition-all duration-300 z-25"
+                    aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                >
+                    <Heart size={16} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-400"} />
+                </button>
+            </div>
+        );
+    };
+
     return (
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 relative overflow-hidden">
             {/* Desktop Navbar */}
@@ -176,85 +259,198 @@ function MapContent() {
                 </div>
             </header>
 
-            {/* Unified Search & Filter Header */}
-            <div className="absolute top-0 left-0 right-0 md:top-20 md:left-4 md:right-auto z-[1000] p-0 pt-safe md:pt-0 pointer-events-none w-full md:w-96">
-                <div className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-xl border-b md:border border-gray-100 dark:border-gray-800 md:rounded-3xl pointer-events-auto overflow-hidden">
-                    <div className="p-1.5 flex flex-col">
-                        {/* Search Input */}
-                        <div className="flex items-center gap-2 p-1.5">
-                            <div className="p-2 text-brand-primary">
-                                <Search size={20} />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="¿A dónde vamos hoy?"
-                                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-gray-900 dark:text-white placeholder:text-gray-400"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            {searchQuery && (
-                                <button 
-                                    onClick={() => setSearchQuery("")} 
-                                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                >
-                                    <X size={18} />
-                                </button>
-                            )}
-                            <button className="p-2 text-gray-400 hover:text-brand-accent transition-colors">
-                                <Filter size={18} />
-                            </button>
-                        </div>
-
-                        {/* Floating Search Results */}
-                        {searchQuery.trim() !== "" && (
-                            <div className="max-h-60 overflow-y-auto border-t border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
-                                {filteredPlaces.length === 0 ? (
-                                    <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                        No se encontraron lugares
-                                    </div>
-                                ) : (
-                                    filteredPlaces.map((place) => (
-                                        <button
-                                            key={place.id}
-                                            onClick={() => {
-                                                handleSelectPlace(place);
-                                                setSearchQuery("");
-                                            }}
-                                            className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center gap-3 transition-colors cursor-pointer"
-                                        >
-                                            <MapPin className="text-brand-primary flex-shrink-0" size={18} />
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">{place.name}</h4>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{place.address}</p>
-                                            </div>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        )}
-
-                        {/* Integrated Filters */}
-                        <div className="flex gap-2 overflow-x-auto no-scrollbar p-3 pt-2 border-t border-gray-100 dark:border-gray-800">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${activeCategory === cat
-                                        ? 'bg-brand-accent text-white shadow-lg shadow-brand/20'
-                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
+            {/* Mobile Header controls */}
+            <header className="bg-white dark:bg-gray-855 p-4 pb-4 sticky top-0 md:top-[65px] z-10 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300 lg:hidden">
+                <div className="flex justify-between items-end mb-4">
+                    <div className="flex flex-col">
+                        <h1 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">
+                            Mapa
+                        </h1>
                     </div>
                 </div>
-            </div>
 
-            {/* Map Container - Zero index to be behind overlay */}
-            <div className="flex-1 relative z-0">
-                <MapContainer places={filteredPlaces} onSelectPlace={handleSelectPlace} selectedPlace={selectedPlace} />
+                {/* Mobile Tab Switcher (Featured / Calendar) */}
+                <div className="flex gap-2 mb-3 bg-gray-55 dark:bg-gray-900/10 p-1.5 rounded-full border border-gray-100 dark:border-gray-800">
+                    <button
+                        onClick={() => setActiveMobileTab('featured')}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-black rounded-full transition-all duration-300 ${
+                            activeMobileTab === 'featured'
+                                ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20 scale-105'
+                                : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        <Star size={12} className={activeMobileTab === 'featured' ? 'fill-white text-white' : 'text-gray-550'} />
+                        Destacados
+                    </button>
+                    <button
+                        onClick={() => setActiveMobileTab('all')}
+                        className={`flex-1 py-2 px-4 text-xs font-black rounded-full transition-all duration-300 ${
+                            activeMobileTab === 'all'
+                                ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20 scale-105'
+                                : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        Todos
+                    </button>
+                </div>
+            </header>
+
+            {/* Main responsive grid layout */}
+            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 overflow-hidden relative">
+                {/* COLUMN LEFT (Desktop always, Mobile when activeMobileTab is 'featured') */}
+                <div className={`${activeMobileTab === 'featured' ? 'flex' : 'hidden'} lg:flex lg:col-span-5 xl:col-span-4 h-full flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 overflow-y-auto p-4 space-y-4`}>
+                    {/* Desktop Header title */}
+                    <div className="hidden lg:block pb-2">
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-white transition-colors">Mapa</h1>
+                    </div>
+
+                    {/* Tab Switcher for Desktop */}
+                    <div className="hidden lg:flex gap-2 bg-gray-50 dark:bg-gray-900/10 p-1.5 rounded-full border border-gray-100 dark:border-gray-800">
+                        <button
+                            onClick={() => setActiveMobileTab('featured')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-black rounded-full transition-all duration-300 ${
+                                activeMobileTab === 'featured'
+                                    ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20 scale-105'
+                                    : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            <Star size={12} className={activeMobileTab === 'featured' ? 'fill-white text-white' : 'text-gray-550'} />
+                            Destacados
+                        </button>
+                        <button
+                            onClick={() => setActiveMobileTab('all')}
+                            className={`flex-1 py-2 px-4 text-xs font-black rounded-full transition-all duration-300 ${
+                                activeMobileTab === 'all'
+                                    ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20 scale-105'
+                                    : 'text-gray-550 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            Todos
+                        </button>
+                    </div>
+
+                    {/* Search & Category filter box */}
+                    {activeMobileTab === 'featured' ? (
+                        <div className="bg-brand-accent/5 dark:bg-brand-accent/15 p-4 rounded-3xl border border-brand-accent/10">
+                            <p className="text-sm font-bold text-brand-accent leading-relaxed">
+                                Los lugares recomendados para disfrutar en familia 🌟
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="bg-white/95 dark:bg-gray-900/95 shadow-md border border-gray-100 dark:border-gray-800 rounded-3xl overflow-hidden p-1.5 flex flex-col">
+                            {/* Search input */}
+                            <div className="flex items-center gap-2 p-1.5">
+                                <div className="p-2 text-brand-primary">
+                                    <Search size={20} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="¿A dónde vamos hoy?"
+                                    className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-gray-900 dark:text-white placeholder:text-gray-400"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                                {searchQuery && (
+                                    <button 
+                                        onClick={() => setSearchQuery("")} 
+                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                )}
+                            </div>
+                            {/* Categories */}
+                            <div className="flex gap-2 overflow-x-auto no-scrollbar p-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setActiveCategory(cat)}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${activeCategory === cat
+                                            ? 'bg-brand-accent text-white shadow-lg shadow-brand/20'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Places List (Featured places if tab is 'featured', otherwise filteredPlaces) */}
+                    <div className="space-y-4 pt-2">
+                        {activeMobileTab === 'featured' ? (
+                            featuredPlaces.length === 0 ? (
+                                <div className="p-8 border border-dashed border-gray-200 dark:border-gray-800 rounded-3xl text-center text-gray-500">
+                                    No hay lugares destacados cargados
+                                </div>
+                            ) : (
+                                featuredPlaces.map(renderPlaceCard)
+                            )
+                        ) : (
+                            filteredPlaces.length === 0 ? (
+                                <div className="p-8 border border-dashed border-gray-200 dark:border-gray-800 rounded-3xl text-center text-gray-500">
+                                    No se encontraron lugares
+                                </div>
+                            ) : (
+                                filteredPlaces.map(renderPlaceCard)
+                            )
+                        )}
+                    </div>
+                </div>
+
+                {/* COLUMN RIGHT: MAP CONTAINER (Desktop always, Mobile when activeMobileTab is 'all') */}
+                <div className={`${activeMobileTab === 'all' ? 'block' : 'hidden'} lg:block lg:col-span-7 xl:col-span-8 h-full relative z-0`}>
+                    {/* Floating search/filter card for mobile only (when activeMobileTab is 'all') */}
+                    {activeMobileTab === 'all' && (
+                        <div className="absolute top-4 left-4 right-4 z-[1000] p-0 pointer-events-none md:w-96 lg:hidden">
+                            <div className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-xl border border-gray-100 dark:border-gray-800 rounded-3xl pointer-events-auto overflow-hidden">
+                                <div className="p-1.5 flex flex-col">
+                                    <div className="flex items-center gap-2 p-1.5">
+                                        <div className="p-2 text-brand-primary">
+                                            <Search size={20} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="¿A dónde vamos hoy?"
+                                            className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-gray-900 dark:text-white placeholder:text-gray-400"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                        {searchQuery && (
+                                            <button 
+                                                onClick={() => setSearchQuery("")} 
+                                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2 overflow-x-auto no-scrollbar p-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+                                        {categories.map((cat) => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => setActiveCategory(cat)}
+                                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${activeCategory === cat
+                                                    ? 'bg-brand-accent text-white shadow-lg shadow-brand/20'
+                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                                    }`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <MapContainer 
+                        places={activeMobileTab === 'featured' ? featuredPlaces : filteredPlaces} 
+                        onSelectPlace={handleSelectPlace} 
+                        selectedPlace={selectedPlace} 
+                    />
+                </div>
             </div>
 
             {/* Place Details Modal */}

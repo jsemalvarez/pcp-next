@@ -6,6 +6,7 @@ import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User, Home 
 import { getActiveNews } from "@/actions/news";
 import { getActiveBanners } from "@/actions/banners";
 import { FavoriteHeartButton } from "@/presentation/components/common/FavoriteHeartButton";
+import { Footer } from "@/presentation/components/Footer/Footer";
 
 import prisma from "@/data/prisma/db";
 
@@ -423,6 +424,8 @@ export default async function Home() {
           </div>
         </section>
       </div>
+
+      <Footer />
     </div>
   );
 }
