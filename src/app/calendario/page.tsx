@@ -73,7 +73,13 @@ function CalendarContent() {
     };
 
     const featuredOccurrences = useMemo(() => {
-        return occurrences.filter(occ => occ.event.isFeatured);
+        const seenEventIds = new Set<string>();
+        return occurrences.filter(occ => {
+            if (!occ.event.isFeatured) return false;
+            if (seenEventIds.has(occ.event.id)) return false;
+            seenEventIds.add(occ.event.id);
+            return true;
+        });
     }, [occurrences]);
 
     // Fetch occurrences from database whenever the viewed month changes
