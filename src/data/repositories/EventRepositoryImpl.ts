@@ -30,6 +30,7 @@ export class EventRepositoryImpl implements EventRepository {
                 ticketUrl:    o.event.ticketUrl,
                 bookingWhatsapp: o.event.bookingWhatsapp,
                 isFeatured:   o.event.isFeatured,
+                isSponsored:  o.event.isSponsored,
                 priceType:    o.event.priceType,
                 activityTypes: o.event.activityTypes,
                 ageMin:       o.event.ageMin,

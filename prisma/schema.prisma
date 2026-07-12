@@ -140,6 +140,7 @@ model Event {
 
   // Visibilidad
   isFeatured    Boolean           @default(false)
+  isSponsored   Boolean           @default(false)
 
   // Ocurrencias (borrar el evento borra todas sus fechas)
   occurrences   EventOccurrence[]

@@ -16,6 +16,7 @@ export interface Event {
     ageMin: number;
     ageMax?: number | null;
     isFeatured: boolean;
+    isSponsored: boolean;
     occurrences: EventOccurrence[];
     createdAt: Date;
     updatedAt: Date;
@@ -55,6 +56,7 @@ export interface CalendarEvent {
     ticketUrl?: string | null;
     bookingWhatsapp?: string | null;
     isFeatured: boolean;
+    isSponsored: boolean;
 
     // Clasificación (del evento padre)
     priceType: PriceType;
