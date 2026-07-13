@@ -22,6 +22,7 @@ export type CreateEventInput = {
   ageMin: number;
   ageMax?: number | null;
   isFeatured?: boolean;
+  isSponsored?: boolean;
   occurrences: CreateOccurrenceInput[];
   organizerIds?: string[];
 };
@@ -132,6 +133,7 @@ export async function createEvent(data: CreateEventInput) {
         data: {
           ...eventData,
           isFeatured: eventData.isFeatured ?? false,
+          isSponsored: eventData.isSponsored ?? false,
           occurrences: {
             createMany: {
               data: occurrences.map((o) => ({

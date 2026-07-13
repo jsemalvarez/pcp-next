@@ -513,6 +513,11 @@ function CalendarContent() {
                                                 onClick={() => handleOpenEvent(occ.event.id)}
                                                 className="bg-white dark:bg-gray-855 rounded-3xl p-4 flex gap-4 border border-gray-100 dark:border-gray-800 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgb(227,123,124,0.08)] dark:shadow-none hover:shadow-[0_8px_30px_rgb(227,123,124,0.15)] hover:border-brand-accent/20 relative group"
                                             >
+                                                {occ.event.isSponsored && (
+                                                    <div className="absolute -top-2.5 right-4 bg-brand-accent text-white text-[9px] font-black tracking-widest px-3 py-1 rounded-full shadow-md uppercase z-20">
+                                                        Patrocinado
+                                                    </div>
+                                                )}
                                                 {/* Left side: Square image or placeholder */}
                                                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-brand-accent/10">
                                                     {occ.event.photoId ? (

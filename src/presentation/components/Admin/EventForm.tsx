@@ -314,6 +314,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
         ageMin: Number(formData.get('ageMin')) || 0,
         ageMax: formData.get('ageMax') ? Number(formData.get('ageMax')) : null,
         isFeatured: formData.get('isFeatured') === 'on',
+        isSponsored: formData.get('isSponsored') === 'on',
         occurrences: occurrences.map((o) => ({
           date: new Date(o.date + 'T00:00:00'),
           timeStart: o.timeStart,
@@ -407,6 +408,22 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
               <div className="text-left leading-tight">
                 <span className="text-sm font-bold text-gray-700 block">⭐ Destacar este evento</span>
                 <span className="text-xs text-gray-400 block">Aparecerá destacado en la sección de recomendados</span>
+              </div>
+            </label>
+          </div>
+
+          {/* Patrocinar Evento */}
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-3 px-4 py-3.5 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors w-full bg-white">
+              <input
+                name="isSponsored"
+                type="checkbox"
+                defaultChecked={initialData?.isSponsored}
+                className="w-5 h-5 rounded border-gray-300 text-brand-accent focus:ring-brand-accent shrink-0"
+              />
+              <div className="text-left leading-tight">
+                <span className="text-sm font-bold text-gray-700 block">🎁 Patrocinar este evento</span>
+                <span className="text-xs text-gray-400 block">Se mostrará con un badge de patrocinado en la lista de destacados</span>
               </div>
             </label>
           </div>
