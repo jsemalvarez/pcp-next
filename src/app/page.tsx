@@ -9,6 +9,7 @@ import { FavoriteHeartButton } from "@/presentation/components/common/FavoriteHe
 import { Footer } from "@/presentation/components/Footer/Footer";
 
 import prisma from "@/data/prisma/db";
+import { fortmatDate } from "@/presentation/utils/formatDate";
 
 // Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
 const Facebook = Share2;
@@ -38,27 +39,51 @@ export default async function Home() {
 
   const dbOccurrences = await prisma.eventOccurrence.findMany({
     where: {
-      date: startOfToday,
+      date: {
+        gte: startOfToday,
+      },
+      event: {
+        isFeatured: true,
+      },
     },
     include: {
       event: true,
       place: true,
     },
-    orderBy: {
-      timeStart: "asc",
-    },
   });
 
-  const events = dbOccurrences.map((occ) => ({
+  const sortedOccurrences = [...dbOccurrences].sort((a, b) => {
+    if (a.event.isSponsored && !b.event.isSponsored) return -1;
+    if (!a.event.isSponsored && b.event.isSponsored) return 1;
+    const dateDiff = a.date.getTime() - b.date.getTime();
+    if (dateDiff !== 0) return dateDiff;
+    return a.timeStart.localeCompare(b.timeStart);
+  });
+
+  // Filter occurrences to show each event only once (the earliest occurrence)
+  const seenEventIds = new Set<string>();
+  const uniqueOccurrences: typeof sortedOccurrences = [];
+  for (const occ of sortedOccurrences) {
+    if (!seenEventIds.has(occ.event.id)) {
+      seenEventIds.add(occ.event.id);
+      uniqueOccurrences.push(occ);
+    }
+  }
+
+  const events = uniqueOccurrences.slice(0, 6).map((occ) => ({
     id: occ.id,
     eventId: occ.event.id,
     title: occ.event.title,
-    time: `Hoy • ${occ.timeStart} hs`,
+    time: occ.date.getTime() === startOfToday.getTime()
+      ? `Hoy • ${occ.timeStart} hs`
+      : `${fortmatDate(occ.date.toISOString())} • ${occ.timeStart} hs`,
     location: occ.place.name,
+    isSponsored: occ.event.isSponsored,
     image: occ.event.photoId
       ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`
       : "/images/evento_dia.png",
   }));
+
 
   // Fetch recommended places from the database
   const dbPlaces = await prisma.place.findMany({
@@ -338,21 +363,30 @@ export default async function Home() {
         {/* Eventos del dia section */}
         <section className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Eventos del día</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Eventos destacados</h2>
             <Link href="/calendario" className="px-4 py-1.5 bg-brand-primary dark:bg-brand-soft hover:bg-brand-accent dark:hover:bg-brand-accent/20 text-brand-accent hover:text-brand-primary dark:hover:text-brand-accent border border-gray-300 dark:border-brand-accent/20 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95 shadow-sm">Agenda completa</Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.length === 0 ? (
               <div className="p-6 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 col-span-full">
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-bold">No hay eventos programados para hoy.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-bold">No hay eventos destacados programados.</p>
                 <Link href="/calendario" className="text-xs text-brand-primary hover:underline mt-1 inline-block font-bold">Ver toda la agenda ➔</Link>
               </div>
             ) : (
               events.map((event) => (
                 <div key={event.id} className="relative group">
+                  {event.isSponsored && (
+                    <div className="absolute -top-2 right-4 bg-brand-accent text-white text-[9px] font-black tracking-widest px-3 py-1 rounded-full shadow-md uppercase z-20">
+                      Patrocinado
+                    </div>
+                  )}
                   <Link
                     href={`/calendario?event=${event.eventId}`}
-                    className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block pr-12 h-full"
+                    className={`flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border ${
+                      event.isSponsored 
+                        ? "border-brand-accent/30 dark:border-brand-accent/20" 
+                        : "border-gray-100 dark:border-gray-700"
+                    } hover:shadow-md transition-shadow duration-200 block pr-12 h-full`}
                   >
                     <div className="w-20 h-20 relative rounded-xl overflow-hidden flex-none bg-gray-150 dark:bg-gray-700">
                       <Image
