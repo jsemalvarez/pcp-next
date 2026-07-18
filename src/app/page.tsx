@@ -25,7 +25,7 @@ export default async function Home() {
     description: item.subtitle || item.content.substring(0, 150),
     image: item.photoId
       ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${item.photoId.includes('/') ? item.photoId : 'events/' + item.photoId}`
-      : "/images/noticia_preview.png",
+      : "/images/fallbackImage.webp",
     slug: item.slug,
     photoWidth: item.photoWidth,
     photoHeight: item.photoHeight,
@@ -81,7 +81,7 @@ export default async function Home() {
     isSponsored: occ.event.isSponsored,
     image: occ.event.photoId
       ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`
-      : "/images/evento_dia.png",
+      : "/images/fallbackImage.webp",
   }));
 
 
@@ -460,7 +460,7 @@ export default async function Home() {
                         className="object-cover w-full h-full"
                         actualWidth={96}
                         actualHeight={96}
-                        fallbackImage="/images/lugar_recomendado.png"
+                        fallbackImage="/images/fallbackImage.webp"
                       />
                     </div>
                     <div className="flex flex-col justify-center flex-1">
