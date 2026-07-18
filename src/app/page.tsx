@@ -17,6 +17,8 @@ const Facebook = Share2;
 const Instagram = Camera;
 
 
+export const revalidate = 28800; // Revalidate every 8 hours
+
 export default async function Home() {
   const dbNews = await getActiveNews();
   const banners = await getActiveBanners();
