@@ -24,6 +24,30 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 function MapController({ selectedPlace }: { selectedPlace: Place | null }) {
     const map = useMap();
+
+    useEffect(() => {
+        const container = map.getContainer();
+        if (!container) return;
+
+        const resizeObserver = new ResizeObserver(() => {
+            // Trigger size invalidation when the container size or display state changes
+            map.invalidateSize();
+        });
+
+        resizeObserver.observe(container);
+
+        // Initial invalidation
+        map.invalidateSize();
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 400);
+
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timer);
+        };
+    }, [map]);
+
     useEffect(() => {
         if (selectedPlace) {
             map.flyTo([selectedPlace.lat, selectedPlace.lng], 15, {

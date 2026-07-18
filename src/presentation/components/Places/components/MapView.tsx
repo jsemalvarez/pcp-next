@@ -21,14 +21,24 @@ interface Props{
 function MapResizer() {
   const map = useMap()
   useEffect(() => {
+    const container = map.getContainer()
+    if (!container) return
+
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize()
+    })
+
+    resizeObserver.observe(container)
+
     map.invalidateSize()
-    
-    // Invalidate size after a short timeout to handle transitions/layout settling
     const timer = setTimeout(() => {
       map.invalidateSize()
     }, 400)
     
-    return () => clearTimeout(timer)
+    return () => {
+      resizeObserver.disconnect()
+      clearTimeout(timer)
+    }
   }, [map])
   return null
 }
