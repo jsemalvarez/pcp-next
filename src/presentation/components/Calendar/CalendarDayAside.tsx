@@ -22,7 +22,7 @@ export const CalendarDayAside = ({calendarDayEvents, handleOpenEventDetail, hand
     
     return ( 
         <aside 
-            className={`${ isCalendarDayAsideOpen? 'flex' : 'hidden'} top-0 w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-200 text-primary z-1600  overflow-y-auto`}
+            className={`${ isCalendarDayAsideOpen? 'flex' : 'hidden'} top-0 w-full sm:w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-200 text-primary z-[1600] overflow-y-auto`}
         >
             <div className="flex justify-between items-center p-6">
                 <h2 className="font-extrabold text-xl">

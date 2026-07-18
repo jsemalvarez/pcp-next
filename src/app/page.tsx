@@ -10,6 +10,7 @@ import { Footer } from "@/presentation/components/Footer/Footer";
 
 import prisma from "@/data/prisma/db";
 import { fortmatDate } from "@/presentation/utils/formatDate";
+import { CloudinaryImage } from "@/presentation/components/common/CloudinaryImage";
 
 // Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
 const Facebook = Share2;
@@ -432,11 +433,13 @@ export default async function Home() {
                     className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-150 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block pr-12 h-full"
                   >
                     <div className="w-24 h-24 relative rounded-xl overflow-hidden flex-none bg-gray-100 dark:bg-gray-700">
-                      <Image
-                        src={place.photoUrl || "/images/lugar_recomendado.png"}
+                      <CloudinaryImage
+                        imageName={place.photoUrl || undefined}
                         alt={place.name}
-                        fill
-                        className="object-cover"
+                        className="object-cover w-full h-full"
+                        actualWidth={96}
+                        actualHeight={96}
+                        fallbackImage="/images/lugar_recomendado.png"
                       />
                     </div>
                     <div className="flex flex-col justify-center flex-1">
