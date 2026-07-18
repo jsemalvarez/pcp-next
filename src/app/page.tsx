@@ -2,19 +2,19 @@ import Image from "next/image";
 import Link from "next/link";
 
 import BannerCarousel from "@/presentation/components/BannerCarousel";
-import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User, Home as HomeIcon, Heart } from "lucide-react";
+import { MessageCircle, Newspaper, Calendar, MapPin, User, Home as HomeIcon, Heart } from "lucide-react";
 import { getActiveNews } from "@/actions/news";
 import { getActiveBanners } from "@/actions/banners";
 import { FavoriteHeartButton } from "@/presentation/components/common/FavoriteHeartButton";
 import { Footer } from "@/presentation/components/Footer/Footer";
+import { InstagramIcon } from "@/presentation/components/common/icons";
 
 import prisma from "@/data/prisma/db";
 import { fortmatDate } from "@/presentation/utils/formatDate";
+import { CloudinaryImage } from "@/presentation/components/common/CloudinaryImage";
 
-// Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
-const Facebook = Share2;
-const Instagram = Camera;
 
+export const revalidate = 28800; // Revalidate every 8 hours
 
 export default async function Home() {
   const dbNews = await getActiveNews();
@@ -25,7 +25,7 @@ export default async function Home() {
     description: item.subtitle || item.content.substring(0, 150),
     image: item.photoId
       ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${item.photoId.includes('/') ? item.photoId : 'events/' + item.photoId}`
-      : "/images/noticia_preview.png",
+      : "/images/fallbackImage.webp",
     slug: item.slug,
     photoWidth: item.photoWidth,
     photoHeight: item.photoHeight,
@@ -81,7 +81,7 @@ export default async function Home() {
     isSponsored: occ.event.isSponsored,
     image: occ.event.photoId
       ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`
-      : "/images/evento_dia.png",
+      : "/images/fallbackImage.webp",
   }));
 
 
@@ -130,15 +130,37 @@ export default async function Home() {
               <span>Mapa</span>
             </Link>
             <div className="h-4 w-px bg-white/20" />
+            <a
+              href="https://www.instagram.com/paseosconpeques"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-white/70 hover:text-white transition-colors flex items-center justify-center"
+              title="Instagram"
+            >
+              <InstagramIcon className="w-5 h-5" />
+            </a>
+            <div className="h-4 w-px bg-white/20" />
             <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
               <User className="w-5 h-5" />
             </Link>
           </div>
 
-          {/* Mobile Admin Icon */}
-          <Link href="/admin/login" className="md:hidden p-2 text-white/70 hover:text-white transition-colors">
-            <User className="w-5 h-5" />
-          </Link>
+          {/* Mobile Navigation Icons */}
+          <div className="flex md:hidden items-center gap-2">
+            <a
+              href="https://www.instagram.com/paseosconpeques"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-white/70 hover:text-white transition-colors flex items-center justify-center"
+              title="Instagram"
+            >
+              <InstagramIcon className="w-5 h-5" />
+            </a>
+            <div className="h-4 w-px bg-white/20" />
+            <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
+              <User className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -432,11 +454,13 @@ export default async function Home() {
                     className="flex gap-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-150 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 block pr-12 h-full"
                   >
                     <div className="w-24 h-24 relative rounded-xl overflow-hidden flex-none bg-gray-100 dark:bg-gray-700">
-                      <Image
-                        src={place.photoUrl || "/images/lugar_recomendado.png"}
+                      <CloudinaryImage
+                        imageName={place.photoUrl || undefined}
                         alt={place.name}
-                        fill
-                        className="object-cover"
+                        className="object-cover w-full h-full"
+                        actualWidth={96}
+                        actualHeight={96}
+                        fallbackImage="/images/fallbackImage.webp"
                       />
                     </div>
                     <div className="flex flex-col justify-center flex-1">

@@ -6,6 +6,7 @@ interface Props {
   className?: string;
   actualWidth?: number | null;
   actualHeight?: number | null;
+  fallbackImage?: string;
 }
 
 export const CloudinaryImage = ({
@@ -14,19 +15,20 @@ export const CloudinaryImage = ({
   className = "",
   actualWidth,
   actualHeight,
+  fallbackImage,
 }: Props) => {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
   const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
   
   // Si no hay imagen, usamos una imagen por defecto local
-  const fallbackImage = "/images/img-molinos.webp";
+  const finalFallback = fallbackImage || "/images/fallbackImage.webp";
   
   // Dado que el photoId guardado ya contiene la subcarpeta (ej. 'events/nombre.jpg'), 
   // solo lo concatenamos directamente a la URL base.
   const formattedImageName = imageName?.includes('/') ? imageName : `events/${imageName}`;
   const photoUrl = `${baseUrl}/w_600,q_auto,f_auto/${formattedImageName}`;
 
-  const imageUrl = imageName ? photoUrl : fallbackImage;
+  const imageUrl = imageName ? photoUrl : finalFallback;
 
   const width = actualWidth || 600;
   const height = actualHeight || 400;

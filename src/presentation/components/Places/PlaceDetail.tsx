@@ -38,7 +38,7 @@ export const PlaceDetail = ({placeDetail, setSetselectedPlace}:Props) => {
   
     return ( 
         <aside 
-            className={`${ isPlaceDetailOpen? 'flex' : 'hidden'} top-0 w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-100 text-primary z-50 transition-all z-1600`}
+            className={`${ isPlaceDetailOpen? 'flex' : 'hidden'} top-0 w-full sm:w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-100 text-primary transition-all z-[1600]`}
         >
             <div className="flex justify-between items-center px-6 py-1 mb-2">
                 <button

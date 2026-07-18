@@ -41,7 +41,7 @@ export const EventDetail = ({ eventDetail, setSelectedEvent, handleFindPlaceById
 
     return (
         <aside
-            className={`${isEventDetailOpen ? 'flex' : 'hidden'} top-0 w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-100 text-primary z-1700 transition-all`}
+            className={`${isEventDetailOpen ? 'flex' : 'hidden'} top-0 w-full sm:w-[360px] h-full flex-col fixed right-0 border-l-4 border-secondary bg-gray-100 text-primary z-[1700] transition-all`}
         >
             <div className="flex justify-between items-center px-6 py-1">
                 <button

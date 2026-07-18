@@ -174,7 +174,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
           ) : (
             <div className="space-y-4 animate-fadeIn">
               {favoritePlaces.map(place => {
-                const imageUrl = place.photoUrl || "/images/lugar_recomendado.png";
+                const imageUrl = place.photoUrl || "/images/fallbackImage.webp";
 
                 return (
                   <div
@@ -242,7 +242,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
               {favoriteEvents.map(event => {
                 const imageUrl = event.photoId
                   ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${event.photoId.includes('/') ? event.photoId : 'events/' + event.photoId}`
-                  : "/images/evento_dia.png";
+                  : "/images/fallbackImage.webp";
 
                 // Find next upcoming occurrence if any
                 const nextOcc = event.occurrences.length > 0 ? event.occurrences[0] : null;

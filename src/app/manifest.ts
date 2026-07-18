@@ -52,18 +52,18 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     screenshots: [
       {
-        src: '/images/noticia_preview.png',
-        sizes: '1024x1024',
-        type: 'image/png',
+        src: '/images/screenshot_home.webp',
+        sizes: '450x1000',
+        type: 'image/webp',
         form_factor: 'narrow',
-        label: 'Noticias y novedades',
+        label: 'Inicio de Paseos con Peques',
       },
       {
-        src: '/images/lugar_recomendado.png',
-        sizes: '1024x1024',
-        type: 'image/png',
+        src: '/images/screenshot_calendar.webp',
+        sizes: '450x1000',
+        type: 'image/webp',
         form_factor: 'narrow',
-        label: 'Lugares recomendados',
+        label: 'Calendario de Eventos',
       },
     ],
   }

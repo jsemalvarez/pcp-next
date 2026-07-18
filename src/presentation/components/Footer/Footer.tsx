@@ -1,10 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Share2, Camera } from "lucide-react";
-
-// Using Share2 and Camera as placeholders since Facebook & Instagram are not available in this version of lucide-react
-const FacebookIcon = Share2;
-const InstagramIcon = Camera;
+import { FacebookIcon, InstagramIcon } from "@/presentation/components/common/icons";
 
 export const Footer = () => {
   return (
