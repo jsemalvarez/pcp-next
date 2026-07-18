@@ -2,19 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 
 import BannerCarousel from "@/presentation/components/BannerCarousel";
-import { Share2, Camera, MessageCircle, Newspaper, Calendar, MapPin, User, Home as HomeIcon, Heart } from "lucide-react";
+import { MessageCircle, Newspaper, Calendar, MapPin, User, Home as HomeIcon, Heart } from "lucide-react";
 import { getActiveNews } from "@/actions/news";
 import { getActiveBanners } from "@/actions/banners";
 import { FavoriteHeartButton } from "@/presentation/components/common/FavoriteHeartButton";
 import { Footer } from "@/presentation/components/Footer/Footer";
+import { InstagramIcon } from "@/presentation/components/common/icons";
 
 import prisma from "@/data/prisma/db";
 import { fortmatDate } from "@/presentation/utils/formatDate";
 import { CloudinaryImage } from "@/presentation/components/common/CloudinaryImage";
-
-// Note: Facebook & Instagram icons were removed from lucide-react; using Share2 and Camera as placeholders
-const Facebook = Share2;
-const Instagram = Camera;
 
 
 export const revalidate = 28800; // Revalidate every 8 hours
@@ -133,15 +130,37 @@ export default async function Home() {
               <span>Mapa</span>
             </Link>
             <div className="h-4 w-px bg-white/20" />
+            <a
+              href="https://www.instagram.com/paseosconpeques"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-white/70 hover:text-white transition-colors flex items-center justify-center"
+              title="Instagram"
+            >
+              <InstagramIcon className="w-5 h-5" />
+            </a>
+            <div className="h-4 w-px bg-white/20" />
             <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
               <User className="w-5 h-5" />
             </Link>
           </div>
 
-          {/* Mobile Admin Icon */}
-          <Link href="/admin/login" className="md:hidden p-2 text-white/70 hover:text-white transition-colors">
-            <User className="w-5 h-5" />
-          </Link>
+          {/* Mobile Navigation Icons */}
+          <div className="flex md:hidden items-center gap-2">
+            <a
+              href="https://www.instagram.com/paseosconpeques"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-white/70 hover:text-white transition-colors flex items-center justify-center"
+              title="Instagram"
+            >
+              <InstagramIcon className="w-5 h-5" />
+            </a>
+            <div className="h-4 w-px bg-white/20" />
+            <Link href="/admin/login" className="p-2 text-white/70 hover:text-white transition-colors">
+              <User className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </header>
 
