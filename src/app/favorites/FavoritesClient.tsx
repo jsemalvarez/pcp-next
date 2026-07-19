@@ -355,7 +355,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                     <Info size={16} className="text-brand-primary" />
                     <span className="text-xs font-black uppercase tracking-wider">Acerca del lugar</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-line">
                     {selectedPlace.description}
                   </p>
                 </div>
