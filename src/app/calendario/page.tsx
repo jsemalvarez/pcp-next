@@ -276,9 +276,10 @@ function CalendarContent() {
         });
     };
 
-    // Filter occurrences for the selected date
+    // Filter occurrences for the selected date and sort them chronologically by start time
     const filteredOccurrences = useMemo(() => {
-        return getOccurrencesForDate(selectedDate);
+        const daily = getOccurrencesForDate(selectedDate);
+        return [...daily].sort((a, b) => a.timeStart.localeCompare(b.timeStart));
     }, [occurrences, selectedDate]);
 
     // Format age range text
