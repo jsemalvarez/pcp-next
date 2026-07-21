@@ -7,7 +7,7 @@ import { Place } from "@/domain/entities/Place";
 export async function getPlaces() {
   try {
     const places = await prisma.place.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { name: "asc" },
     });
     return places;
   } catch (error) {
