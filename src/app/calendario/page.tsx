@@ -73,12 +73,40 @@ function CalendarContent() {
     };
 
     const featuredOccurrences = useMemo(() => {
-        const seenEventIds = new Set<string>();
-        return occurrences.filter(occ => {
-            if (!occ.event.isFeatured) return false;
-            if (seenEventIds.has(occ.event.id)) return false;
-            seenEventIds.add(occ.event.id);
-            return true;
+        // Group occurrences of featured events by their event ID
+        const groups: Record<string, any[]> = {};
+        for (const occ of occurrences) {
+            if (!occ.event.isFeatured) continue;
+            if (!groups[occ.event.id]) {
+                groups[occ.event.id] = [];
+            }
+            groups[occ.event.id].push(occ);
+        }
+
+        const now = new Date();
+        const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // For each event, select the best occurrence (first one that is today or in the future)
+        const selectedOccurrences: any[] = [];
+        for (const eventId in groups) {
+            const group = groups[eventId];
+            
+            let bestOcc = group.find(occ => {
+                const occDate = new Date(occ.date);
+                const occUtc = Date.UTC(occDate.getUTCFullYear(), occDate.getUTCMonth(), occDate.getUTCDate());
+                return occUtc >= todayUtc;
+            });
+
+            if (bestOcc) {
+                selectedOccurrences.push(bestOcc);
+            }
+        }
+
+        // Sort: sponsored first, then featured (non-sponsored)
+        return selectedOccurrences.sort((a, b) => {
+            if (a.event.isSponsored && !b.event.isSponsored) return -1;
+            if (!a.event.isSponsored && b.event.isSponsored) return 1;
+            return 0;
         });
     }, [occurrences]);
 
@@ -122,6 +150,8 @@ function CalendarContent() {
     // Find the currently selected event details from occurrences
     const selectedEventOccurrence = useMemo(() => {
         if (!selectedEventId) return null;
+        const byOccId = occurrences.find(occ => occ.id === selectedEventId);
+        if (byOccId) return byOccId;
         return occurrences.find(occ => occ.event.id === selectedEventId);
     }, [selectedEventId, occurrences]);
 
@@ -507,11 +537,11 @@ function CalendarContent() {
                             ) : (
                                 <div className="space-y-4">
                                     {featuredOccurrences.map((occ) => {
-                                        const isFav = isFavoriteEvent(occ.event.id);
+                                        const isFav = isFavoriteEvent(occ.id);
                                         return (
                                             <div
                                                 key={occ.id}
-                                                onClick={() => handleOpenEvent(occ.event.id)}
+                                                onClick={() => handleOpenEvent(occ.id)}
                                                 className="bg-white dark:bg-gray-855 rounded-3xl p-4 flex gap-4 border border-gray-100 dark:border-gray-800 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgb(227,123,124,0.08)] dark:shadow-none hover:shadow-[0_8px_30px_rgb(227,123,124,0.15)] hover:border-brand-accent/20 relative group"
                                             >
                                                 {occ.event.isSponsored && (
@@ -523,19 +553,15 @@ function CalendarContent() {
                                                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-brand-accent/10">
                                                     {occ.event.photoId ? (
                                                         <img
-                                                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`}
-                                                            alt={occ.event.title}
-                                                            className="w-full h-full object-cover"
+                                                                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`}
+                                                                alt={occ.event.title}
+                                                                className="w-full h-full object-cover"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full bg-gradient-to-br from-brand-accent to-brand-primary/40 flex items-center justify-center">
-                                                            <Star className="text-white w-6 h-6 fill-white opacity-40" />
+                                                                <Star className="text-white w-6 h-6 fill-white opacity-40" />
                                                         </div>
                                                     )}
-                                                    {/* Star Badge on Top-Right Corner of image */}
-                                                    <div className="absolute top-1 right-1 bg-brand-accent text-white p-1 rounded-full shadow-md border border-white/20 z-10">
-                                                        <Star size={10} className="fill-white text-white" />
-                                                    </div>
                                                 </div>
 
                                                 {/* Middle side: details */}
@@ -565,9 +591,9 @@ function CalendarContent() {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        toggleFavoriteEvent(occ.event.id);
+                                                        toggleFavoriteEvent(occ.id);
                                                     }}
-                                                    className="absolute top-4 right-4 p-2 bg-gray-50 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full text-gray-400 dark:text-gray-500 hover:text-rose-500 dark:hover:text-rose-400 transition-all duration-300 z-25"
+                                                    className="absolute top-4 right-4 p-2 bg-gray-55 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full text-gray-400 dark:text-gray-500 hover:text-rose-500 dark:hover:text-rose-400 transition-all duration-300 z-25 md:hidden"
                                                     aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
                                                 >
                                                     <Heart size={16} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-400"} />
@@ -710,43 +736,58 @@ function CalendarContent() {
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {filteredOccurrences.map((occ) => (
-                                            <div 
-                                                key={occ.id} 
-                                                className="bg-white dark:bg-gray-855 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 transition-all duration-300 group hover:shadow-md hover:border-brand-primary/20"
-                                            >
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <div className="flex flex-col items-center justify-center p-2 bg-brand-primary/5 dark:bg-brand-primary/10 rounded-2xl w-16 h-16 text-brand-primary transition-colors group-hover:scale-105 duration-300">
-                                                        <span className="text-sm font-black">{occ.timeStart}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex-1 flex flex-col justify-center">
-                                                    <h3
-                                                        onClick={() => handleOpenEvent(occ.event.id)}
-                                                        className="text-lg font-bold text-gray-950 dark:text-gray-50 transition-colors cursor-pointer hover:text-brand-primary leading-tight mb-1"
+                                            {filteredOccurrences.map((occ) => {
+                                                const isFav = isFavoriteEvent(occ.id);
+                                                return (
+                                                    <div 
+                                                        key={occ.id} 
+                                                        className="bg-white dark:bg-gray-855 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 transition-all duration-300 group hover:shadow-md hover:border-brand-primary/20 relative"
                                                     >
-                                                        {occ.event.title}
-                                                    </h3>
-                                                    <div className="text-gray-550 dark:text-gray-455 text-sm transition-colors flex flex-col gap-0.5">
-                                                        <span className="font-bold text-gray-750 dark:text-gray-300">{occ.place.name}</span>
-                                                        <span className="text-xs opacity-80">{occ.place.address}</span>
-                                                        <div className="flex gap-2 mt-1 flex-wrap">
-                                                            <span className="text-[10px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded font-bold uppercase tracking-wide">
-                                                                {PRICE_TYPE_LABELS[occ.event.priceType as PriceType]}
-                                                            </span>
-                                                            <span className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded font-bold uppercase tracking-wide">
-                                                                {formatAgeRange(occ.event.ageMin, occ.event.ageMax)}
-                                                            </span>
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <div className="flex flex-col items-center justify-center p-2 bg-brand-primary/5 dark:bg-brand-primary/10 rounded-2xl w-16 h-16 text-brand-primary transition-colors group-hover:scale-105 duration-300">
+                                                                <span className="text-sm font-black">{occ.timeStart}</span>
+                                                            </div>
                                                         </div>
+
+                                                        <div className="flex-1 flex flex-col justify-center pr-8">
+                                                            <h3
+                                                                onClick={() => handleOpenEvent(occ.id)}
+                                                                className="text-lg font-bold text-gray-950 dark:text-gray-550 transition-colors cursor-pointer hover:text-brand-primary leading-tight mb-1"
+                                                            >
+                                                                {occ.event.title}
+                                                            </h3>
+                                                            <div className="text-gray-550 dark:text-gray-455 text-sm transition-colors flex flex-col gap-0.5">
+                                                                <span className="font-bold text-gray-750 dark:text-gray-300">{occ.place.name}</span>
+                                                                <span className="text-xs opacity-80">{occ.place.address}</span>
+                                                                <div className="flex gap-2 mt-1 flex-wrap">
+                                                                    <span className="text-[10px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded font-bold uppercase tracking-wide">
+                                                                        {PRICE_TYPE_LABELS[occ.event.priceType as PriceType]}
+                                                                    </span>
+                                                                    <span className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded font-bold uppercase tracking-wide">
+                                                                        {formatAgeRange(occ.event.ageMin, occ.event.ageMax)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Favorite toggle button */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleFavoriteEvent(occ.id);
+                                                            }}
+                                                            className="absolute top-4 right-4 p-2 bg-gray-55 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full text-gray-400 dark:text-gray-500 hover:text-rose-500 dark:hover:text-rose-400 transition-all duration-300 z-25 md:hidden"
+                                                            aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                                                        >
+                                                            <Heart size={16} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-400"} />
+                                                        </button>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                         {/* 2. WEEK VIEW */}
                         {viewType === 'week' && (
@@ -786,7 +827,7 @@ function CalendarContent() {
                                                         {dayEvents.map((occ) => (
                                                             <div 
                                                                 key={occ.id} 
-                                                                onClick={() => handleOpenEvent(occ.event.id)}
+                                                                onClick={() => handleOpenEvent(occ.id)}
                                                                 className="flex justify-between items-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-xl transition-colors"
                                                             >
                                                                 <div className="flex-1 min-w-0">
@@ -857,21 +898,36 @@ function CalendarContent() {
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            {filteredOccurrences.map((occ) => (
-                                                <div 
-                                                    key={occ.id}
-                                                    onClick={() => handleOpenEvent(occ.event.id)}
-                                                    className="bg-white dark:bg-gray-855 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex justify-between items-center cursor-pointer hover:shadow-md transition-all"
-                                                >
-                                                    <div>
-                                                        <p className="font-bold text-gray-900 dark:text-gray-100">{occ.event.title}</p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">{occ.place.name}</p>
+                                            {filteredOccurrences.map((occ) => {
+                                                const isFav = isFavoriteEvent(occ.id);
+                                                return (
+                                                    <div 
+                                                        key={occ.id}
+                                                        onClick={() => handleOpenEvent(occ.id)}
+                                                        className="bg-white dark:bg-gray-855 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex justify-between items-center cursor-pointer hover:shadow-md transition-all"
+                                                    >
+                                                        <div>
+                                                            <p className="font-bold text-gray-900 dark:text-gray-100">{occ.event.title}</p>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">{occ.place.name}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-black text-brand-primary bg-brand-primary/5 px-2.5 py-1 rounded-lg">
+                                                                {occ.timeStart} hs
+                                                            </span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    toggleFavoriteEvent(occ.id);
+                                                                }}
+                                                                className="p-2 bg-gray-55 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-full text-gray-400 dark:text-gray-500 hover:text-rose-500 dark:hover:text-rose-400 transition-all duration-300 md:hidden"
+                                                                aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                                                            >
+                                                                <Heart size={16} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-400"} />
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs font-black text-brand-primary bg-brand-primary/5 px-2.5 py-1 rounded-lg">
-                                                        {occ.timeStart} hs
-                                                    </span>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
@@ -889,11 +945,11 @@ function CalendarContent() {
                         <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 opacity-50" />
 
                         <button
-                            onClick={() => toggleFavoriteEvent(selectedEventOccurrence.event.id)}
-                            className="absolute top-6 right-16 p-2 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-450 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110] md:hidden"
-                            aria-label={isFavoriteEvent(selectedEventOccurrence.event.id) ? "Quitar de favoritos" : "Guardar en favoritos"}
+                            onClick={() => toggleFavoriteEvent(selectedEventOccurrence.id)}
+                            className="absolute top-6 right-16 p-2 bg-gray-55 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-450 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110] md:hidden"
+                            aria-label={isFavoriteEvent(selectedEventOccurrence.id) ? "Quitar de favoritos" : "Guardar en favoritos"}
                         >
-                            <Heart size={20} className={isFavoriteEvent(selectedEventOccurrence.event.id) ? "fill-rose-500 text-rose-500" : "text-gray-500"} />
+                            <Heart size={20} className={isFavoriteEvent(selectedEventOccurrence.id) ? "fill-rose-500 text-rose-500" : "text-gray-500"} />
                         </button>
 
                         <button

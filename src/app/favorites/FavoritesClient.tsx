@@ -88,9 +88,29 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
 
   const { favoritePlaceIds, favoriteEventIds, toggleFavoritePlace, toggleFavoriteEvent, isFavoritePlace, isFavoriteEvent } = useFavorites();
 
-  // Filter places and events based on favorite IDs
+  // Construct the favorite events based on favorite occurrence IDs
   const favoritePlaces = initialPlaces.filter(place => favoritePlaceIds.includes(place.id));
-  const favoriteEvents = initialEvents.filter(event => favoriteEventIds.includes(event.id));
+  const favoriteEvents = favoriteEventIds
+    .map(occId => {
+      const parentEvent = initialEvents.find(event => 
+        event.occurrences.some(occ => occ.id === occId)
+      );
+      if (!parentEvent) return null;
+      
+      const occurrence = parentEvent.occurrences.find(occ => occ.id === occId);
+      if (!occurrence) return null;
+      
+      return {
+        ...parentEvent,
+        occurrences: [occurrence]
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => {
+      const aOcc = a.occurrences[0];
+      const bOcc = b.occurrences[0];
+      return new Date(aOcc.date).getTime() - new Date(bOcc.date).getTime();
+    });
 
   const handleShare = async (title: string, text: string, url: string) => {
     const shareData = { title, text, url };
@@ -245,7 +265,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                   : "/images/fallbackImage.webp";
 
                 // Find next upcoming occurrence if any
-                const nextOcc = event.occurrences.length > 0 ? event.occurrences[0] : null;
+                const nextOcc = event.occurrences[0] || null;
 
                 return (
                   <div
@@ -290,7 +310,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleFavoriteEvent(event.id);
+                        if (nextOcc) toggleFavoriteEvent(nextOcc.id);
                       }}
                       className="absolute top-3 right-3 p-1.5 bg-gray-55 dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-full text-rose-500 hover:text-rose-600 transition-colors duration-155 z-10 cursor-pointer active:scale-90"
                       aria-label="Quitar de favoritos"
@@ -436,10 +456,10 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 opacity-50" />
 
             <button
-              onClick={() => toggleFavoriteEvent(selectedEvent.id)}
-              className="absolute top-6 right-16 p-2 bg-gray-55 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-450 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110]"
+              onClick={() => toggleFavoriteEvent(selectedEvent.occurrences[0]?.id || selectedEvent.id)}
+              className="absolute top-6 right-16 p-2 bg-gray-55 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-455 hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer active:scale-90 transition-all z-[110]"
             >
-              <Heart size={20} className={isFavoriteEvent(selectedEvent.id) ? "fill-rose-500 text-rose-500" : "text-gray-550"} />
+              <Heart size={20} className={isFavoriteEvent(selectedEvent.occurrences[0]?.id || selectedEvent.id) ? "fill-rose-500 text-rose-500" : "text-gray-550"} />
             </button>
 
             <button
