@@ -73,12 +73,40 @@ function CalendarContent() {
     };
 
     const featuredOccurrences = useMemo(() => {
-        const seenEventIds = new Set<string>();
-        return occurrences.filter(occ => {
-            if (!occ.event.isFeatured) return false;
-            if (seenEventIds.has(occ.event.id)) return false;
-            seenEventIds.add(occ.event.id);
-            return true;
+        // Group occurrences of featured events by their event ID
+        const groups: Record<string, any[]> = {};
+        for (const occ of occurrences) {
+            if (!occ.event.isFeatured) continue;
+            if (!groups[occ.event.id]) {
+                groups[occ.event.id] = [];
+            }
+            groups[occ.event.id].push(occ);
+        }
+
+        const now = new Date();
+        const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // For each event, select the best occurrence (first one that is today or in the future)
+        const selectedOccurrences: any[] = [];
+        for (const eventId in groups) {
+            const group = groups[eventId];
+            
+            let bestOcc = group.find(occ => {
+                const occDate = new Date(occ.date);
+                const occUtc = Date.UTC(occDate.getUTCFullYear(), occDate.getUTCMonth(), occDate.getUTCDate());
+                return occUtc >= todayUtc;
+            });
+
+            if (bestOcc) {
+                selectedOccurrences.push(bestOcc);
+            }
+        }
+
+        // Sort: sponsored first, then featured (non-sponsored)
+        return selectedOccurrences.sort((a, b) => {
+            if (a.event.isSponsored && !b.event.isSponsored) return -1;
+            if (!a.event.isSponsored && b.event.isSponsored) return 1;
+            return 0;
         });
     }, [occurrences]);
 
@@ -532,10 +560,6 @@ function CalendarContent() {
                                                             <Star className="text-white w-6 h-6 fill-white opacity-40" />
                                                         </div>
                                                     )}
-                                                    {/* Star Badge on Top-Right Corner of image */}
-                                                    <div className="absolute top-1 right-1 bg-brand-accent text-white p-1 rounded-full shadow-md border border-white/20 z-10">
-                                                        <Star size={10} className="fill-white text-white" />
-                                                    </div>
                                                 </div>
 
                                                 {/* Middle side: details */}
