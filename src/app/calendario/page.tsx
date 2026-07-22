@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User, Ticket, MessageCircle, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, MapPin, Clock, Users, Info, Share2, Check, Globe, AlertCircle, Heart, Home as HomeIcon, Newspaper, User, Ticket, MessageCircle, Star, Search } from 'lucide-react';
 import { useFavorites } from '@/presentation/contexts/FavoritesContext';
 import Link from 'next/link';
 import { getOccurrencesByMonth } from "@/actions/events";
@@ -58,6 +58,7 @@ function CalendarContent() {
     const [copyFeedback, setCopyFeedback] = useState(false);
 
     const [activeMobileTab, setActiveMobileTab] = useState<'featured' | 'all'>('featured');
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Helper to format occurrence date and time in Spanish (e.g., Sáb 12 jul · 17:00)
     const formatOccurrenceDateTime = (dateVal: string | Date, timeStart: string) => {
@@ -72,10 +73,22 @@ function CalendarContent() {
         return `${dayName} ${dayNum} ${monthName} · ${timeStart}`;
     };
 
+    const filteredOccurrencesBySearch = useMemo(() => {
+        const term = searchTerm.trim().toLowerCase();
+        if (!term) return occurrences;
+
+        return occurrences.filter(occ => {
+            const matchesTitle = occ.event.title.toLowerCase().includes(term);
+            const matchesDescription = occ.event.description?.toLowerCase().includes(term) ?? false;
+            const matchesPlaceName = occ.place.name.toLowerCase().includes(term);
+            return matchesTitle || matchesDescription || matchesPlaceName;
+        });
+    }, [occurrences, searchTerm]);
+
     const featuredOccurrences = useMemo(() => {
         // Group occurrences of featured events by their event ID
         const groups: Record<string, any[]> = {};
-        for (const occ of occurrences) {
+        for (const occ of filteredOccurrencesBySearch) {
             if (!occ.event.isFeatured) continue;
             if (!groups[occ.event.id]) {
                 groups[occ.event.id] = [];
@@ -108,7 +121,7 @@ function CalendarContent() {
             if (!a.event.isSponsored && b.event.isSponsored) return 1;
             return 0;
         });
-    }, [occurrences]);
+    }, [filteredOccurrencesBySearch]);
 
     // Fetch occurrences from database whenever the viewed month changes
     useEffect(() => {
@@ -298,7 +311,7 @@ function CalendarContent() {
 
     // Helper to get occurrences for a specific date
     const getOccurrencesForDate = (date: Date) => {
-        return occurrences.filter(occ => {
+        return filteredOccurrencesBySearch.filter(occ => {
             const occDate = new Date(occ.date);
             return occDate.getUTCDate() === date.getDate() &&
                    occDate.getUTCMonth() === date.getMonth() &&
@@ -310,7 +323,7 @@ function CalendarContent() {
     const filteredOccurrences = useMemo(() => {
         const daily = getOccurrencesForDate(selectedDate);
         return [...daily].sort((a, b) => a.timeStart.localeCompare(b.timeStart));
-    }, [occurrences, selectedDate]);
+    }, [filteredOccurrencesBySearch, selectedDate]);
 
     // Format age range text
     const formatAgeRange = (min: number, max: number | null) => {
@@ -390,6 +403,28 @@ function CalendarContent() {
                     >
                         Todos
                     </button>
+                </div>
+
+                {/* Search Bar on Mobile */}
+                <div className="relative w-full mb-3">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <Search size={16} className="text-gray-400" />
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre, descripción o lugar..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white rounded-xl border border-gray-100 dark:border-gray-800 text-xs focus:outline-none focus:border-brand-primary transition-all duration-205"
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        >
+                            <X size={14} />
+                        </button>
+                    )}
                 </div>
 
                 {/* Month Selector and HOY button below tabs (only in 'all' tab) */}
@@ -532,7 +567,9 @@ function CalendarContent() {
                             {featuredOccurrences.length === 0 ? (
                                 <div className="bg-white dark:bg-gray-855 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-2">
                                     <AlertCircle className="w-8 h-8 text-gray-400 mx-auto" />
-                                    <p className="font-bold text-gray-600 dark:text-gray-350">No hay eventos destacados programados.</p>
+                                    <p className="font-bold text-gray-600 dark:text-gray-350">
+                                        {searchTerm ? "No hay destacados que coincidan con la búsqueda." : "No hay eventos destacados programados."}
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -638,6 +675,28 @@ function CalendarContent() {
                                         </div>
                                     </div>
 
+                                    {/* Desktop Search Bar */}
+                                    <div className="relative w-80 mx-4">
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <Search size={16} className="text-gray-400" />
+                                        </span>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar por nombre, descripción o lugar..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white rounded-xl border border-gray-100 dark:border-gray-800 text-xs focus:outline-none focus:border-brand-primary transition-all duration-205"
+                                        />
+                                        {searchTerm && (
+                                            <button
+                                                onClick={() => setSearchTerm('')}
+                                                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-405 hover:text-gray-650"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+
                                     <button
                                         onClick={goToToday}
                                         className="px-4 py-1.5 text-xs font-black rounded-full bg-brand-primary text-white shadow-lg shadow-brand-primary/20 active:scale-95 transition-all cursor-pointer"
@@ -731,8 +790,12 @@ function CalendarContent() {
                                     {filteredOccurrences.length === 0 ? (
                                         <div className="bg-white dark:bg-gray-855 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-2">
                                             <AlertCircle className="w-8 h-8 text-gray-400 mx-auto" />
-                                            <p className="font-bold text-gray-600 dark:text-gray-350">No hay eventos programados para este día.</p>
-                                            <p className="text-xs text-gray-400">¡Explorá otras fechas en el calendario!</p>
+                                            <p className="font-bold text-gray-600 dark:text-gray-350">
+                                                {searchTerm ? "No se encontraron eventos para esta búsqueda." : "No hay eventos programados para este día."}
+                                            </p>
+                                            <p className="text-xs text-gray-400">
+                                                {searchTerm ? "Intenta con otras palabras o limpia el buscador." : "¡Explorá otras fechas en el calendario!"}
+                                            </p>
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
@@ -821,7 +884,9 @@ function CalendarContent() {
                                                 </div>
 
                                                 {dayEvents.length === 0 ? (
-                                                    <p className="text-xs text-gray-400 dark:text-gray-500 italic py-1">Sin eventos programados</p>
+                                                    <p className="text-xs text-gray-400 dark:text-gray-500 italic py-1">
+                                                        {searchTerm ? "Sin coincidencias" : "Sin eventos programados"}
+                                                    </p>
                                                 ) : (
                                                     <div className="space-y-3">
                                                         {dayEvents.map((occ) => (
@@ -894,7 +959,7 @@ function CalendarContent() {
 
                                     {filteredOccurrences.length === 0 ? (
                                         <div className="bg-white dark:bg-gray-855 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 text-center text-sm text-gray-400">
-                                            No hay eventos para esta fecha.
+                                            {searchTerm ? "No hay coincidencias para esta fecha." : "No hay eventos para esta fecha."}
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
