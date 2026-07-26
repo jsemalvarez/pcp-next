@@ -371,7 +371,7 @@ function CalendarContent() {
             </header>
 
             {/* Mobile Header controls */}
-            <header className="bg-white dark:bg-gray-855 p-4 pb-4 sticky top-0 md:top-[65px] z-10 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300 lg:hidden">
+            <header className="bg-white dark:bg-gray-855 p-4 pb-4 sticky top-0 md:top-[65px] z-40 shadow-sm pt-safe border-b border-gray-100 dark:border-gray-800 transition-colors duration-300 lg:hidden">
                 <div className="flex justify-between items-end mb-4">
                     <div className="flex flex-col">
                         <h1 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">
