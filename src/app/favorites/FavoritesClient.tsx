@@ -194,7 +194,11 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
           ) : (
             <div className="space-y-4 animate-fadeIn">
               {favoritePlaces.map(place => {
-                const imageUrl = place.photoUrl || "/images/fallbackImage.webp";
+                const imageUrl = place.photoUrl
+                  ? (place.photoUrl.startsWith("http")
+                      ? place.photoUrl
+                      : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${place.photoUrl.includes('/') ? place.photoUrl : 'places/' + place.photoUrl}`)
+                  : "/images/fallbackImage.webp";
 
                 return (
                   <div
@@ -261,7 +265,9 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
             <div className="space-y-4 animate-fadeIn">
               {favoriteEvents.map(event => {
                 const imageUrl = event.photoId
-                  ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${event.photoId.includes('/') ? event.photoId : 'events/' + event.photoId}`
+                  ? (event.photoId.startsWith("http")
+                      ? event.photoId
+                      : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${event.photoId.includes('/') ? event.photoId : 'events/' + event.photoId}`)
                   : "/images/fallbackImage.webp";
 
                 // Find next upcoming occurrence if any
@@ -368,6 +374,20 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                   )}
                 </div>
               </div>
+
+              {selectedPlace.photoUrl && (
+                <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <img
+                    src={
+                      selectedPlace.photoUrl.startsWith("http")
+                        ? selectedPlace.photoUrl
+                        : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_800,q_auto,f_auto/${selectedPlace.photoUrl.includes('/') ? selectedPlace.photoUrl : 'places/' + selectedPlace.photoUrl}`
+                    }
+                    alt={selectedPlace.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
 
               {selectedPlace.description && (
                 <div className="space-y-2">
