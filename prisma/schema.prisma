@@ -66,6 +66,59 @@ model User {
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  oauthCodes  OAuthAuthorizationCode[]
+  oauthTokens OAuthToken[]
+}
+
+// ─────────────────────────────────────────────
+// OAUTH — conexión de clientes MCP (ej. Claude) a /api/mcp
+// ─────────────────────────────────────────────
+
+// Clientes registrados por DCR (RFC 7591). Los que usan CIMD no se guardan:
+// su client_id es la URL de su documento de metadatos.
+model OAuthClient {
+  id           String   @id @default(uuid())
+  clientId     String   @unique
+  clientName   String?
+  redirectUris String[]
+  createdAt    DateTime @default(now())
+}
+
+// Códigos de un solo uso, de vida corta (se guarda solo el hash)
+model OAuthAuthorizationCode {
+  id            String    @id @default(uuid())
+  codeHash      String    @unique
+  clientId      String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  redirectUri   String
+  codeChallenge String    // PKCE S256
+  scope         String?
+  resource      String?
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+// Access + refresh token emitidos juntos (se guardan solo los hashes).
+// El refresh rota: al usarlo se revoca esta fila y se emite una nueva.
+model OAuthToken {
+  id               String    @id @default(uuid())
+  accessTokenHash  String    @unique
+  refreshTokenHash String?   @unique
+  clientId         String
+  clientName       String?
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  scope            String?
+  resource         String?
+  accessExpiresAt  DateTime
+  refreshExpiresAt DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([clientId])
 }
 
 // ─────────────────────────────────────────────

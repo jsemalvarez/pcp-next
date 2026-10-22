@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getSession } from './data/auth/session'
+import { safeNextPath } from './server/auth/safe-next'
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -14,11 +15,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Si un usuario ya logueado intenta ir al login, enviarlo al dashboard
+  // Si un usuario ya logueado intenta ir al login, enviarlo al destino pedido o al dashboard
   if (path === '/admin/login') {
     const session = await getSession();
     if (session) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      const next = safeNextPath(request.nextUrl.searchParams.get('next'));
+      return NextResponse.redirect(new URL(next, request.url));
     }
   }
 

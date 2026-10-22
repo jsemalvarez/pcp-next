@@ -3,6 +3,7 @@
 import prisma from "@/data/prisma/db";
 import bcrypt from "bcryptjs";
 import { createSession, destroySession } from "@/data/auth/session";
+import { safeNextPath } from "@/server/auth/safe-next";
 import { redirect } from "next/navigation";
 
 export async function loginAction(prevState: any, formData: FormData) {
@@ -28,7 +29,7 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   await createSession(user.id, user.role);
-  redirect("/admin/dashboard");
+  redirect(safeNextPath(formData.get("next")));
 }
 
 export async function logoutAction() {

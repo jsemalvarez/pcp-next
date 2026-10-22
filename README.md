@@ -153,13 +153,33 @@ Otros comandos: `npm run db:studio` (Prisma Studio), `npm run db:down`, `npm run
 
 ## 🤖 Servidor MCP (carga de eventos con IA)
 
-La app expone un servidor MCP en `/api/mcp` para buscar, cargar y editar eventos desde un asistente de IA (por ejemplo Claude). Es de uso personal y está protegido con un token: sin `Authorization: Bearer <MCP_API_TOKEN>` responde `401`.
+La app expone un servidor MCP en `/api/mcp` para buscar, cargar y editar eventos desde un asistente de IA (por ejemplo Claude). Es de uso personal: sin un token válido responde `401`. Acepta dos tipos de token:
+
+- **OAuth** (recomendado): Claude abre el login del admin, autorizás una vez y listo. Funciona en claude.ai, la app móvil, Claude Desktop y Claude Code.
+- **Token fijo** `MCP_API_TOKEN`: para Claude Code o scripts, enviado como `Authorization: Bearer <token>`.
 
 **Qué se puede hacer:** buscar eventos, lugares y organizadores; crear borradores (nunca se publican solos); editar eventos y fechas; publicar, pasar a borrador y archivar; listar los borradores incompletos con los contactos para completarlos. Los eventos no se borran desde el MCP.
 
 **Configuración:** definir `MCP_API_TOKEN` (mínimo 32 caracteres) y `NEXT_PUBLIC_SITE_URL` en `.env.dev` para local, y en las variables de entorno de Vercel para producción. Ver `.env.example`.
 
+**Conectar claude.ai y la app del celular (OAuth):**
+
+1. En claude.ai: **Configuración → Conectores → Agregar conector personalizado**.
+2. URL: `https://www.paseosconpeques.com.ar/api/mcp`. Tiene que coincidir exactamente con `NEXT_PUBLIC_SITE_URL` + `/api/mcp` (mismo `www`). Dejá vacíos el client ID y el secreto.
+3. Tocá **Conectar**: se abre el login del admin y después la pantalla "Autorizar acceso". Tocá **Permitir**.
+4. El conector queda disponible también en la app móvil.
+
+Solo se aceptan las URLs de retorno de Claude (`https://claude.ai/api/mcp/auth_callback`, `https://claude.com/...` y el loopback de Claude Code). Los tokens OAuth duran 1 hora y se renuevan solos con un refresh token que rota (válido 30 días).
+
 **Conectar Claude Code:**
+
+Con OAuth (abre el navegador para autorizar):
+
+```bash
+claude mcp add --transport http paseos-con-peques https://www.paseosconpeques.com.ar/api/mcp
+```
+
+O con el token fijo:
 
 ```bash
 claude mcp add --transport http paseos-con-peques http://localhost:3000/api/mcp --header "Authorization: Bearer <MCP_API_TOKEN>"
@@ -180,8 +200,6 @@ En producción, reemplazar la URL por `https://www.paseosconpeques.com.ar/api/mc
   }
 }
 ```
-
-**claude.ai y la app móvil:** los conectores personalizados se autentican con OAuth, que todavía no está implementado (ver `docs/MEJORAS.md`).
 
 ---
 

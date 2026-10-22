@@ -1,10 +1,11 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { AuthInfo } from "@modelcontextprotocol/server";
+import { verifyOAuthAccessToken } from "@/server/oauth/oauth.service";
 
 /**
- * Autenticación del endpoint MCP: un token largo en MCP_API_TOKEN, enviado
- * como `Authorization: Bearer <token>`. Uso personal (un solo admin).
- * Sin token configurado, el MCP queda cerrado: nunca se abre sin autenticación.
+ * Autenticación del endpoint MCP. Acepta dos tipos de `Authorization: Bearer <token>`:
+ * - Token fijo en MCP_API_TOKEN (Claude Code, Desktop vía mcp-remote, scripts).
+ * - Access token OAuth emitido por /oauth/token (claude.ai, app móvil, Claude Code con OAuth).
  */
 
 const MIN_TOKEN_LENGTH = 32;
@@ -13,16 +14,17 @@ function digest(value: string) {
   return createHash("sha256").update(value).digest();
 }
 
-export function verifyMcpToken(_req: Request, bearerToken?: string): AuthInfo | undefined {
+function matchesStaticToken(bearerToken: string) {
   const expected = process.env.MCP_API_TOKEN;
-  if (!expected || expected.length < MIN_TOKEN_LENGTH) {
-    console.error(`[mcp] MCP_API_TOKEN no está definido o tiene menos de ${MIN_TOKEN_LENGTH} caracteres.`);
-    return undefined;
-  }
-  if (!bearerToken) return undefined;
-
+  if (!expected || expected.length < MIN_TOKEN_LENGTH) return false;
   // Se comparan los hashes para que el tiempo no dependa del largo ni del contenido
-  if (!timingSafeEqual(digest(bearerToken), digest(expected))) return undefined;
+  return timingSafeEqual(digest(bearerToken), digest(expected));
+}
 
-  return { token: bearerToken, clientId: "pcp-admin", scopes: [] };
+export async function verifyMcpToken(_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> {
+  if (!bearerToken) return undefined;
+  if (matchesStaticToken(bearerToken)) {
+    return { token: bearerToken, clientId: "pcp-admin", scopes: [] };
+  }
+  return verifyOAuthAccessToken(bearerToken);
 }

@@ -1,6 +1,7 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { verifyMcpToken } from "@/server/auth/mcp-auth";
 import { registerEventTools } from "@/server/mcp/event-tools";
+import { oauthUrls } from "@/server/oauth/oauth.config";
 
 // Prisma necesita el runtime de Node (no Edge)
 export const runtime = "nodejs";
@@ -30,7 +31,12 @@ const handler = createMcpHandler(
   }
 );
 
-// Sin token válido responde 401: nada del MCP es público
-const authHandler = withMcpAuth(handler, verifyMcpToken, { required: true });
+// Sin token válido responde 401 con el puntero a los metadatos OAuth (así Claude inicia el login).
+// Nada del MCP es público.
+const authHandler = withMcpAuth(handler, verifyMcpToken, {
+  required: true,
+  // Origen (no la URL del recurso): mcp-handler le agrega /.well-known/oauth-protected-resource
+  resourceUrl: oauthUrls().issuer,
+});
 
 export { authHandler as GET, authHandler as POST, authHandler as DELETE };

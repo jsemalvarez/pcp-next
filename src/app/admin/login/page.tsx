@@ -1,11 +1,17 @@
 "use client";
 
-import { useActionState } from "react";
+import { use, useActionState } from "react";
 import { loginAction } from "@/actions/auth";
 import { Lock, Mail, ArrowRight } from "lucide-react";
 import Image from "next/image";
 
-export default function LoginPage() {
+interface Props {
+  searchParams: Promise<{ next?: string }>;
+}
+
+export default function LoginPage({ searchParams }: Props) {
+  // Destino después del login (ej. volver a /oauth/authorize); el servidor valida que sea interno
+  const { next } = use(searchParams);
   const [state, formAction, isPending] = useActionState(loginAction, null);
 
   return (
@@ -90,6 +96,7 @@ export default function LoginPage() {
 
           {/* Formulario */}
           <form className="space-y-4" action={formAction}>
+            {next && <input type="hidden" name="next" value={next} />}
 
             {/* Email */}
             <div className="space-y-1.5">

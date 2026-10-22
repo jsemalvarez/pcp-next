@@ -141,7 +141,7 @@ Además, un **resource** (o tool `get_catalogs`) con los valores válidos de `Ac
 
 - [x] Autenticación obligatoria en `/api/mcp` (`withMcpAuth`, `required: true`): sin token válido responde 401.
 - [x] Token en `MCP_API_TOKEN` (mínimo 32 caracteres), comparado en tiempo constante (hash SHA-256 + `timingSafeEqual`), enviado como `Authorization: Bearer …`. Sin token configurado, el MCP rechaza todo. **Falta cargarlo en Vercel.**
-- [ ] **Compatibilidad de clientes:** Claude Code y Claude Desktop permiten configurar headers, así que el token funciona directo. Los conectores personalizados de claude.ai (web y app móvil) se autentican con OAuth. **Para usarlo desde el celular (necesario para el flujo de Instagram) probablemente haga falta un OAuth mínimo.** Verificar al implementar qué acepta hoy el conector.
+- [x] **Compatibilidad de clientes:** OAuth 2.1 propio según los requisitos de Claude (https://claude.com/docs/connectors/building/authentication): metadatos RFC 9728 y RFC 8414, CIMD (preferido por Claude) y DCR, PKCE S256, clientes públicos, refresh tokens que rotan, `iss` en el callback. Solo acepta URLs de retorno de Claude. El consentimiento usa el login del admin. Funciona en claude.ai, la app móvil, Desktop y Claude Code; el token fijo sigue sirviendo para Claude Code y scripts.
 - [x] Sin tools sobre usuarios, contraseñas ni banners/noticias: solo eventos, fechas y búsqueda de lugares y organizadores.
 - [ ] Tabla `AuditLog` (fecha, actor, tool, entidad, id, cambios). Como escribe una IA, poder ver y revertir qué cambió es importante.
 - [ ] Rate limit básico por token.
@@ -164,7 +164,8 @@ Una IA no puede subir de forma confiable al MCP una imagen adjunta en el chat. O
 - [x] 14 tools: `get_catalogs`, `search_events`, `get_event`, `list_incomplete_events`, `create_event_draft`, `update_event`, `add_occurrence`, `update_occurrence`, `delete_occurrence`, `publish_event`, `unpublish_event`, `archive_event`, `search_places`, `search_organizers` (`src/server/mcp/event-tools.ts`). Probadas de punta a punta con el cliente oficial (SDK v2) y con el protocolo 2025 por HTTP.
 - [ ] P1 Tools de alta/edición de lugares y organizadores.
 - [ ] P1 Auditoría.
-- [ ] P1 OAuth para conectarlo desde claude.ai / app móvil.
+- [x] OAuth para conectarlo desde claude.ai / app móvil (`src/server/oauth`, `/oauth/*`, `/.well-known/*`, migración `20261023120000_add_oauth`). Probado de punta a punta en local con el cliente CIMD real de Claude Code: consentimiento en el navegador, canje, MCP con el token, refresh con rotación, reuso de código y de refresh rechazados. **Falta probarlo con claude.ai en producción** (Claude no puede llegar a localhost).
+- [ ] P2 Pantalla en el admin para ver y revocar las conexiones OAuth activas (hoy se revocan borrando filas de `OAuthToken`).
 - [ ] P2 `set_event_photo_from_url`.
 - [x] README: cómo conectar Claude Code y Claude Desktop.
 
@@ -234,7 +235,7 @@ Si falta algo obligatorio, el estado es `INCOMPLETE`. Si está todo, queda en `D
 3. Responde qué cargó y qué falta.
 4. Revisás en el admin y publicás (o le pedís a Claude "publicalo").
 
-Limitación: Claude no puede abrir links de Instagram (piden login), así que hay que compartir **captura o texto**, no solo el link. Depende del OAuth del punto 2.4 para usarlo desde el celular.
+Limitación: Claude no puede abrir links de Instagram (piden login), así que hay que compartir **captura o texto**, no solo el link. El OAuth del punto 2.4 ya está implementado: falta conectarlo en claude.ai después del deploy.
 
 **Opción B: Web Share Target en la PWA.**
 
