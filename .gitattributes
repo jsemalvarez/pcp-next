@@ -1,0 +1,3 @@
+# Los scripts que corren dentro de los contenedores deben tener fin de línea LF,
+# aunque el repo se clone en Windows.
+*.sh text eol=lf

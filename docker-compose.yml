@@ -1,27 +1,54 @@
-version: "3.9"
+# Entorno local: Postgres + pgAdmin.
+# Sin .env también funciona: usa los valores por defecto (pcp/pcp/pcp).
+# pgAdmin: http://localhost:5050 (sin login, con la conexión a Postgres ya cargada)
 
 services:
   postgres:
-    image: postgres:16
+    # Misma versión mayor que producción (Supabase)
+    image: postgres:17
     container_name: postgres-pcp
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-pcp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pcp}
+      POSTGRES_DB: ${POSTGRES_DB:-pcp}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  adminer:
-    image: adminer
-    container_name: adminer-pcp
-    restart: always
-    ports:
-      - "8080:8080"
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: pgadmin-pcp
+    restart: unless-stopped
     environment:
-      ADMINER_DEFAULT_SERVER: postgres
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      # Modo escritorio: sin pantalla de login ni contraseña maestra
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # Por defecto escucha en [::] (IPv6) y Docker Desktop no tiene IPv6 en la red
+      PGADMIN_LISTEN_ADDRESS: 0.0.0.0
+      PGADMIN_CONFIG_UPGRADE_CHECK_ENABLED: "False"
+      # Usados por init.sh para precargar la conexión
+      POSTGRES_USER: ${POSTGRES_USER:-pcp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pcp}
+      POSTGRES_DB: ${POSTGRES_DB:-pcp}
+    entrypoint: ["/bin/sh", "/pcp/init.sh"]
+    ports:
+      - "127.0.0.1:5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/init.sh:/pcp/init.sh:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
+  pgadmin_data:

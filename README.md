@@ -118,16 +118,36 @@ git commit -m "fix: corregir bug."
 
 ## 🛠️ Desarrollo local
 
+Requisitos: Node 20+ y Docker.
+
 ```bash
-# Instalar dependencias
+# 1. Instalar dependencias
 npm install
 
-# Correr en modo desarrollo
-npm run dev
+# 2. Crear el archivo de entorno local a partir de la plantilla
+cp .env.example .env.dev   # completar JWT_SECRET, ADMIN_* y Cloudinary
 
-# Lint
-npm run lint
+# 3. Levantar Postgres 17 (localhost:5433) y pgAdmin (http://localhost:5050)
+npm run db:up
+
+# 4a. Base vacía: crear tablas y el usuario admin
+npm run db:migrate
+npm run db:seed
+
+# 4b. O bien, copiar los datos de producción (necesita .env.prod con DIRECT_URL)
+npm run db:pull-prod
+
+# 5. Correr la app contra la base local
+npm run dev
 ```
+
+| Archivo | Uso |
+|---|---|
+| `.env.example` | Plantilla (es el único que se sube al repo) |
+| `.env.dev` | Desarrollo local; lo usan `npm run dev` y los scripts `db:*` |
+| `.env.prod` | Credenciales de producción; solo lo usa `db:pull-prod`. En Vercel las variables van en el dashboard |
+
+Otros comandos: `npm run db:studio` (Prisma Studio), `npm run db:down`, `npm run lint`.
 
 ---
 
