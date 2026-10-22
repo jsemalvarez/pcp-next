@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
 import { Place } from "@/domain/entities/Place";
@@ -30,6 +31,7 @@ export async function getPlaceById(id: string) {
 
 export async function createPlace(data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
+    await requireAdmin();
     const place = await prisma.place.create({
       data,
     });
@@ -44,6 +46,7 @@ export async function createPlace(data: Omit<Place, 'id' | 'createdAt' | 'update
 
 export async function updatePlace(id: string, data: Partial<Omit<Place, 'id' | 'createdAt' | 'updatedAt'>>) {
   try {
+    await requireAdmin();
     const place = await prisma.place.update({
       where: { id },
       data,
@@ -60,6 +63,7 @@ export async function updatePlace(id: string, data: Partial<Omit<Place, 'id' | '
 
 export async function deletePlace(id: string) {
   try {
+    await requireAdmin();
     await prisma.place.delete({
       where: { id },
     });

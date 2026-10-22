@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
 import { News } from "@/domain/entities/News";
@@ -103,6 +104,7 @@ export type NewsInput = Omit<News, "id" | "slug" | "createdAt" | "updatedAt"> & 
 
 export async function createNews(data: NewsInput) {
   try {
+    await requireAdmin();
     const baseSlugName = data.slug || data.title;
     const slug = await generateUniqueSlug(baseSlugName);
     
@@ -125,6 +127,7 @@ export async function createNews(data: NewsInput) {
 
 export async function updateNews(id: string, data: NewsInput) {
   try {
+    await requireAdmin();
     const baseSlugName = data.slug || data.title;
     const slug = await generateUniqueSlug(baseSlugName, id);
 
@@ -149,6 +152,7 @@ export async function updateNews(id: string, data: NewsInput) {
 
 export async function deleteNews(id: string) {
   try {
+    await requireAdmin();
     const newsItem = await prisma.news.findUnique({
       where: { id },
       select: { slug: true },

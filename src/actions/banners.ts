@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
 import { Banner } from "@/domain/entities/Banner";
@@ -47,6 +48,7 @@ export type BannerInput = Omit<Banner, "id" | "createdAt" | "updatedAt">;
 
 export async function createBanner(data: BannerInput) {
   try {
+    await requireAdmin();
     const banner = await prisma.banner.create({
       data,
     });
@@ -62,6 +64,7 @@ export async function createBanner(data: BannerInput) {
 
 export async function updateBanner(id: string, data: BannerInput) {
   try {
+    await requireAdmin();
     const banner = await prisma.banner.update({
       where: { id },
       data,
@@ -78,6 +81,7 @@ export async function updateBanner(id: string, data: BannerInput) {
 
 export async function deleteBanner(id: string) {
   try {
+    await requireAdmin();
     await prisma.banner.delete({
       where: { id },
     });

@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
 
@@ -31,6 +32,7 @@ export async function getOrganizerTypes() {
 
 export async function createOrganizerType(name: string) {
   try {
+    await requireAdmin();
     const slug = slugify(name);
     const type = await prisma.organizerType.create({
       data: {
@@ -51,6 +53,7 @@ export async function createOrganizerType(name: string) {
 
 export async function updateOrganizerType(id: string, name: string) {
   try {
+    await requireAdmin();
     const slug = slugify(name);
     const type = await prisma.organizerType.update({
       where: { id },
@@ -72,6 +75,7 @@ export async function updateOrganizerType(id: string, name: string) {
 
 export async function deleteOrganizerType(id: string) {
   try {
+    await requireAdmin();
     // Check if there are organizers using this type
     const count = await prisma.organizer.count({
       where: { typeId: id },
