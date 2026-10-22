@@ -86,13 +86,15 @@ src/
 
 ### 1.4 Tareas
 
-- [ ] P0 Crear `src/server/auth/require-admin.ts` y aplicarlo en todas las acciones de escritura.
-- [ ] P0 Fallar al arrancar si falta `JWT_SECRET`.
-- [ ] P1 Crear `src/server/events` (schemas, service, queries, completeness) y migrar `actions/events.ts` a acciones finas.
+- [x] `src/server/auth/require-admin.ts` aplicado en todas las acciones de escritura (eventos, lugares, organizadores, especialidades, noticias, banners) y en las lecturas de admin de eventos. Verificado llamando a las actions sin sesión: se rechazan.
+- [x] `JWT_SECRET` obligatorio (mínimo 32 caracteres): sin él no se firma ni se verifica ninguna sesión.
+- [x] `src/server/events` (schemas, service, queries, completeness) y `actions/events.ts` como acciones finas.
 - [ ] P1 Repetir para places, organizers, organizerTypes, news, banners.
-- [ ] P1 Mover las lecturas públicas de páginas (`app/page.tsx`, `app/favorites/page.tsx`, calendario) a `*.queries.ts`.
+- [x] Bug corregido: al editar un evento en el admin, los cambios en las fechas no se guardaban (se descartaban las ocurrencias). Ahora se reemplazan.
+- [x] Bug corregido: las fechas (guardadas a medianoche UTC) se leían en hora local en el formulario del admin, el listado, favoritos, la home y el perfil, y se mostraban un día antes. Ahora se leen en UTC (`dayjs.utc`, `fortmatDate`). Encontrado probando el admin en el navegador: al guardar, el evento se corría al día anterior.
+- [x] Lecturas públicas de eventos (home, favoritos, calendario) movidas a `event.queries.ts`. Los lugares de la home y favoritos todavía se leen directo con Prisma.
 - [ ] P2 Separar lecturas públicas de `"use server"`: el calendario puede pedir datos a un Route Handler GET o recibirlos de un server component.
-- [ ] P2 Borrar `src/domain`, `src/data/repositories`, `src/config/firebase.ts` y la dependencia `firebase`.
+- [~] P2 Borrar `src/domain`, `src/data/repositories`, `src/config/firebase.ts` y la dependencia `firebase`. Ya se borró la cadena repositorio/use case de eventos (no se usaba); quedan las entidades que usan los componentes `Calendar/*` y la parte de lugares/Firebase.
 - [ ] P2 Regla de ESLint que prohíba importar `@prisma/client` / `db` fuera de `src/server`.
 
 ---
@@ -157,7 +159,7 @@ Una IA no puede subir de forma confiable al MCP una imagen adjunta en el chat. O
 
 ### 2.7 Tareas
 
-- [ ] P0 Fase 1 terminada (services + auth + estados): es prerrequisito.
+- [x] Fase 1 terminada para eventos (services + auth + estados).
 - [ ] P0 Endpoint `/api/mcp` con autenticación por token.
 - [ ] P0 Tools de eventos y fechas + `search_places` / `search_organizers` + catálogos.
 - [ ] P1 Tools de alta/edición de lugares y organizadores.
@@ -208,17 +210,16 @@ En la migración, todos los eventos existentes pasan a `PUBLISHED`.
 
 Un solo lugar del código (`event.completeness.ts`) decide los faltantes. Propuesta:
 
-**Obligatorio para publicar:**
-- título
+**Obligatorio para publicar (implementado):**
+- título (siempre, también en borradores)
 - al menos una fecha con hora de inicio
 - lugar asignado en cada fecha
 - tipo de precio
-- al menos un tipo de actividad
-- foto
 
 **Recomendado (se muestra como aviso, no bloquea):**
+- foto (132 de los 144 eventos actuales no tienen, así que no puede ser obligatoria)
+- tipo de actividad (8 eventos actuales no tienen)
 - descripción
-- rango de edad
 - organizador
 - link de entradas o WhatsApp de reserva (si es `PAID_TICKET`)
 
@@ -245,26 +246,26 @@ Limitaciones: no funciona en iOS e Instagram comparte solo el link, sin imagen n
 
 ### 3.5 Cambios en el admin
 
-- [ ] Filtro por estado en `/admin/eventos` (Todos / Borradores / Incompletos / Publicados / Archivados).
-- [ ] Badge de estado y columna de faltantes en la tabla.
+- [x] Filtro por estado en `/admin/eventos` (Todos / Borradores / Incompletos / Publicados / Archivados).
+- [x] Badge de estado y columna de faltantes en la tabla.
 - [ ] Vista "Incompletos" con link al post original y WhatsApp/Instagram del lugar y del organizador, para contactarlos rápido.
-- [ ] Botón "Publicar" (deshabilitado si faltan obligatorios) y "Archivar".
-- [ ] Mostrar `sourceText` e `internalNotes` en el formulario de edición.
+- [~] Botones "Guardar borrador" y "Guardar y publicar" (deshabilitado si faltan obligatorios) y, en publicados, "Pasar a borrador". Falta un botón "Archivar" en la UI (la acción ya existe).
+- [x] Sección "Origen y notas internas" en el formulario: link de la fuente, texto original (solo lectura) y notas internas.
 
 ### 3.6 Lecturas públicas a filtrar por `PUBLISHED`
 
-- [ ] `src/app/page.tsx` (destacados de la home)
-- [ ] `src/app/favorites/page.tsx`
-- [ ] `getOccurrencesByMonth` (calendario)
-- [ ] `src/app/perfil/[slug]/page.tsx` (eventos del organizador)
-- [ ] `sitemap.ts` si llega a listar eventos
+- [x] `src/app/page.tsx` (destacados de la home)
+- [x] `src/app/favorites/page.tsx`
+- [x] `getOccurrencesByMonth` (calendario)
+- [x] `src/app/perfil/[slug]/page.tsx` (eventos del organizador)
+- [x] `sitemap.ts`: hoy no lista eventos, no hace falta.
 
 ### 3.7 Tareas
 
-- [ ] P0 Migración: `EventStatus`, campos nuevos, `placeId` opcional + `placeText`.
-- [ ] P0 `event.completeness.ts` y recálculo en cada escritura.
-- [ ] P0 Filtrar lecturas públicas por `PUBLISHED`.
-- [ ] P1 Cambios en el admin (3.5).
+- [x] Migración `20261022180000_add_event_status_and_drafts`: `EventStatus`, campos nuevos, `placeId` opcional + `placeText`, `priceType` opcional. Los eventos existentes pasan a `PUBLISHED` y las fechas a medianoche UTC. Aplicada en local; en producción se aplica sola en el próximo deploy (`prisma migrate deploy` del build).
+- [x] `event.completeness.ts` y recálculo en cada escritura. Obligatorios: fecha, lugar en cada fecha, tipo de precio. La foto quedó como *recomendada*: 132 de los 144 eventos actuales no tienen.
+- [x] Filtrar lecturas públicas por `PUBLISHED`.
+- [~] P1 Cambios en el admin (3.5): falta la vista de contacto de incompletos y el botón de archivar.
 - [ ] P1 Probar el flujo completo Instagram → Claude → borrador → publicar.
 - [ ] P3 Web Share Target (opción B).
 
@@ -273,15 +274,15 @@ Limitaciones: no funciona en iOS e Instagram comparte solo el link, sin imagen n
 ## 4. Deuda técnica (del análisis inicial)
 
 ### Seguridad
-- [ ] P0 Autenticación en server actions de escritura (ver 1.4).
-- [ ] P0 Validar `JWT_SECRET` al arrancar.
-- [ ] P1 No devolver `error.message` de Prisma al cliente; mensajes genéricos y log del detalle.
+- [x] Autenticación en server actions de escritura (ver 1.4).
+- [x] Validar `JWT_SECRET`.
+- [~] P1 No devolver `error.message` de Prisma al cliente. Hecho en eventos; falta en lugares y noticias.
 - [ ] P1 `getPlaces()` público no debe devolver lugares inactivos.
 - [ ] P2 El upload preset de Cloudinary es *unsigned*: cualquiera que lo conozca puede subir imágenes. Pasar a subida firmada desde el servidor (se resuelve con 5.2).
 - [ ] P3 Renombrar `middleware.ts` → `proxy.ts` (Next 16).
 
 ### Calidad
-- [ ] P1 Validación con zod en todas las entradas (sale con la capa de servicios).
+- [~] P1 Validación con zod en todas las entradas. Hecho en eventos; falta el resto de los módulos.
 - [ ] P1 Centralizar el manejo de fechas y zona horaria (Argentina, UTC−3) con `dayjs`. Hoy hay cálculos manuales distintos en la home y en el calendario.
 - [ ] P2 Partir `calendario/page.tsx` (1.230 líneas, todo cliente) en server component + componentes chicos; revisar si los componentes `Calendar/*` existentes se pueden reutilizar o borrar.
 - [ ] P2 Partir `EventForm.tsx` (920 líneas) y `FavoritesClient.tsx` (695).

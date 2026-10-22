@@ -3,8 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Place } from "@/domain/entities/Place";
-import { createEvent, updateEvent, CreateEventInput } from "@/actions/events";
+import { createEvent, updateEvent, publishEvent, unpublishEvent, CreateEventInput } from "@/actions/events";
 import { Prisma } from "@prisma/client";
+import {
+  getMissingFields,
+  getWarnings,
+  MISSING_FIELD_LABELS,
+  WARNING_LABELS,
+} from "@/server/events/event.completeness";
 import { getPlaces } from "@/actions/places";
 import { getOrganizers } from "@/actions/organizers";
 
@@ -15,9 +21,11 @@ import { Save, ArrowLeft, Plus, Trash2, Calendar, ChevronDown } from "lucide-rea
 import Link from "next/link";
 import dayjs from "dayjs";
 import 'dayjs/locale/es';
+import utc from 'dayjs/plugin/utc';
 import { SearchablePlaceSelect } from "./SearchablePlaceSelect";
 import { SearchableOrganizerSelect } from "./SearchableOrganizerSelect";
 dayjs.locale('es');
+dayjs.extend(utc);
 
 // ─────────────────────────────────────────────
 // Sub-components
@@ -49,7 +57,15 @@ interface OccurrenceRow {
   timeStart: string;
   timeEnd: string;
   placeId: string;
+  placeText?: string | null; // lugar según la fuente, en borradores sin lugar asignado
 }
+
+const STATUS_LABELS = {
+  DRAFT: 'Borrador',
+  INCOMPLETE: 'Borrador incompleto',
+  PUBLISHED: 'Publicado',
+  ARCHIVED: 'Archivado',
+} as const;
 
 interface Organizer {
   id: string;
@@ -157,7 +173,10 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>(initialData?.activityTypes ?? []);
   const [ageMin, setAgeMin] = useState<number>(initialData?.ageMin ?? 0);
   const [ageMax, setAgeMax] = useState<number | null>(initialData?.ageMax ?? null);
-  const [priceType, setPriceType] = useState<PriceType>(initialData?.priceType ?? 'FREE_ENTRY');
+  // En borradores puede venir sin definir; en eventos nuevos arranca en "Gratuito"
+  const [priceType, setPriceType] = useState<PriceType | null>(
+    initialData ? initialData.priceType : 'FREE_ENTRY'
+  );
   const [selectedColor, setSelectedColor] = useState<string>(initialData?.bgColor ?? '#9575CD');
   const [selectedOrganizerIds, setSelectedOrganizerIds] = useState<string[]>(
     initialData?.organizers?.map((o) => o.organizerId) ?? []
@@ -190,12 +209,30 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
   const [occurrences, setOccurrences] = useState<OccurrenceRow[]>(
     initialData?.occurrences.map((o) => ({
       key: o.id,
-      date: dayjs(o.date).format('YYYY-MM-DD'),
+      // Las fechas se guardan a medianoche UTC: leerlas en hora local las corre un día atrás
+      date: dayjs.utc(o.date).format('YYYY-MM-DD'),
       timeStart: o.timeStart,
       timeEnd: o.timeEnd ?? '',
-      placeId: o.placeId,
+      placeId: o.placeId ?? '',
+      placeText: o.placeText,
     })) ?? []
   );
+
+  const isPublished = initialData?.status === 'PUBLISHED';
+  const missingFields = getMissingFields({
+    priceType,
+    occurrences: occurrences.map((o) => ({ placeId: o.placeId || null })),
+  });
+  const warnings = getWarnings({
+    priceType,
+    occurrences: occurrences.map((o) => ({ placeId: o.placeId || null })),
+    photoId: imagePreview,
+    description: initialData?.description ?? null,
+    activityTypes,
+    ticketUrl: initialData?.ticketUrl ?? null,
+    bookingWhatsapp: initialData?.bookingWhatsapp ?? null,
+    organizerCount: selectedOrganizerIds.length,
+  });
   const [previewGenerated, setPreviewGenerated] = useState(isEditing);
 
   // ── Upload helper ──
@@ -275,13 +312,22 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
 
     const formElement = e.currentTarget;
     const formData = new FormData(formElement);
+    // "draft" = guardar sin publicar; "publish" = guardar y publicar;
+    // "save" = guardar un publicado; "unpublish" = pasar un publicado a borrador y guardar
+    const intent = ((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value ?? 'save';
+    const wantsPublished = intent === 'publish' || (intent === 'save' && isPublished);
 
-    if (occurrences.length === 0) {
-      setError('Necesitás agregar al menos una fecha antes de guardar.');
+    if (occurrences.some((o) => !o.date || !o.timeStart)) {
+      setError('Todas las fechas tienen que tener día y hora de inicio.');
       return;
     }
-    if (occurrences.some((o) => !o.placeId)) {
-      setError('Todas las fechas deben tener un lugar asignado.');
+    if (wantsPublished && missingFields.length > 0) {
+      const missing = missingFields.map((f) => MISSING_FIELD_LABELS[f]).join(', ');
+      setError(
+        isPublished
+          ? `Un evento publicado no puede quedar sin: ${missing}. Usá "Pasar a borrador" si querés guardarlo así.`
+          : `Para publicar falta: ${missing}. Podés guardarlo como borrador.`
+      );
       return;
     }
 
@@ -315,22 +361,33 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
         ageMax: formData.get('ageMax') ? Number(formData.get('ageMax')) : null,
         isFeatured: formData.get('isFeatured') === 'on',
         isSponsored: formData.get('isSponsored') === 'on',
+        sourceUrl: (formData.get('sourceUrl') as string) || null,
+        internalNotes: (formData.get('internalNotes') as string) || null,
         occurrences: occurrences.map((o) => ({
-          date: new Date(o.date + 'T00:00:00'),
+          date: o.date, // 'YYYY-MM-DD'; el servidor lo guarda a medianoche UTC
           timeStart: o.timeStart,
-          timeEnd: o.timeEnd || undefined,
-          placeId: o.placeId,
+          timeEnd: o.timeEnd || null,
+          placeId: o.placeId || null,
+          placeText: o.placeText ?? null,
         })),
         organizerIds: selectedOrganizerIds,
       };
 
       if (isEditing && initialData) {
-        // En edición: actualizar datos del evento (las ocurrencias se editan en la tabla)
-        const { occurrences: _occ, ...eventData } = data;
-        const res = await updateEvent(initialData.id, eventData);
+        // Primero se despublica: un publicado no acepta cambios que lo dejen incompleto
+        if (intent === 'unpublish') {
+          const unpub = await unpublishEvent(initialData.id);
+          if (!unpub.success) throw new Error(unpub.error);
+        }
+        // En edición se reemplazan también las fechas con las de la tabla
+        const res = await updateEvent(initialData.id, data);
         if (!res.success) throw new Error(res.error);
+        if (intent === 'publish' && !isPublished) {
+          const pub = await publishEvent(initialData.id);
+          if (!pub.success) throw new Error(pub.error);
+        }
       } else {
-        const res = await createEvent(data);
+        const res = await createEvent({ ...data, publish: intent === 'publish' });
         if (!res.success) throw new Error(res.error);
       }
       router.push('/admin/eventos');
@@ -346,6 +403,27 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
       {error && (
         <div className="p-4 bg-red-100 text-red-700 font-bold rounded-xl border border-red-200">
           {error}
+        </div>
+      )}
+
+      {/* ── Estado y faltantes ── */}
+      {(isEditing || missingFields.length > 0 || warnings.length > 0) && (
+        <div className="p-4 bg-white/70 rounded-xl border border-gray-200 space-y-2 text-sm">
+          {initialData && (
+            <p className="font-bold text-gray-700">
+              Estado: <span className="text-brand-primary">{STATUS_LABELS[initialData.status]}</span>
+            </p>
+          )}
+          {missingFields.length > 0 && (
+            <p className="text-amber-700 font-bold">
+              Falta para publicar: {missingFields.map((f) => MISSING_FIELD_LABELS[f]).join(', ')}
+            </p>
+          )}
+          {warnings.length > 0 && (
+            <p className="text-gray-500">
+              Recomendado completar: {warnings.map((w) => WARNING_LABELS[w]).join(', ')}
+            </p>
+          )}
         </div>
       )}
 
@@ -875,13 +953,17 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
                       onChange={(e) => handleUpdateOccurrence(o.key, 'timeEnd', e.target.value)}
                       className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-brand-primary outline-none"
                     />
-                    <SearchablePlaceSelect
-                      places={currentPlaces}
-                      value={o.placeId}
-                      onChange={(val) => handleUpdateOccurrence(o.key, 'placeId', val)}
-                      placeholder="— Lugar —"
-                      className="min-w-[200px]"
-                    />
+                    <div className="min-w-[200px]">
+                      <SearchablePlaceSelect
+                        places={currentPlaces}
+                        value={o.placeId}
+                        onChange={(val) => handleUpdateOccurrence(o.key, 'placeId', val)}
+                        placeholder="— Lugar —"
+                      />
+                      {!o.placeId && o.placeText && (
+                        <p className="text-xs text-amber-700 mt-1">Según la fuente: {o.placeText}</p>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveOccurrence(o.key)}
@@ -897,8 +979,42 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
         </div>
       </FormSection>
 
+      {/* ── Origen y notas internas ── */}
+      <FormSection title="Origen y notas internas">
+        <div className="grid grid-cols-1 gap-6">
+          <div>
+            <InputLabel>Link de la fuente</InputLabel>
+            <input
+              name="sourceUrl"
+              type="url"
+              defaultValue={initialData?.sourceUrl ?? ''}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none"
+              placeholder="https://www.instagram.com/p/..."
+            />
+          </div>
+          {initialData?.sourceText && (
+            <div>
+              <InputLabel>Texto original de la fuente</InputLabel>
+              <p className="whitespace-pre-wrap text-sm text-gray-600 bg-gray-50 rounded-xl border border-gray-100 p-4">
+                {initialData.sourceText}
+              </p>
+            </div>
+          )}
+          <div>
+            <InputLabel>Notas internas</InputLabel>
+            <textarea
+              name="internalNotes"
+              rows={3}
+              defaultValue={initialData?.internalNotes ?? ''}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all outline-none"
+              placeholder="A quién contactar, qué falta confirmar... (no se muestra en la app)"
+            />
+          </div>
+        </div>
+      </FormSection>
+
       {/* ── Footer ── */}
-      <div className="flex justify-between items-center pt-2">
+      <div className="flex flex-wrap justify-between items-center gap-3 pt-2">
         <Link
           href="/admin/eventos"
           className="flex items-center gap-2 text-gray-500 hover:text-gray-800 font-bold transition-colors"
@@ -906,14 +1022,53 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
           <ArrowLeft className="w-4 h-4" />
           Volver
         </Link>
-        <button
-          type="submit"
-          disabled={isSubmitting || occurrences.length === 0}
-          className="flex items-center gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-3 rounded-2xl font-black tracking-wide transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          <Save className="w-4 h-4" />
-          {isSubmitting ? 'Guardando...' : `Guardar evento (${occurrences.length} fecha${occurrences.length !== 1 ? 's' : ''})`}
-        </button>
+        <div className="flex flex-wrap gap-3">
+          {isPublished ? (
+            <>
+            <button
+              type="submit"
+              value="unpublish"
+              disabled={isSubmitting}
+              title="Lo saca de la app y lo guarda como borrador"
+              className="flex items-center gap-2 bg-white hover:bg-gray-50 text-brand-primary border-2 border-brand-primary/30 px-6 py-3 rounded-2xl font-black tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4" />
+              {isSubmitting ? 'Guardando...' : 'Pasar a borrador'}
+            </button>
+            <button
+              type="submit"
+              value="save"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-3 rounded-2xl font-black tracking-wide transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <Save className="w-4 h-4" />
+              {isSubmitting ? 'Guardando...' : `Guardar cambios (${occurrences.length} fecha${occurrences.length !== 1 ? 's' : ''})`}
+            </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="submit"
+                value="draft"
+                disabled={isSubmitting}
+                className="flex items-center gap-2 bg-white hover:bg-gray-50 text-brand-primary border-2 border-brand-primary/30 px-6 py-3 rounded-2xl font-black tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save className="w-4 h-4" />
+                {isSubmitting ? 'Guardando...' : 'Guardar borrador'}
+              </button>
+              <button
+                type="submit"
+                value="publish"
+                disabled={isSubmitting || missingFields.length > 0}
+                title={missingFields.length > 0 ? `Falta: ${missingFields.map((f) => MISSING_FIELD_LABELS[f]).join(', ')}` : undefined}
+                className="flex items-center gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-3 rounded-2xl font-black tracking-wide transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <Save className="w-4 h-4" />
+                {isSubmitting ? 'Guardando...' : `Guardar y publicar (${occurrences.length} fecha${occurrences.length !== 1 ? 's' : ''})`}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </form>
   );

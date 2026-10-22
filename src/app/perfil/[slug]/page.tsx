@@ -11,8 +11,10 @@ import {
 import Link from "next/link";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
 
 dayjs.locale("es");
+dayjs.extend(utc); // las fechas de los eventos se guardan a medianoche UTC
 
 // ── SVG Icons ──
 const YoutubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -268,11 +270,11 @@ export default async function PerfilOrganizadorPage({ params }: Props) {
                             {event.occurrences.map((occ) => (
                               <div key={occ.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
                                 <span className="font-bold text-brand-primary">
-                                  {dayjs(occ.date).format("dddd D [de] MMMM")} a las {occ.timeStart} hs
+                                  {dayjs.utc(occ.date).format("dddd D [de] MMMM")} a las {occ.timeStart} hs
                                 </span>
                                 <span className="flex items-center gap-1 text-gray-400">
                                   <LocationIcon className="w-3 h-3" />
-                                  {occ.place.name}
+                                  {occ.place?.name}
                                 </span>
                               </div>
                             ))}

@@ -38,6 +38,13 @@ enum ActivityType {
 
 
 
+enum EventStatus {
+  DRAFT             // Borrador completo, listo para revisar y publicar
+  INCOMPLETE        // Borrador con datos obligatorios faltantes
+  PUBLISHED         // Visible en la app
+  ARCHIVED          // Oculto, se conserva
+}
+
 enum PlaceCategory {
   ALL_DAY           // Todo el día
   CULTURE           // Cultura
@@ -133,7 +140,7 @@ model Event {
   bookingWhatsapp String?
 
   // Clasificación
-  priceType     PriceType         @default(FREE_ENTRY)
+  priceType     PriceType?        // null = sin definir (solo en borradores)
   activityTypes ActivityType[]
   ageMin        Float             @default(0)
   ageMax        Float?
@@ -141,6 +148,14 @@ model Event {
   // Visibilidad
   isFeatured    Boolean           @default(false)
   isSponsored   Boolean           @default(false)
+
+  // Estado y carga (borradores desde Instagram / MCP)
+  status        EventStatus       @default(DRAFT)
+  missingFields String[]          // obligatorios faltantes; se recalcula en cada guardado
+  sourceUrl     String?           // post de Instagram u otra fuente
+  sourceText    String?           @db.Text // texto original de la fuente
+  internalNotes String?           @db.Text // notas internas (a quién contactar, qué falta)
+  publishedAt   DateTime?
 
   // Ocurrencias (borrar el evento borra todas sus fechas)
   occurrences   EventOccurrence[]
@@ -150,6 +165,8 @@ model Event {
 
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+
+  @@index([status])
 }
 
 // ─────────────────────────────────────────────
@@ -231,10 +248,11 @@ model EventOccurrence {
   timeStart String   // "18:00"
   timeEnd   String?  // "20:00" (opcional)
 
-  // Dónde — siempre un Place registrado
-  // Si el lugar no existe, se crea inline desde el formulario antes de guardar
-  place     Place    @relation(fields: [placeId], references: [id], onDelete: Restrict)
-  placeId   String
+  // Dónde — un Place registrado. Solo puede faltar en borradores: en ese caso
+  // placeText guarda el lugar tal como figura en la fuente, para asociarlo después
+  place     Place?   @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  placeId   String?
+  placeText String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

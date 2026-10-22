@@ -1,7 +1,9 @@
 "use server";
 
+import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
+import { PUBLIC_EVENT_WHERE } from "@/server/events/event.queries";
 
 const slugify = (text: string) => {
   return text
@@ -75,11 +77,14 @@ export async function getOrganizerBySlug(slug: string) {
       where: { slug },
       include: {
         type: true,
+        // Perfil público: solo eventos publicados y fechas con lugar
         events: {
+          where: { event: PUBLIC_EVENT_WHERE },
           include: {
             event: {
               include: {
                 occurrences: {
+                  where: { placeId: { not: null } },
                   include: {
                     place: true,
                   },
@@ -116,6 +121,7 @@ interface OrganizerInput {
 
 export async function createOrganizer(data: OrganizerInput) {
   try {
+    await requireAdmin();
     const baseSlugName = data.slug || data.name;
     const slug = await generateUniqueSlug(baseSlugName);
     const organizer = await prisma.organizer.create({
@@ -134,6 +140,7 @@ export async function createOrganizer(data: OrganizerInput) {
 
 export async function updateOrganizer(id: string, data: OrganizerInput) {
   try {
+    await requireAdmin();
     const baseSlugName = data.slug || data.name;
     const slug = await generateUniqueSlug(baseSlugName, id);
     const organizer = await prisma.organizer.update({
@@ -154,6 +161,7 @@ export async function updateOrganizer(id: string, data: OrganizerInput) {
 
 export async function deleteOrganizer(id: string) {
   try {
+    await requireAdmin();
     const organizer = await prisma.organizer.findUnique({
       where: { id },
       select: { slug: true },

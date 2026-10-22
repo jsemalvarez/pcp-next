@@ -6,23 +6,50 @@ import { Edit2, Calendar, Search } from "lucide-react";
 import { DeleteEventButton } from "./DeleteEventButton";
 import dayjs from "dayjs";
 import 'dayjs/locale/es';
+import utc from 'dayjs/plugin/utc';
+import { MISSING_FIELD_LABELS } from "@/server/events/event.completeness";
 
 dayjs.locale('es');
+dayjs.extend(utc); // las fechas se guardan a medianoche UTC
 
 interface Props {
   initialEvents: any[];
 }
 
+const STATUS_TABS = [
+  { id: 'ALL', label: 'Todos' },
+  { id: 'PUBLISHED', label: 'Publicados' },
+  { id: 'DRAFT', label: 'Borradores' },
+  { id: 'INCOMPLETE', label: 'Incompletos' },
+  { id: 'ARCHIVED', label: 'Archivados' },
+] as const;
+
+type StatusFilter = (typeof STATUS_TABS)[number]['id'];
+
+const STATUS_BADGES: Record<string, { label: string; className: string }> = {
+  PUBLISHED: { label: 'Publicado', className: 'bg-green-100 text-green-700' },
+  DRAFT: { label: 'Borrador', className: 'bg-blue-100 text-blue-700' },
+  INCOMPLETE: { label: 'Incompleto', className: 'bg-amber-100 text-amber-700' },
+  ARCHIVED: { label: 'Archivado', className: 'bg-gray-100 text-gray-500' },
+};
+
 export function AdminEventsTable({ initialEvents }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+
+  const countByStatus = useMemo(() => {
+    const counts: Record<string, number> = { ALL: initialEvents.length };
+    for (const event of initialEvents) counts[event.status] = (counts[event.status] ?? 0) + 1;
+    return counts;
+  }, [initialEvents]);
 
   const filteredEvents = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return initialEvents;
     return initialEvents.filter((event) =>
-      event.title.toLowerCase().includes(term)
+      (statusFilter === 'ALL' || event.status === statusFilter) &&
+      (!term || event.title.toLowerCase().includes(term))
     );
-  }, [searchTerm, initialEvents]);
+  }, [searchTerm, statusFilter, initialEvents]);
 
   return (
     <div className="space-y-6">
@@ -45,6 +72,23 @@ export function AdminEventsTable({ initialEvents }: Props) {
         )}
       </div>
 
+      {/* Filtro por estado */}
+      <div className="flex flex-wrap gap-2">
+        {STATUS_TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setStatusFilter(id)}
+            className={`px-4 py-2 rounded-full text-sm font-bold border-2 transition-all ${statusFilter === id
+              ? 'bg-brand-primary text-white border-brand-primary'
+              : 'bg-white/80 text-gray-600 border-gray-200 hover:border-brand-primary/40'
+              }`}
+          >
+            {label} ({countByStatus[id] ?? 0})
+          </button>
+        ))}
+      </div>
+
       {/* Table Card */}
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/50 overflow-hidden">
         <div className="overflow-x-auto">
@@ -53,6 +97,7 @@ export function AdminEventsTable({ initialEvents }: Props) {
               <tr className="bg-brand-primary/5 text-brand-primary text-sm uppercase tracking-wider">
                 <th className="p-4 font-black">Evento</th>
                 <th className="p-4 font-black">Fechas</th>
+                <th className="p-4 font-black">Estado</th>
                 <th className="p-4 font-black">Tipo</th>
                 <th className="p-4 font-black text-center">Destacado</th>
                 <th className="p-4 font-black text-right">Acciones</th>
@@ -61,7 +106,7 @@ export function AdminEventsTable({ initialEvents }: Props) {
             <tbody>
               {filteredEvents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500 font-medium">
+                  <td colSpan={6} className="p-8 text-center text-gray-500 font-medium">
                     {searchTerm ? "No se encontraron eventos que coincidan con la búsqueda." : "No hay eventos registrados aún."}
                   </td>
                 </tr>
@@ -84,7 +129,7 @@ export function AdminEventsTable({ initialEvents }: Props) {
                           <div className="flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5 text-brand-primary shrink-0" />
                             <span>
-                              {dayjs(firstOccurrence.date).format('DD/MM/YYYY')}
+                              {dayjs.utc(firstOccurrence.date).format('DD/MM/YYYY')}
                               {occurrenceCount > 1 && (
                                 <span className="ml-1.5 px-1.5 py-0.5 bg-brand-primary/10 text-brand-primary text-xs font-black rounded-full">
                                   +{occurrenceCount - 1}
@@ -94,6 +139,18 @@ export function AdminEventsTable({ initialEvents }: Props) {
                           </div>
                         ) : (
                           <span className="text-gray-400">Sin fechas</span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-0.5 text-xs font-black rounded-full whitespace-nowrap ${STATUS_BADGES[event.status]?.className ?? ''}`}>
+                          {STATUS_BADGES[event.status]?.label ?? event.status}
+                        </span>
+                        {event.missingFields?.length > 0 && (
+                          <p className="text-xs text-amber-700 mt-1">
+                            Falta: {event.missingFields
+                              .map((f: string) => MISSING_FIELD_LABELS[f as keyof typeof MISSING_FIELD_LABELS] ?? f)
+                              .join(', ')}
+                          </p>
                         )}
                       </td>
                       <td className="p-4">

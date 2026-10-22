@@ -1,5 +1,6 @@
 import prisma from "@/data/prisma/db";
 import FavoritesClient from "./FavoritesClient";
+import { getPublishedEventsWithOccurrences } from "@/server/events/event.queries";
 
 export const revalidate = 0; // Disable caching to ensure it always gets the latest data
 
@@ -14,26 +15,7 @@ export default async function FavoritesPage() {
     ],
   });
 
-  const events = await prisma.event.findMany({
-    include: {
-      occurrences: {
-        include: {
-          place: true,
-        },
-        orderBy: {
-          date: "asc",
-        },
-      },
-      organizers: {
-        include: {
-          organizer: true,
-        },
-      },
-    },
-    orderBy: {
-      title: "asc",
-    },
-  });
+  const events = await getPublishedEventsWithOccurrences();
 
   // Map events to a format that matches what we need
   const serializedEvents = events.map(event => ({
@@ -41,7 +23,7 @@ export default async function FavoritesPage() {
     title: event.title,
     description: event.description,
     photoId: event.photoId,
-    priceType: event.priceType,
+    priceType: event.priceType ?? "", // siempre definido en eventos publicados
     activityTypes: event.activityTypes,
     ageMin: event.ageMin,
     ageMax: event.ageMax,

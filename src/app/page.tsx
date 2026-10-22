@@ -10,6 +10,7 @@ import { Footer } from "@/presentation/components/Footer/Footer";
 import { InstagramIcon } from "@/presentation/components/common/icons";
 
 import prisma from "@/data/prisma/db";
+import { getFeaturedUpcomingOccurrences } from "@/server/events/event.queries";
 import { fortmatDate } from "@/presentation/utils/formatDate";
 import { CloudinaryImage } from "@/presentation/components/common/CloudinaryImage";
 
@@ -37,20 +38,7 @@ export default async function Home() {
   const localDate = new Date(today.getTime() + offset * 3600000);
   const startOfToday = new Date(Date.UTC(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate()));
 
-  const dbOccurrences = await prisma.eventOccurrence.findMany({
-    where: {
-      date: {
-        gte: startOfToday,
-      },
-      event: {
-        isFeatured: true,
-      },
-    },
-    include: {
-      event: true,
-      place: true,
-    },
-  });
+  const dbOccurrences = await getFeaturedUpcomingOccurrences(startOfToday);
 
   const sortedOccurrences = [...dbOccurrences].sort((a, b) => {
     if (a.event.isSponsored && !b.event.isSponsored) return -1;

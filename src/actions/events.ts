@@ -1,115 +1,58 @@
 "use server";
 
-import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
-import { ActivityType, PriceType } from "@prisma/client";
+import { requireAdmin, UnauthorizedError } from "@/server/auth/require-admin";
+import * as eventService from "@/server/events/event.service";
+import { EventValidationError } from "@/server/events/event.service";
+import {
+  getEventForAdmin,
+  getPublishedOccurrencesByMonth,
+  listEventsForAdmin,
+} from "@/server/events/event.queries";
+import type { CreateEventInput, OccurrenceInput, UpdateEventInput } from "@/server/events/event.schemas";
 
-// ─────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────
+/**
+ * Adaptador fino entre la UI y el servicio de eventos:
+ * verifica la sesión, llama al servicio y revalida las páginas afectadas.
+ */
 
-export type CreateEventInput = {
-  title: string;
-  description?: string;
-  photoId?: string;
-  photoWidth?: number;
-  photoHeight?: number;
-  bgColor?: string;
-  ticketUrl?: string;
-  bookingWhatsapp?: string;
-  priceType: PriceType;
-  activityTypes: ActivityType[];
-  ageMin: number;
-  ageMax?: number | null;
-  isFeatured?: boolean;
-  isSponsored?: boolean;
-  occurrences: CreateOccurrenceInput[];
-  organizerIds?: string[];
-};
+export type { CreateEventInput, UpdateEventInput, OccurrenceInput };
 
-export type CreateOccurrenceInput = {
-  date: Date;
-  timeStart: string;
-  timeEnd?: string;
-  placeId: string;
-};
+function revalidateEvents(id?: string) {
+  revalidatePath("/");
+  revalidatePath("/calendario");
+  revalidatePath("/favorites");
+  revalidatePath("/admin/eventos");
+  if (id) revalidatePath(`/admin/eventos/${id}`);
+}
 
-export type UpdateEventInput = Partial<Omit<CreateEventInput, "occurrences">> & {
-  organizerIds?: string[];
-};
+/** Mensaje para la UI sin filtrar detalles internos (Prisma, stack, etc.) */
+function toErrorMessage(context: string, error: unknown, fallback: string) {
+  if (error instanceof EventValidationError || error instanceof UnauthorizedError) return error.message;
+  console.error(`[${context}] Error:`, error);
+  return fallback;
+}
 
 // ─────────────────────────────────────────────
 // READ
 // ─────────────────────────────────────────────
 
+/** Admin: todos los eventos, incluidos borradores */
 export async function getEvents() {
-  try {
-    const events = await prisma.event.findMany({
-      include: {
-        occurrences: {
-          include: { place: true },
-          orderBy: [{ date: "asc" }, { timeStart: "asc" }],
-        },
-        organizers: {
-          include: {
-            organizer: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    return events;
-  } catch (error) {
-    console.error("[getEvents] Error:", error);
-    return [];
-  }
+  await requireAdmin();
+  return listEventsForAdmin();
 }
 
+/** Admin: un evento con sus fechas */
 export async function getEventById(id: string) {
-  try {
-    return await prisma.event.findUnique({
-      where: { id },
-      include: {
-        occurrences: {
-          include: { place: true },
-          orderBy: [{ date: "asc" }, { timeStart: "asc" }],
-        },
-        organizers: true,
-      },
-    });
-  } catch (error) {
-    console.error("[getEventById] Error:", error);
-    return null;
-  }
+  await requireAdmin();
+  return getEventForAdmin(id);
 }
 
-/**
- * Devuelve todas las ocurrencias de un mes dado.
- * Usado por el CalendarGrid para renderizar el calendario.
- */
+/** Público: fechas publicadas de un mes, para el calendario */
 export async function getOccurrencesByMonth(year: number, month: number) {
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0, 23, 59, 59);
-
   try {
-    return await prisma.eventOccurrence.findMany({
-      where: {
-        date: { gte: startDate, lte: endDate },
-      },
-      include: {
-        event: {
-          include: {
-            organizers: {
-              include: {
-                organizer: true,
-              },
-            },
-          },
-        },
-        place: true,
-      },
-      orderBy: [{ date: "asc" }, { timeStart: "asc" }],
-    });
+    return await getPublishedOccurrencesByMonth(year, month);
   } catch (error) {
     console.error("[getOccurrencesByMonth] Error:", error);
     return [];
@@ -117,149 +60,72 @@ export async function getOccurrencesByMonth(year: number, month: number) {
 }
 
 // ─────────────────────────────────────────────
-// CREATE
+// WRITE
 // ─────────────────────────────────────────────
 
-/**
- * Crea un Event con todas sus ocurrencias en una sola transacción.
- * Si cualquier parte falla, se revierte todo.
- */
 export async function createEvent(data: CreateEventInput) {
   try {
-    const { occurrences, organizerIds, ...eventData } = data;
-
-    const event = await prisma.$transaction(async (tx) => {
-      const newEvent = await tx.event.create({
-        data: {
-          ...eventData,
-          isFeatured: eventData.isFeatured ?? false,
-          isSponsored: eventData.isSponsored ?? false,
-          occurrences: {
-            createMany: {
-              data: occurrences.map((o) => ({
-                date: o.date,
-                timeStart: o.timeStart,
-                timeEnd: o.timeEnd,
-                placeId: o.placeId,
-              })),
-            },
-          },
-          organizers: organizerIds && organizerIds.length > 0 ? {
-            create: organizerIds.map((id) => ({
-              organizerId: id
-            }))
-          } : undefined
-        },
-        include: { occurrences: true, organizers: true },
-      });
-      return newEvent;
-    });
-
-    revalidatePath("/");
-    revalidatePath("/admin/eventos");
-    return { success: true, event };
-  } catch (error: any) {
-    console.error("[createEvent] Error:", error);
-    return { success: false, error: error?.message || "Error al crear el evento" };
+    await requireAdmin();
+    const event = await eventService.createEvent(data);
+    revalidateEvents();
+    return { success: true as const, event };
+  } catch (error) {
+    return { success: false as const, error: toErrorMessage("createEvent", error, "Error al crear el evento") };
   }
 }
-
-// ─────────────────────────────────────────────
-// UPDATE
-// ─────────────────────────────────────────────
 
 export async function updateEvent(id: string, data: UpdateEventInput) {
   try {
-    const { organizerIds, ...eventData } = data;
-
-    const event = await prisma.event.update({
-      where: { id },
-      data: {
-        ...eventData,
-        organizers: organizerIds ? {
-          deleteMany: {},
-          create: organizerIds.map((orgId) => ({
-            organizerId: orgId
-          }))
-        } : undefined
-      },
-      include: { occurrences: { include: { place: true } }, organizers: true },
-    });
-    revalidatePath("/");
-    revalidatePath("/admin/eventos");
-    revalidatePath(`/admin/eventos/${id}`);
-    return { success: true, event };
-  } catch (error: any) {
-    console.error("[updateEvent] Error:", error);
-    return { success: false, error: error?.message || "Error al actualizar el evento" };
-  }
-}
-
-// ─────────────────────────────────────────────
-// OCCURRENCE — CRUD individual
-// ─────────────────────────────────────────────
-
-export async function addOccurrence(eventId: string, data: CreateOccurrenceInput) {
-  try {
-    const occurrence = await prisma.eventOccurrence.create({
-      data: { eventId, ...data },
-      include: { place: true },
-    });
-    revalidatePath("/");
-    revalidatePath("/admin/eventos");
-    return { success: true, occurrence };
-  } catch (error: any) {
-    console.error("[addOccurrence] Error:", error);
-    return { success: false, error: error?.message || "Error al agregar la fecha" };
-  }
-}
-
-export async function updateOccurrence(
-  id: string,
-  data: Partial<CreateOccurrenceInput>
-) {
-  try {
-    const occurrence = await prisma.eventOccurrence.update({
-      where: { id },
-      data,
-      include: { place: true },
-    });
-    revalidatePath("/");
-    revalidatePath("/admin/eventos");
-    return { success: true, occurrence };
-  } catch (error: any) {
-    console.error("[updateOccurrence] Error:", error);
-    return { success: false, error: error?.message || "Error al actualizar la fecha" };
-  }
-}
-
-export async function deleteOccurrence(id: string) {
-  try {
-    await prisma.eventOccurrence.delete({ where: { id } });
-    revalidatePath("/");
-    revalidatePath("/admin/eventos");
-    return { success: true };
+    await requireAdmin();
+    const event = await eventService.updateEvent(id, data);
+    revalidateEvents(id);
+    return { success: true as const, event };
   } catch (error) {
-    console.error("[deleteOccurrence] Error:", error);
-    return { success: false, error: "Error al eliminar la fecha" };
+    return { success: false as const, error: toErrorMessage("updateEvent", error, "Error al actualizar el evento") };
   }
 }
 
-// ─────────────────────────────────────────────
-// DELETE
-// ─────────────────────────────────────────────
+export async function publishEvent(id: string) {
+  try {
+    await requireAdmin();
+    await eventService.publishEvent(id);
+    revalidateEvents(id);
+    return { success: true as const };
+  } catch (error) {
+    return { success: false as const, error: toErrorMessage("publishEvent", error, "Error al publicar el evento") };
+  }
+}
 
-/**
- * Borra el evento y todas sus ocurrencias (onDelete: Cascade en el schema).
- */
+export async function unpublishEvent(id: string) {
+  try {
+    await requireAdmin();
+    await eventService.unpublishEvent(id);
+    revalidateEvents(id);
+    return { success: true as const };
+  } catch (error) {
+    return { success: false as const, error: toErrorMessage("unpublishEvent", error, "Error al pasar a borrador") };
+  }
+}
+
+export async function archiveEvent(id: string) {
+  try {
+    await requireAdmin();
+    await eventService.archiveEvent(id);
+    revalidateEvents(id);
+    return { success: true as const };
+  } catch (error) {
+    return { success: false as const, error: toErrorMessage("archiveEvent", error, "Error al archivar el evento") };
+  }
+}
+
+/** Borra el evento y todas sus fechas (onDelete: Cascade en el schema). */
 export async function deleteEvent(id: string) {
   try {
-    await prisma.event.delete({ where: { id } });
-    revalidatePath("/");
-    revalidatePath("/admin/eventos");
-    return { success: true };
+    await requireAdmin();
+    await eventService.deleteEvent(id);
+    revalidateEvents();
+    return { success: true as const };
   } catch (error) {
-    console.error("[deleteEvent] Error:", error);
-    return { success: false, error: "Error al eliminar el evento" };
+    return { success: false as const, error: toErrorMessage("deleteEvent", error, "Error al eliminar el evento") };
   }
 }
