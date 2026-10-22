@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { requireAdmin, UnauthorizedError } from "@/server/auth/require-admin";
+import { revalidateEvents } from "@/server/events/event.revalidate";
 import * as eventService from "@/server/events/event.service";
 import { EventValidationError } from "@/server/events/event.service";
 import {
@@ -17,14 +17,6 @@ import type { CreateEventInput, OccurrenceInput, UpdateEventInput } from "@/serv
  */
 
 export type { CreateEventInput, UpdateEventInput, OccurrenceInput };
-
-function revalidateEvents(id?: string) {
-  revalidatePath("/");
-  revalidatePath("/calendario");
-  revalidatePath("/favorites");
-  revalidatePath("/admin/eventos");
-  if (id) revalidatePath(`/admin/eventos/${id}`);
-}
 
 /** Mensaje para la UI sin filtrar detalles internos (Prisma, stack, etc.) */
 function toErrorMessage(context: string, error: unknown, fallback: string) {

@@ -88,6 +88,77 @@ export async function listEventsForAdmin(filters: { status?: EventStatus } = {})
   });
 }
 
+export type EventSearchFilters = {
+  /** Texto en título, descripción, texto de la fuente o nombre del lugar */
+  text?: string;
+  status?: EventStatus;
+  /** Rango de fechas 'YYYY-MM-DD' (inclusive): eventos con alguna fecha dentro */
+  from?: string;
+  to?: string;
+  placeId?: string;
+  organizerId?: string;
+  limit?: number;
+};
+
+/** Búsqueda de admin / MCP. Incluye borradores. */
+export async function searchEvents(filters: EventSearchFilters = {}) {
+  const { text, status, from, to, placeId, organizerId, limit = 20 } = filters;
+  const dateRange =
+    from || to
+      ? {
+          ...(from ? { gte: new Date(`${from}T00:00:00.000Z`) } : {}),
+          ...(to ? { lte: new Date(`${to}T00:00:00.000Z`) } : {}),
+        }
+      : undefined;
+  const contains = text?.trim() ? { contains: text.trim(), mode: "insensitive" as const } : undefined;
+
+  return prisma.event.findMany({
+    where: {
+      status,
+      ...(contains
+        ? {
+            OR: [
+              { title: contains },
+              { description: contains },
+              { sourceText: contains },
+              { occurrences: { some: { place: { name: contains } } } },
+              { occurrences: { some: { placeText: contains } } },
+            ],
+          }
+        : {}),
+      ...(dateRange || placeId
+        ? { occurrences: { some: { date: dateRange, placeId } } }
+        : {}),
+      ...(organizerId ? { organizers: { some: { organizerId } } } : {}),
+    },
+    include: {
+      occurrences: {
+        include: { place: true },
+        orderBy: [{ date: "asc" }, { timeStart: "asc" }],
+      },
+      organizers: { include: { organizer: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: Math.min(Math.max(limit, 1), 50),
+  });
+}
+
+/** Borradores incompletos con los contactos del lugar y los organizadores, para pedir los datos que faltan */
+export async function listIncompleteEvents(limit = 50) {
+  return prisma.event.findMany({
+    where: { status: EventStatus.INCOMPLETE },
+    include: {
+      occurrences: {
+        include: { place: true },
+        orderBy: [{ date: "asc" }, { timeStart: "asc" }],
+      },
+      organizers: { include: { organizer: true } },
+    },
+    orderBy: { createdAt: "asc" },
+    take: Math.min(Math.max(limit, 1), 100),
+  });
+}
+
 export async function getEventForAdmin(id: string) {
   return prisma.event.findUnique({
     where: { id },
@@ -96,7 +167,7 @@ export async function getEventForAdmin(id: string) {
         include: { place: true },
         orderBy: [{ date: "asc" }, { timeStart: "asc" }],
       },
-      organizers: true,
+      organizers: { include: { organizer: true } },
     },
   });
 }

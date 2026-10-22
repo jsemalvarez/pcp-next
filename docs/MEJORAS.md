@@ -139,10 +139,10 @@ Además, un **resource** (o tool `get_catalogs`) con los valores válidos de `Ac
 
 ### 2.4 Seguridad
 
-- [ ] Autenticación obligatoria en `/api/mcp`. Nada del MCP es público.
-- [ ] Token largo y aleatorio en `MCP_API_TOKEN` (env de Vercel), comparado en tiempo constante, enviado como `Authorization: Bearer …`.
+- [x] Autenticación obligatoria en `/api/mcp` (`withMcpAuth`, `required: true`): sin token válido responde 401.
+- [x] Token en `MCP_API_TOKEN` (mínimo 32 caracteres), comparado en tiempo constante (hash SHA-256 + `timingSafeEqual`), enviado como `Authorization: Bearer …`. Sin token configurado, el MCP rechaza todo. **Falta cargarlo en Vercel.**
 - [ ] **Compatibilidad de clientes:** Claude Code y Claude Desktop permiten configurar headers, así que el token funciona directo. Los conectores personalizados de claude.ai (web y app móvil) se autentican con OAuth. **Para usarlo desde el celular (necesario para el flujo de Instagram) probablemente haga falta un OAuth mínimo.** Verificar al implementar qué acepta hoy el conector.
-- [ ] Sin tools sobre usuarios, contraseñas ni banners/noticias en la primera versión: superficie mínima.
+- [x] Sin tools sobre usuarios, contraseñas ni banners/noticias: solo eventos, fechas y búsqueda de lugares y organizadores.
 - [ ] Tabla `AuditLog` (fecha, actor, tool, entidad, id, cambios). Como escribe una IA, poder ver y revertir qué cambió es importante.
 - [ ] Rate limit básico por token.
 
@@ -160,13 +160,13 @@ Una IA no puede subir de forma confiable al MCP una imagen adjunta en el chat. O
 ### 2.7 Tareas
 
 - [x] Fase 1 terminada para eventos (services + auth + estados).
-- [ ] P0 Endpoint `/api/mcp` con autenticación por token.
-- [ ] P0 Tools de eventos y fechas + `search_places` / `search_organizers` + catálogos.
+- [x] Endpoint `/api/mcp` (`mcp-handler` 2.3 + `@modelcontextprotocol/server` 2.3, spec 2026-07-28 con fallback a Streamable HTTP 2025) con autenticación por token.
+- [x] 14 tools: `get_catalogs`, `search_events`, `get_event`, `list_incomplete_events`, `create_event_draft`, `update_event`, `add_occurrence`, `update_occurrence`, `delete_occurrence`, `publish_event`, `unpublish_event`, `archive_event`, `search_places`, `search_organizers` (`src/server/mcp/event-tools.ts`). Probadas de punta a punta con el cliente oficial (SDK v2) y con el protocolo 2025 por HTTP.
 - [ ] P1 Tools de alta/edición de lugares y organizadores.
 - [ ] P1 Auditoría.
 - [ ] P1 OAuth para conectarlo desde claude.ai / app móvil.
 - [ ] P2 `set_event_photo_from_url`.
-- [ ] P2 Documentar en el README cómo conectar el MCP desde cada cliente.
+- [x] README: cómo conectar Claude Code y Claude Desktop.
 
 ---
 
@@ -357,7 +357,7 @@ Nota: pgAdmin importa la conexión solo la primera vez que arranca. Si se cambia
 - [x] Postgres local en versión 17, igual que producción.
 - [x] Script `npm run db:pull-prod` (`scripts/db-pull-prod.sh`). Exporta solo el schema `public` (Supabase agrega los suyos: `auth`, `storage`, etc.). Los dumps van a `backups/`, ignorado por git.
 - [x] Primera copia hecha el 2026-10-22: 144 eventos, 461 fechas, 52 lugares, 5 banners, 2 organizadores, 1 noticia, 1 usuario. Coincide con producción.
-- [ ] P1 Agregar a `.env.example` las variables nuevas cuando se implementen (`MCP_API_TOKEN`, `IMAGE_STORAGE`, `CLOUDINARY_API_KEY/SECRET`).
+- [~] P1 Agregar a `.env.example` las variables nuevas cuando se implementen. Ya están `MCP_API_TOKEN` y `NEXT_PUBLIC_SITE_URL`; faltan `IMAGE_STORAGE` y `CLOUDINARY_API_KEY/SECRET`.
 - [x] Sección "Desarrollo local" del README actualizada con este flujo.
 - [ ] P1 `npm install` reporta 62 vulnerabilidades (5 críticas, 45 altas). Revisar con `npm audit`; probablemente se resuelvan en buena parte actualizando Next (16.0.7) y Prisma (5.22, hay versión 6/7).
 - [ ] P2 `build` sigue corriendo `prisma migrate deploy`. En local ya no es peligroso (sin `.env` falla), pero conviene moverlo a un script `vercel-build` para que quede explícito.
