@@ -6,7 +6,7 @@
 
 /** Origen público y estable de la app; es el issuer y la base del resource */
 export function siteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "https://www.paseosconpeques.com.ar").replace(/\/$/, "");
+  return (process.env.SITE_URL || "https://www.paseosconpeques.com.ar").replace(/\/$/, "");
 }
 
 export const oauthUrls = () => {

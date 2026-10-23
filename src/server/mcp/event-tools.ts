@@ -15,6 +15,7 @@ import { revalidateEvents } from "@/server/events/event.revalidate";
 import { searchPlaces } from "@/server/places/place.queries";
 import { searchOrganizers } from "@/server/organizers/organizer.queries";
 import { EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
+import { siteUrl } from "@/server/oauth/oauth.config";
 
 /**
  * Tools MCP de eventos, lugares y organizadores.
@@ -22,7 +23,6 @@ import { EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filter
  * en los servicios, que vuelven a validar y aplican las reglas de negocio.
  */
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.paseosconpeques.com.ar").replace(/\/$/, "");
 
 // ─────────────────────────────────────────────
 // Esquemas de entrada (sin transforms: se convierten a JSON Schema para la IA)
@@ -108,7 +108,7 @@ function formatEvent(event: EventWithRelations) {
     organizers: event.organizers.map((eo) => ({ id: eo.organizer.id, name: eo.organizer.name })),
     sourceUrl: event.sourceUrl,
     internalNotes: event.internalNotes,
-    adminUrl: `${SITE_URL}/admin/eventos/${event.id}`,
+    adminUrl: `${siteUrl()}/admin/eventos/${event.id}`,
   };
 }
 

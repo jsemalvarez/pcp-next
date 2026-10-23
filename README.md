@@ -160,12 +160,12 @@ La app expone un servidor MCP en `/api/mcp` para buscar, cargar y editar eventos
 
 **Qué se puede hacer:** buscar eventos, lugares y organizadores; crear borradores (nunca se publican solos); editar eventos y fechas; publicar, pasar a borrador y archivar; listar los borradores incompletos con los contactos para completarlos. Los eventos no se borran desde el MCP.
 
-**Configuración:** definir `MCP_API_TOKEN` (mínimo 32 caracteres) y `NEXT_PUBLIC_SITE_URL` en `.env.dev` para local, y en las variables de entorno de Vercel para producción. Ver `.env.example`.
+**Configuración:** definir `MCP_API_TOKEN` (mínimo 32 caracteres) y `SITE_URL` en `.env.dev` para local, y en las variables de entorno de Vercel para producción. Ver `.env.example`.
 
 **Conectar claude.ai y la app del celular (OAuth):**
 
 1. En claude.ai: **Configuración → Conectores → Agregar conector personalizado**.
-2. URL: `https://www.paseosconpeques.com.ar/api/mcp`. Tiene que coincidir exactamente con `NEXT_PUBLIC_SITE_URL` + `/api/mcp` (mismo `www`). Dejá vacíos el client ID y el secreto.
+2. URL: `https://www.paseosconpeques.com.ar/api/mcp`. Tiene que coincidir exactamente con `SITE_URL` + `/api/mcp` (mismo `www`). Dejá vacíos el client ID y el secreto.
 3. Tocá **Conectar**: se abre el login del admin y después la pantalla "Autorizar acceso". Tocá **Permitir**.
 4. El conector queda disponible también en la app móvil.
 

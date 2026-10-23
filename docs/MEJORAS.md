@@ -358,7 +358,7 @@ Nota: pgAdmin importa la conexión solo la primera vez que arranca. Si se cambia
 - [x] Postgres local en versión 17, igual que producción.
 - [x] Script `npm run db:pull-prod` (`scripts/db-pull-prod.sh`). Exporta solo el schema `public` (Supabase agrega los suyos: `auth`, `storage`, etc.). Los dumps van a `backups/`, ignorado por git.
 - [x] Primera copia hecha el 2026-10-22: 144 eventos, 461 fechas, 52 lugares, 5 banners, 2 organizadores, 1 noticia, 1 usuario. Coincide con producción.
-- [~] P1 Agregar a `.env.example` las variables nuevas cuando se implementen. Ya están `MCP_API_TOKEN` y `NEXT_PUBLIC_SITE_URL`; faltan `IMAGE_STORAGE` y `CLOUDINARY_API_KEY/SECRET`.
+- [~] P1 Agregar a `.env.example` las variables nuevas cuando se implementen. Ya están `MCP_API_TOKEN` y `SITE_URL`; faltan `IMAGE_STORAGE` y `CLOUDINARY_API_KEY/SECRET`.
 - [x] Sección "Desarrollo local" del README actualizada con este flujo.
 - [ ] P1 `npm install` reporta 62 vulnerabilidades (5 críticas, 45 altas). Revisar con `npm audit`; probablemente se resuelvan en buena parte actualizando Next (16.0.7) y Prisma (5.22, hay versión 6/7).
 - [ ] P2 `build` sigue corriendo `prisma migrate deploy`. En local ya no es peligroso (sin `.env` falla), pero conviene moverlo a un script `vercel-build` para que quede explícito.
