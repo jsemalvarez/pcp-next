@@ -122,6 +122,30 @@ model OAuthToken {
 }
 
 // ─────────────────────────────────────────────
+// AUDIT LOG — historial de cambios hechos desde el MCP
+// ─────────────────────────────────────────────
+
+// Una fila por escritura. before/after son fotos del registro para poder ver y revertir
+// qué cambió. Sin relación con User: el historial se conserva aunque se borre el usuario.
+model AuditLog {
+  id         String   @id @default(uuid())
+  source     String   // "mcp"
+  clientId   String?  // cliente MCP: URL de metadatos (CIMD), id DCR o "pcp-admin" (token fijo)
+  clientName String?
+  userId     String?
+  action     String   // nombre de la tool, ej. "update_event"
+  entityType String   // "event" | "place" | "organizer"
+  entityId   String
+  input      Json?    // argumentos tal como llegaron
+  before     Json?    // estado previo (null al crear)
+  after      Json?    // estado resultante
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
 // PLACE
 // ─────────────────────────────────────────────
 

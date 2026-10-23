@@ -1,22 +1,10 @@
 "use server";
 
 import { requireAdmin } from "@/server/auth/require-admin";
+import { Prisma } from "@prisma/client";
 import prisma from "@/data/prisma/db";
 import { revalidatePath } from "next/cache";
-
-const slugify = (text: string) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize("NFD") // normalize diacritics
-    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
-    .trim()
-    .replace(/\s+/g, "-") // replace spaces with -
-    .replace(/[^\w\-]+/g, "") // remove all non-word chars
-    .replace(/\-\-+/g, "-") // replace multiple - with single -
-    .replace(/^-+/, "") // trim - from start of text
-    .replace(/-+$/, ""); // trim - from end of text
-};
+import { slugify } from "@/server/organizers/organizer.service";
 
 export async function getOrganizerTypes() {
   try {
@@ -42,9 +30,9 @@ export async function createOrganizerType(name: string) {
     });
     revalidatePath("/admin/organizer-types");
     return { success: true, data: type };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error al crear tipo de organizador:", error);
-    if (error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { success: false, error: "Ya existe una especialidad con este nombre." };
     }
     return { success: false, error: "Error interno del servidor." };
@@ -64,9 +52,9 @@ export async function updateOrganizerType(id: string, name: string) {
     });
     revalidatePath("/admin/organizer-types");
     return { success: true, data: type };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error al actualizar tipo de organizador:", error);
-    if (error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { success: false, error: "Ya existe una especialidad con este nombre." };
     }
     return { success: false, error: "Error interno del servidor." };

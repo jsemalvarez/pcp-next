@@ -1,9 +1,11 @@
-import type { McpServer } from "@modelcontextprotocol/server";
-import { ActivityType, EventStatus, Prisma, PriceType } from "@prisma/client";
+import type { McpServer, ServerContext } from "@modelcontextprotocol/server";
+import { ActivityType, EventStatus, PlaceCategory, Prisma, PriceType } from "@prisma/client";
 import { z } from "zod";
+import prisma from "@/data/prisma/db";
 import * as eventService from "@/server/events/event.service";
 import { EventValidationError } from "@/server/events/event.service";
 import { getEventForAdmin, listIncompleteEvents, searchEvents } from "@/server/events/event.queries";
+import { recordAudit } from "@/server/audit/audit.service";
 import {
   getWarnings,
   MISSING_FIELD_LABELS,
@@ -12,13 +14,14 @@ import {
   type MissingField,
 } from "@/server/events/event.completeness";
 import { revalidateEvents } from "@/server/events/event.revalidate";
-import { searchPlaces } from "@/server/places/place.queries";
-import { searchOrganizers } from "@/server/organizers/organizer.queries";
+import { listOrganizerTypes } from "@/server/organizers/organizer.queries";
 import { EVENT_PRICES, EVENT_TYPES } from "@/presentation/constants/event-filters";
+import { CATEGORIES_TRANSLATE } from "@/presentation/constants/categories";
 import { siteUrl } from "@/server/oauth/oauth.config";
+import { actorFrom, idSchema as id, json, omit, run } from "./mcp.shared";
 
 /**
- * Tools MCP de eventos, lugares y organizadores.
+ * Tools MCP de eventos y sus fechas.
  * Son adaptadores finos: validan la forma de la entrada para la IA y delegan
  * en los servicios, que vuelven a validar y aplican las reglas de negocio.
  */
@@ -28,7 +31,6 @@ import { siteUrl } from "@/server/oauth/oauth.config";
 // Esquemas de entrada (sin transforms: se convierten a JSON Schema para la IA)
 // ─────────────────────────────────────────────
 
-const id = z.string().uuid();
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe("Fecha de calendario YYYY-MM-DD (hora de Argentina)");
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).describe("Hora HH:mm en 24 hs");
 const priceType = z
@@ -112,41 +114,52 @@ function formatEvent(event: EventWithRelations) {
   };
 }
 
-function json(data: unknown) {
-  return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
-}
-
-function fail(message: string) {
-  return { isError: true, content: [{ type: "text" as const, text: message }] };
-}
-
-/** Ejecuta la tool y traduce errores a mensajes útiles sin filtrar detalles internos */
-async function run(tool: string, args: unknown, fn: () => Promise<ReturnType<typeof json>>) {
-  try {
-    return await fn();
-  } catch (error) {
-    if (error instanceof EventValidationError) return fail(error.message);
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
-      return fail("No existe un registro con ese id.");
-    }
-    console.error(`[mcp:${tool}] Error`, { args, error });
-    return fail("Error interno al ejecutar la herramienta.");
-  }
-}
-
 async function loadEvent(eventId: string) {
   const event = await getEventForAdmin(eventId);
   if (!event) throw new EventValidationError("No existe un evento con ese id.");
   return event;
 }
 
-/** Escritura + revalidación + respuesta con el evento actualizado */
-async function writeAndReturn(tool: string, args: unknown, write: () => Promise<{ id: string }>) {
+/** Foto del evento para el historial (sin los campos derivados para la IA) */
+function eventSnapshot(event: EventWithRelations) {
+  return { ...omit(formatEvent(event), "adminUrl", "recommendedToComplete"), photoId: event.photoId };
+}
+
+async function eventIdOfOccurrence(occurrenceId: string) {
+  const occurrence = await prisma.eventOccurrence.findUnique({ where: { id: occurrenceId }, select: { eventId: true } });
+  return occurrence?.eventId ?? null;
+}
+
+/**
+ * Escritura + historial + revalidación + respuesta con el evento actualizado.
+ * `targetEventId` (null al crear) indica qué evento fotografiar antes del cambio.
+ */
+async function writeEvent(
+  ctx: ServerContext,
+  tool: string,
+  args: unknown,
+  targetEventId: (() => Promise<string | null>) | null,
+  write: () => Promise<{ id: string }>
+) {
   return run(tool, args, async () => {
+    const beforeId = targetEventId ? await targetEventId() : null;
+    const before = beforeId ? await getEventForAdmin(beforeId) : null;
+
     const { id: eventId } = await write();
     console.info(`[mcp:${tool}] evento ${eventId}`);
     revalidateEvents(eventId);
-    return json(formatEvent(await loadEvent(eventId)));
+
+    const after = await loadEvent(eventId);
+    await recordAudit({
+      actor: actorFrom(ctx),
+      action: tool,
+      entityType: "event",
+      entityId: eventId,
+      input: args,
+      before: before ? eventSnapshot(before) : null,
+      after: eventSnapshot(after),
+    });
+    return json(formatEvent(after));
   });
 }
 
@@ -165,11 +178,11 @@ export function registerEventTools(server: McpServer) {
     {
       title: "Catálogos y fecha de hoy",
       description:
-        "Devuelve los valores válidos de tipo de precio, tipo de actividad y estados, más la fecha de hoy en Argentina. Llamala antes de crear o editar eventos.",
+        "Devuelve los valores válidos de tipo de precio, tipo de actividad, estados, categorías de lugar y tipos de organizador, más la fecha de hoy en Argentina. Llamala antes de crear o editar.",
       annotations: { readOnlyHint: true },
     },
     async () =>
-      json({
+      run("get_catalogs", {}, async () => json({
         today: todayInArgentina(),
         timezone: "America/Argentina/Buenos_Aires",
         priceTypes: EVENT_PRICES,
@@ -182,7 +195,9 @@ export function registerEventTools(server: McpServer) {
         },
         requiredToPublish: Object.values(MISSING_FIELD_LABELS),
         recommended: Object.values(WARNING_LABELS),
-      })
+        placeCategories: Object.values(PlaceCategory).map((value) => ({ value, label: CATEGORIES_TRANSLATE[value] })),
+        organizerTypes: await listOrganizerTypes(),
+      }))
   );
 
   server.registerTool(
@@ -272,7 +287,8 @@ export function registerEventTools(server: McpServer) {
         occurrences: z.array(occurrence).optional().describe("Fechas del evento"),
       }),
     },
-    async (args) => writeAndReturn("create_event_draft", args, () => eventService.createEvent({ ...args, publish: false }))
+    async (args, ctx) =>
+      writeEvent(ctx, "create_event_draft", args, null, () => eventService.createEvent({ ...args, publish: false }))
   );
 
   server.registerTool(
@@ -291,8 +307,10 @@ export function registerEventTools(server: McpServer) {
       }),
       annotations: { idempotentHint: true },
     },
-    async ({ id: eventId, ...data }) =>
-      writeAndReturn("update_event", { id: eventId, ...data }, () => eventService.updateEvent(eventId, data))
+    async ({ id: eventId, ...data }, ctx) =>
+      writeEvent(ctx, "update_event", { id: eventId, ...data }, async () => eventId, () =>
+        eventService.updateEvent(eventId, data)
+      )
   );
 
   server.registerTool(
@@ -302,8 +320,10 @@ export function registerEventTools(server: McpServer) {
       description: "Agrega una fecha a un evento existente.",
       inputSchema: z.object({ eventId: id, ...occurrence.shape }),
     },
-    async ({ eventId, ...data }) =>
-      writeAndReturn("add_occurrence", { eventId, ...data }, () => eventService.addOccurrence(eventId, data))
+    async ({ eventId, ...data }, ctx) =>
+      writeEvent(ctx, "add_occurrence", { eventId, ...data }, async () => eventId, () =>
+        eventService.addOccurrence(eventId, data)
+      )
   );
 
   server.registerTool(
@@ -321,8 +341,8 @@ export function registerEventTools(server: McpServer) {
       }),
       annotations: { idempotentHint: true },
     },
-    async ({ id: occurrenceId, ...data }) =>
-      writeAndReturn("update_occurrence", { id: occurrenceId, ...data }, () =>
+    async ({ id: occurrenceId, ...data }, ctx) =>
+      writeEvent(ctx, "update_occurrence", { id: occurrenceId, ...data }, () => eventIdOfOccurrence(occurrenceId), () =>
         eventService.updateOccurrence(occurrenceId, data)
       )
   );
@@ -335,7 +355,10 @@ export function registerEventTools(server: McpServer) {
       inputSchema: z.object({ id: id.describe("Id de la fecha (occurrences[].id)") }),
       annotations: { destructiveHint: true },
     },
-    async (args) => writeAndReturn("delete_occurrence", args, () => eventService.deleteOccurrence(args.id))
+    async (args, ctx) =>
+      writeEvent(ctx, "delete_occurrence", args, () => eventIdOfOccurrence(args.id), () =>
+        eventService.deleteOccurrence(args.id)
+      )
   );
 
   server.registerTool(
@@ -347,7 +370,7 @@ export function registerEventTools(server: McpServer) {
       inputSchema: z.object({ id }),
       annotations: { idempotentHint: true },
     },
-    async (args) => writeAndReturn("publish_event", args, () => eventService.publishEvent(args.id))
+    async (args, ctx) => writeEvent(ctx, "publish_event", args, async () => args.id, () => eventService.publishEvent(args.id))
   );
 
   server.registerTool(
@@ -358,7 +381,7 @@ export function registerEventTools(server: McpServer) {
       inputSchema: z.object({ id }),
       annotations: { idempotentHint: true },
     },
-    async (args) => writeAndReturn("unpublish_event", args, () => eventService.unpublishEvent(args.id))
+    async (args, ctx) => writeEvent(ctx, "unpublish_event", args, async () => args.id, () => eventService.unpublishEvent(args.id))
   );
 
   server.registerTool(
@@ -370,42 +393,6 @@ export function registerEventTools(server: McpServer) {
       inputSchema: z.object({ id }),
       annotations: { idempotentHint: true },
     },
-    async (args) => writeAndReturn("archive_event", args, () => eventService.archiveEvent(args.id))
-  );
-
-  server.registerTool(
-    "search_places",
-    {
-      title: "Buscar lugares",
-      description: "Busca lugares cargados por nombre o dirección, para asignarlos a las fechas de un evento.",
-      inputSchema: z.object({
-        query: z.string().describe("Nombre o dirección, ej. 'Teatro Colón' o 'Güemes'"),
-        limit: z.number().int().min(1).max(50).optional(),
-      }),
-      annotations: { readOnlyHint: true },
-    },
-    async (args) =>
-      run("search_places", args, async () => {
-        const places = await searchPlaces(args.query, args.limit);
-        return json({ count: places.length, places });
-      })
-  );
-
-  server.registerTool(
-    "search_organizers",
-    {
-      title: "Buscar organizadores",
-      description: "Busca organizadores / artistas cargados por nombre o Instagram, para vincularlos a un evento.",
-      inputSchema: z.object({
-        query: z.string(),
-        limit: z.number().int().min(1).max(50).optional(),
-      }),
-      annotations: { readOnlyHint: true },
-    },
-    async (args) =>
-      run("search_organizers", args, async () => {
-        const organizers = await searchOrganizers(args.query, args.limit);
-        return json({ count: organizers.length, organizers });
-      })
+    async (args, ctx) => writeEvent(ctx, "archive_event", args, async () => args.id, () => eventService.archiveEvent(args.id))
   );
 }

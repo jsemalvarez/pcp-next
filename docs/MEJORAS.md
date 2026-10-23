@@ -89,7 +89,8 @@ src/
 - [x] `src/server/auth/require-admin.ts` aplicado en todas las acciones de escritura (eventos, lugares, organizadores, especialidades, noticias, banners) y en las lecturas de admin de eventos. Verificado llamando a las actions sin sesión: se rechazan.
 - [x] `JWT_SECRET` obligatorio (mínimo 32 caracteres): sin él no se firma ni se verifica ninguna sesión.
 - [x] `src/server/events` (schemas, service, queries, completeness) y `actions/events.ts` como acciones finas.
-- [ ] P1 Repetir para places, organizers, organizerTypes, news, banners.
+- [x] `src/server/places` y `src/server/organizers` (schemas, service, queries, revalidate) y sus actions como adaptadores finos. Validación compartida en `src/server/shared` (`parseInput`, `ValidationError`, `toErrorMessage` para las actions). Verificado que el payload de los formularios del admin valida para todos los lugares y organizadores de la copia de prod. Borrar un lugar con fechas asignadas ahora da un mensaje claro.
+- [ ] P1 Repetir para organizerTypes, news, banners.
 - [x] Bug corregido: al editar un evento en el admin, los cambios en las fechas no se guardaban (se descartaban las ocurrencias). Ahora se reemplazan.
 - [x] Bug corregido: las fechas (guardadas a medianoche UTC) se leían en hora local en el formulario del admin, el listado, favoritos, la home y el perfil, y se mostraban un día antes. Ahora se leen en UTC (`dayjs.utc`, `fortmatDate`). Encontrado probando el admin en el navegador: al guardar, el evento se corría al día anterior.
 - [x] Lecturas públicas de eventos (home, favoritos, calendario) movidas a `event.queries.ts`. Los lugares de la home y favoritos todavía se leen directo con Prisma.
@@ -131,8 +132,9 @@ Ejemplos de uso:
 | `publish_event` | Pasa a `PUBLISHED` | Falla si faltan campos obligatorios |
 | `archive_event` | Lo oculta sin borrarlo | Preferible a borrar (ver 2.5) |
 | `list_incomplete_events` | Borradores incompletos con lo que falta y los contactos del lugar/organizador | Para el seguimiento |
-| `search_places` / `get_place` / `create_place` / `update_place` | CRUD de lugares | `create_place` necesita lat/lng |
-| `search_organizers` / `create_organizer` / `update_organizer` | CRUD de organizadores | |
+| `search_places` / `get_place` / `create_place` / `update_place` | Alta y edición de lugares (sin borrado: `isActive: false`) | Si no vienen lat/lng se geocodifica la dirección (Nominatim) |
+| `search_organizers` / `get_organizer` / `create_organizer` / `update_organizer` | Alta y edición de organizadores (sin borrado) | El slug no cambia al renombrar |
+| `get_change_history` | Historial de cambios hechos desde el MCP | Campos cambiados; con `includeSnapshots` trae el antes y el después |
 | `set_event_photo_from_url` | Sube a Cloudinary una imagen desde una URL pública | Ver 2.6 |
 
 Además, un **resource** (o tool `get_catalogs`) con los valores válidos de `ActivityType`, `PriceType`, `PlaceCategory` y tipos de organizador, para que la IA no invente categorías.
@@ -142,8 +144,9 @@ Además, un **resource** (o tool `get_catalogs`) con los valores válidos de `Ac
 - [x] Autenticación obligatoria en `/api/mcp` (`withMcpAuth`, `required: true`): sin token válido responde 401.
 - [x] Token en `MCP_API_TOKEN` (mínimo 32 caracteres), comparado en tiempo constante (hash SHA-256 + `timingSafeEqual`), enviado como `Authorization: Bearer …`. Sin token configurado, el MCP rechaza todo. **Falta cargarlo en Vercel.**
 - [x] **Compatibilidad de clientes:** OAuth 2.1 propio según los requisitos de Claude (https://claude.com/docs/connectors/building/authentication): metadatos RFC 9728 y RFC 8414, CIMD (preferido por Claude) y DCR, PKCE S256, clientes públicos, refresh tokens que rotan, `iss` en el callback. Solo acepta URLs de retorno de Claude. El consentimiento usa el login del admin. Funciona en claude.ai, la app móvil, Desktop y Claude Code; el token fijo sigue sirviendo para Claude Code y scripts.
-- [x] Sin tools sobre usuarios, contraseñas ni banners/noticias: solo eventos, fechas y búsqueda de lugares y organizadores.
-- [ ] Tabla `AuditLog` (fecha, actor, tool, entidad, id, cambios). Como escribe una IA, poder ver y revertir qué cambió es importante.
+- [x] Sin tools sobre usuarios, contraseñas ni banners/noticias: solo eventos, fechas, lugares y organizadores. Nada se borra desde el MCP.
+- [x] Tabla `AuditLog` (migración `20261023180000_add_audit_log`): cada escritura del MCP guarda cliente, usuario, tool, entidad, id, argumentos y fotos del registro antes y después (`src/server/audit`). Se consulta con la tool `get_change_history`. Los intentos rechazados no se registran. Si el registro falla, se loguea y la escritura sigue.
+- [ ] P2 Auditar también las escrituras del admin web (hoy solo el MCP) y una pantalla en el admin para ver el historial y revertir un cambio con un clic.
 - [ ] Rate limit básico por token.
 
 ### 2.5 Borrar vs archivar
@@ -161,9 +164,10 @@ Una IA no puede subir de forma confiable al MCP una imagen adjunta en el chat. O
 
 - [x] Fase 1 terminada para eventos (services + auth + estados).
 - [x] Endpoint `/api/mcp` (`mcp-handler` 2.3 + `@modelcontextprotocol/server` 2.3, spec 2026-07-28 con fallback a Streamable HTTP 2025) con autenticación por token.
-- [x] 14 tools: `get_catalogs`, `search_events`, `get_event`, `list_incomplete_events`, `create_event_draft`, `update_event`, `add_occurrence`, `update_occurrence`, `delete_occurrence`, `publish_event`, `unpublish_event`, `archive_event`, `search_places`, `search_organizers` (`src/server/mcp/event-tools.ts`). Probadas de punta a punta con el cliente oficial (SDK v2) y con el protocolo 2025 por HTTP.
-- [ ] P1 Tools de alta/edición de lugares y organizadores.
-- [ ] P1 Auditoría.
+- [x] 14 tools de eventos: `get_catalogs`, `search_events`, `get_event`, `list_incomplete_events`, `create_event_draft`, `update_event`, `add_occurrence`, `update_occurrence`, `delete_occurrence`, `publish_event`, `unpublish_event`, `archive_event`, `search_places`, `search_organizers` (`src/server/mcp/event-tools.ts`). Probadas de punta a punta con el cliente oficial (SDK v2) y con el protocolo 2025 por HTTP.
+- [x] Tools de lugares y organizadores (`place-tools.ts`, `organizer-tools.ts`): `get_place`, `create_place`, `update_place`, `get_organizer`, `create_organizer`, `update_organizer`, además de las búsquedas. Controlan duplicados por nombre (y por Instagram en organizadores). `create_place` geocodifica la dirección si no vienen coordenadas, crea el lugar fuera del mapa (`isShowInMap: false`) y devuelve las fechas pendientes cuyo `placeText` coincide, para asignarlas. `get_catalogs` suma las categorías de lugar y los tipos de organizador. En total, 21 tools; probadas contra la base local (25 checks).
+- [x] Auditoría (ver 2.4) + tool `get_change_history`.
+- [ ] P2 Tool para crear tipos de organizador (hoy solo desde el admin).
 - [x] OAuth para conectarlo desde claude.ai / app móvil (`src/server/oauth`, `/oauth/*`, `/.well-known/*`, migración `20261023120000_add_oauth`). Probado de punta a punta en local con el cliente CIMD real de Claude Code: consentimiento en el navegador, canje, MCP con el token, refresh con rotación, reuso de código y de refresh rechazados. **Falta probarlo con claude.ai en producción** (Claude no puede llegar a localhost).
 - [ ] P2 Pantalla en el admin para ver y revocar las conexiones OAuth activas (hoy se revocan borrando filas de `OAuthToken`).
 - [ ] P2 `set_event_photo_from_url`.
@@ -277,13 +281,13 @@ Limitaciones: no funciona en iOS e Instagram comparte solo el link, sin imagen n
 ### Seguridad
 - [x] Autenticación en server actions de escritura (ver 1.4).
 - [x] Validar `JWT_SECRET`.
-- [~] P1 No devolver `error.message` de Prisma al cliente. Hecho en eventos; falta en lugares y noticias.
+- [~] P1 No devolver `error.message` de Prisma al cliente. Hecho en eventos, lugares y organizadores; falta en noticias y banners.
 - [ ] P1 `getPlaces()` público no debe devolver lugares inactivos.
 - [ ] P2 El upload preset de Cloudinary es *unsigned*: cualquiera que lo conozca puede subir imágenes. Pasar a subida firmada desde el servidor (se resuelve con 5.2).
 - [ ] P3 Renombrar `middleware.ts` → `proxy.ts` (Next 16).
 
 ### Calidad
-- [~] P1 Validación con zod en todas las entradas. Hecho en eventos; falta el resto de los módulos.
+- [~] P1 Validación con zod en todas las entradas. Hecho en eventos, lugares y organizadores; falta en especialidades, noticias y banners.
 - [ ] P1 Centralizar el manejo de fechas y zona horaria (Argentina, UTC−3) con `dayjs`. Hoy hay cálculos manuales distintos en la home y en el calendario.
 - [ ] P2 Partir `calendario/page.tsx` (1.230 líneas, todo cliente) en server component + componentes chicos; revisar si los componentes `Calendar/*` existentes se pueden reutilizar o borrar.
 - [ ] P2 Partir `EventForm.tsx` (920 líneas) y `FavoritesClient.tsx` (695).

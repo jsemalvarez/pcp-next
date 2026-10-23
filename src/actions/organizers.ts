@@ -2,47 +2,11 @@
 
 import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
-import { revalidatePath } from "next/cache";
+import * as organizerService from "@/server/organizers/organizer.service";
+import { revalidateOrganizers } from "@/server/organizers/organizer.revalidate";
+import { toErrorMessage } from "@/server/shared/action-errors";
+import type { CreateOrganizerInput, UpdateOrganizerInput } from "@/server/organizers/organizer.schemas";
 import { PUBLIC_EVENT_WHERE } from "@/server/events/event.queries";
-
-const slugify = (text: string) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
-};
-
-// Generar un slug único para el organizador
-async function generateUniqueSlug(name: string, excludeId?: string) {
-  const baseSlug = slugify(name);
-  let slug = baseSlug;
-  let counter = 1;
-
-  while (true) {
-    const existing = await prisma.organizer.findFirst({
-      where: {
-        slug,
-        id: excludeId ? { not: excludeId } : undefined,
-      },
-    });
-
-    if (!existing) {
-      break;
-    }
-
-    slug = `${baseSlug}-${counter}`;
-    counter++;
-  }
-
-  return slug;
-}
 
 export async function getOrganizers() {
   try {
@@ -102,82 +66,37 @@ export async function getOrganizerBySlug(slug: string) {
   }
 }
 
-interface OrganizerInput {
-  name: string;
-  typeId: string;
-  slug?: string | null;
-  description?: string | null;
-  photoId?: string | null;
-  phone?: string | null;
-  whatsapp?: string | null;
-  instagram?: string | null;
-  facebook?: string | null;
-  youtube?: string | null;
-  spotify?: string | null;
-  tiktok?: string | null;
-  web?: string | null;
-  email?: string | null;
-}
-
-export async function createOrganizer(data: OrganizerInput) {
+export async function createOrganizer(data: CreateOrganizerInput) {
   try {
     await requireAdmin();
-    const baseSlugName = data.slug || data.name;
-    const slug = await generateUniqueSlug(baseSlugName);
-    const organizer = await prisma.organizer.create({
-      data: {
-        ...data,
-        slug,
-      },
-    });
-    revalidatePath("/admin/organizers");
+    const organizer = await organizerService.createOrganizer(data);
+    revalidateOrganizers(organizer.slug);
     return { success: true, data: organizer };
   } catch (error) {
-    console.error("Error al crear organizador:", error);
-    return { success: false, error: "Error al crear el organizador." };
+    return { success: false, error: toErrorMessage("createOrganizer", error, "Error al crear el organizador.") };
   }
 }
 
-export async function updateOrganizer(id: string, data: OrganizerInput) {
+export async function updateOrganizer(id: string, data: UpdateOrganizerInput) {
   try {
     await requireAdmin();
-    const baseSlugName = data.slug || data.name;
-    const slug = await generateUniqueSlug(baseSlugName, id);
-    const organizer = await prisma.organizer.update({
-      where: { id },
-      data: {
-        ...data,
-        slug,
-      },
-    });
-    revalidatePath("/admin/organizers");
-    revalidatePath(`/perfil/${organizer.slug}`);
+    const before = await prisma.organizer.findUnique({ where: { id }, select: { slug: true } });
+    const organizer = await organizerService.updateOrganizer(id, data);
+    revalidateOrganizers(organizer.slug);
+    if (before && before.slug !== organizer.slug) revalidateOrganizers(before.slug);
     return { success: true, data: organizer };
   } catch (error) {
-    console.error("Error al actualizar organizador:", error);
-    return { success: false, error: "Error al actualizar el organizador." };
+    return { success: false, error: toErrorMessage("updateOrganizer", error, "Error al actualizar el organizador.") };
   }
 }
 
 export async function deleteOrganizer(id: string) {
   try {
     await requireAdmin();
-    const organizer = await prisma.organizer.findUnique({
-      where: { id },
-      select: { slug: true },
-    });
-
-    await prisma.organizer.delete({
-      where: { id },
-    });
-
-    revalidatePath("/admin/organizers");
-    if (organizer) {
-      revalidatePath(`/perfil/${organizer.slug}`);
-    }
+    const organizer = await organizerService.deleteOrganizer(id);
+    revalidateOrganizers(organizer.slug);
     return { success: true };
   } catch (error) {
-    console.error("Error al eliminar organizador:", error);
-    return { success: false, error: "Error al eliminar el organizador." };
+    return { success: false, error: toErrorMessage("deleteOrganizer", error, "Error al eliminar el organizador.") };
   }
 }

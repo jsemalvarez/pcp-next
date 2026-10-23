@@ -1,9 +1,9 @@
 "use server";
 
-import { requireAdmin, UnauthorizedError } from "@/server/auth/require-admin";
+import { requireAdmin } from "@/server/auth/require-admin";
 import { revalidateEvents } from "@/server/events/event.revalidate";
 import * as eventService from "@/server/events/event.service";
-import { EventValidationError } from "@/server/events/event.service";
+import { toErrorMessage } from "@/server/shared/action-errors";
 import {
   getEventForAdmin,
   getPublishedOccurrencesByMonth,
@@ -17,13 +17,6 @@ import type { CreateEventInput, OccurrenceInput, UpdateEventInput } from "@/serv
  */
 
 export type { CreateEventInput, UpdateEventInput, OccurrenceInput };
-
-/** Mensaje para la UI sin filtrar detalles internos (Prisma, stack, etc.) */
-function toErrorMessage(context: string, error: unknown, fallback: string) {
-  if (error instanceof EventValidationError || error instanceof UnauthorizedError) return error.message;
-  console.error(`[${context}] Error:`, error);
-  return fallback;
-}
 
 // ─────────────────────────────────────────────
 // READ

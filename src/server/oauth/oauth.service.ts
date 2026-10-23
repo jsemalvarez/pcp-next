@@ -222,6 +222,6 @@ export async function verifyOAuthAccessToken(token: string): Promise<AuthInfo | 
     clientId: stored.clientId,
     scopes: stored.scope ? stored.scope.split(" ") : [],
     expiresAt: Math.floor(stored.accessExpiresAt.getTime() / 1000),
-    extra: { userId: stored.userId },
+    extra: { userId: stored.userId, clientName: stored.clientName },
   };
 }

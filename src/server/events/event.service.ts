@@ -11,6 +11,7 @@ import {
   type OccurrenceUpdateInput,
   type UpdateEventInput,
 } from "./event.schemas";
+import { parseInput, ValidationError } from "@/server/shared/validation";
 import { describeMissing, draftStatusFor, getMissingFields } from "./event.completeness";
 
 /**
@@ -19,7 +20,8 @@ import { describeMissing, draftStatusFor, getMissingFields } from "./event.compl
  * No usar "use server" acá: expondría todas las funciones como endpoints.
  */
 
-export class EventValidationError extends Error {
+/** Error de reglas de negocio de eventos; el mensaje se puede mostrar al usuario */
+export class EventValidationError extends ValidationError {
   constructor(message: string) {
     super(message);
     this.name = "EventValidationError";
@@ -32,17 +34,6 @@ type ParsedOccurrence = z.output<typeof occurrenceInputSchema>;
 /** 'YYYY-MM-DD' → medianoche UTC (el front lee el día con getUTC*) */
 export function toUtcDate(date: string) {
   return new Date(`${date}T00:00:00.000Z`);
-}
-
-function parse<T extends z.ZodType>(schema: T, input: unknown): z.output<T> {
-  const result = schema.safeParse(input);
-  if (!result.success) {
-    const message = result.error.issues
-      .map((issue) => (issue.path.length ? `${issue.path.join(".")}: ${issue.message}` : issue.message))
-      .join("; ");
-    throw new EventValidationError(message);
-  }
-  return result.data;
 }
 
 async function assertPlacesExist(tx: Tx, placeIds: (string | null)[]) {
@@ -105,7 +96,7 @@ async function syncCompleteness(tx: Tx, eventId: string) {
 
 /** Crea un evento con sus fechas. Por defecto queda como borrador (DRAFT o INCOMPLETE). */
 export async function createEvent(input: CreateEventInput) {
-  const { occurrences, organizerIds, publish, ...fields } = parse(createEventSchema, input);
+  const { occurrences, organizerIds, publish, ...fields } = parseInput(createEventSchema, input);
   const missing = getMissingFields({ priceType: fields.priceType ?? null, occurrences });
 
   if (publish && missing.length > 0) {
@@ -135,7 +126,7 @@ export async function createEvent(input: CreateEventInput) {
  * Si viene `occurrences`, reemplaza todas las fechas.
  */
 export async function updateEvent(id: string, input: UpdateEventInput) {
-  const { occurrences, organizerIds, ...fields } = parse(updateEventSchema, input);
+  const { occurrences, organizerIds, ...fields } = parseInput(updateEventSchema, input);
 
   return prisma.$transaction(async (tx) => {
     if (occurrences) await assertPlacesExist(tx, occurrences.map((o) => o.placeId));
@@ -199,7 +190,7 @@ export async function deleteEvent(id: string) {
 // ─────────────────────────────────────────────
 
 export async function addOccurrence(eventId: string, input: OccurrenceInput) {
-  const occurrence = parse(occurrenceInputSchema, input);
+  const occurrence = parseInput(occurrenceInputSchema, input);
   return prisma.$transaction(async (tx) => {
     await assertPlacesExist(tx, [occurrence.placeId]);
     await tx.eventOccurrence.create({ data: { eventId, ...toOccurrenceData(occurrence) } });
@@ -208,7 +199,7 @@ export async function addOccurrence(eventId: string, input: OccurrenceInput) {
 }
 
 export async function updateOccurrence(id: string, input: OccurrenceUpdateInput) {
-  const { date, placeId, ...rest } = parse(occurrenceUpdateSchema, input);
+  const { date, placeId, ...rest } = parseInput(occurrenceUpdateSchema, input);
   return prisma.$transaction(async (tx) => {
     if (placeId) await assertPlacesExist(tx, [placeId]);
     const occurrence = await tx.eventOccurrence.update({

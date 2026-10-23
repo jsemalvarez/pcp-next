@@ -19,3 +19,32 @@ export async function searchPlaces(text: string, limit = 10) {
     take: Math.min(Math.max(limit, 1), 50),
   });
 }
+
+export async function getPlaceById(id: string) {
+  return prisma.place.findUnique({ where: { id } });
+}
+
+/**
+ * Fechas de eventos (no archivados) que todavía no tienen lugar asignado y cuyo texto
+ * de la fuente se parece al nombre del lugar. Sirve para ofrecer asignarlas al crear un lugar.
+ */
+export async function findOccurrencesMatchingPlaceText(placeName: string, limit = 20) {
+  const name = placeName.trim();
+  if (!name) return [];
+  return prisma.eventOccurrence.findMany({
+    where: {
+      placeId: null,
+      placeText: { contains: name, mode: "insensitive" },
+      event: { status: { not: "ARCHIVED" } },
+    },
+    select: {
+      id: true,
+      date: true,
+      timeStart: true,
+      placeText: true,
+      event: { select: { id: true, title: true, status: true } },
+    },
+    orderBy: { date: "asc" },
+    take: limit,
+  });
+}

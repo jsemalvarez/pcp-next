@@ -21,3 +21,11 @@ export async function searchOrganizers(text: string, limit = 10) {
     take: Math.min(Math.max(limit, 1), 50),
   });
 }
+
+export async function getOrganizerById(id: string) {
+  return prisma.organizer.findUnique({ where: { id }, include: { type: { select: { id: true, name: true } } } });
+}
+
+export async function listOrganizerTypes() {
+  return prisma.organizerType.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } });
+}

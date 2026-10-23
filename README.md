@@ -158,7 +158,15 @@ La app expone un servidor MCP en `/api/mcp` para buscar, cargar y editar eventos
 - **OAuth** (recomendado): Claude abre el login del admin, autorizás una vez y listo. Funciona en claude.ai, la app móvil, Claude Desktop y Claude Code.
 - **Token fijo** `MCP_API_TOKEN`: para Claude Code o scripts, enviado como `Authorization: Bearer <token>`.
 
-**Qué se puede hacer:** buscar eventos, lugares y organizadores; crear borradores (nunca se publican solos); editar eventos y fechas; publicar, pasar a borrador y archivar; listar los borradores incompletos con los contactos para completarlos. Los eventos no se borran desde el MCP.
+**Qué se puede hacer:**
+
+- Buscar eventos, lugares y organizadores.
+- Crear borradores de eventos (nunca se publican solos), editar eventos y fechas, publicarlos, pasarlos a borrador y archivarlos.
+- Listar los borradores incompletos con los contactos para completarlos.
+- Dar de alta y editar lugares y organizadores. Si no se mandan coordenadas, se calculan a partir de la dirección con [Nominatim](https://nominatim.org/) (OpenStreetMap).
+- Ver el historial de cambios: cada escritura queda en la tabla `AuditLog`, con el estado anterior y el nuevo.
+
+Nada se borra desde el MCP: los eventos se archivan y los lugares se desactivan.
 
 **Configuración:** definir `MCP_API_TOKEN` (mínimo 32 caracteres) y `SITE_URL` en `.env.dev` para local, y en las variables de entorno de Vercel para producción. Ver `.env.example`.
 

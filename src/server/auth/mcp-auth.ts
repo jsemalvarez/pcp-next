@@ -24,7 +24,7 @@ function matchesStaticToken(bearerToken: string) {
 export async function verifyMcpToken(_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> {
   if (!bearerToken) return undefined;
   if (matchesStaticToken(bearerToken)) {
-    return { token: bearerToken, clientId: "pcp-admin", scopes: [] };
+    return { token: bearerToken, clientId: "pcp-admin", scopes: [], extra: { clientName: "Token fijo (MCP_API_TOKEN)" } };
   }
   return verifyOAuthAccessToken(bearerToken);
 }

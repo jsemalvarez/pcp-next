@@ -1,27 +1,10 @@
 import { z } from "zod";
 import { ActivityType, PriceType } from "@prisma/client";
+import { ageRangeError, ageRangeIsValid, optionalText, optionalUrl } from "@/server/shared/validation";
 
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
-
-/**
- * Texto opcional: undefined = no tocar, "" o null = borrar.
- * Siempre sale recortado; los vacíos se guardan como null.
- */
-const optionalText = (max: number) =>
-  z
-    .string()
-    .max(max)
-    .nullish()
-    .transform((v) => (v === undefined ? undefined : v?.trim() || null));
-
-const optionalUrl = z
-  .string()
-  .trim()
-  .nullish()
-  .transform((v) => (v === undefined ? undefined : v || null))
-  .refine((v) => !v || /^https?:\/\/\S+$/i.test(v), "Tiene que ser una URL que empiece con http:// o https://");
 
 /** Fecha de calendario 'YYYY-MM-DD' (sin hora ni zona horaria) */
 export const dateString = z
@@ -85,10 +68,6 @@ const eventFields = {
   internalNotes: optionalText(5000),
   organizerIds: z.array(z.string().uuid()),
 };
-
-const ageRangeIsValid = (v: { ageMin?: number; ageMax?: number | null }) =>
-  v.ageMax == null || v.ageMin == null || v.ageMax >= v.ageMin;
-const ageRangeError = { message: "La edad máxima no puede ser menor que la mínima", path: ["ageMax"] };
 
 export const createEventSchema = z
   .object({

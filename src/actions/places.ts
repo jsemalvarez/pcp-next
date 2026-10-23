@@ -2,8 +2,15 @@
 
 import { requireAdmin } from "@/server/auth/require-admin";
 import prisma from "@/data/prisma/db";
-import { revalidatePath } from "next/cache";
-import { Place } from "@/domain/entities/Place";
+import * as placeService from "@/server/places/place.service";
+import { revalidatePlaces } from "@/server/places/place.revalidate";
+import { toErrorMessage } from "@/server/shared/action-errors";
+import type { CreatePlaceInput, UpdatePlaceInput } from "@/server/places/place.schemas";
+
+/**
+ * Adaptador fino entre la UI y el servicio de lugares:
+ * verifica la sesión, llama al servicio y revalida las páginas afectadas.
+ */
 
 export async function getPlaces() {
   try {
@@ -29,49 +36,35 @@ export async function getPlaceById(id: string) {
   }
 }
 
-export async function createPlace(data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'>) {
+export async function createPlace(data: CreatePlaceInput) {
   try {
     await requireAdmin();
-    const place = await prisma.place.create({
-      data,
-    });
-    revalidatePath("/admin/lugares");
-    revalidatePath("/places"); // En caso de que haya una página pública de lugares
+    const place = await placeService.createPlace(data);
+    revalidatePlaces();
     return { success: true, place };
-  } catch (error: any) {
-    console.error("Error al crear lugar:", error);
-    return { success: false, error: error?.message || "Error al crear lugar" };
+  } catch (error) {
+    return { success: false, error: toErrorMessage("createPlace", error, "Error al crear lugar") };
   }
 }
 
-export async function updatePlace(id: string, data: Partial<Omit<Place, 'id' | 'createdAt' | 'updatedAt'>>) {
+export async function updatePlace(id: string, data: UpdatePlaceInput) {
   try {
     await requireAdmin();
-    const place = await prisma.place.update({
-      where: { id },
-      data,
-    });
-    revalidatePath("/admin/lugares");
-    revalidatePath(`/admin/lugares/${id}`);
-    revalidatePath("/places"); 
+    const place = await placeService.updatePlace(id, data);
+    revalidatePlaces(id);
     return { success: true, place };
-  } catch (error: any) {
-    console.error("Error al actualizar lugar:", error);
-    return { success: false, error: error?.message || "Error al actualizar lugar" };
+  } catch (error) {
+    return { success: false, error: toErrorMessage("updatePlace", error, "Error al actualizar lugar") };
   }
 }
 
 export async function deletePlace(id: string) {
   try {
     await requireAdmin();
-    await prisma.place.delete({
-      where: { id },
-    });
-    revalidatePath("/admin/lugares");
-    revalidatePath("/places");
+    await placeService.deletePlace(id);
+    revalidatePlaces(id);
     return { success: true };
   } catch (error) {
-    console.error("Error al eliminar lugar:", error);
-    return { success: false, error: "Error al eliminar lugar" };
+    return { success: false, error: toErrorMessage("deletePlace", error, "Error al eliminar lugar") };
   }
 }
