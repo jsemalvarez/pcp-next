@@ -4,7 +4,8 @@ import { EventStatus, PriceType } from "@prisma/client";
  * Único lugar que define qué le falta a un evento.
  *
  * - Obligatorios: sin ellos no se puede publicar (el borrador queda INCOMPLETE).
- * - Recomendados: se muestran como aviso, no bloquean.
+ * - Recomendados: se muestran como aviso, no bloquean. La foto solo se pide en eventos
+ *   destacados o patrocinados (es una pieza diseñada aparte, no una captura del post).
  *
  * Los códigos se guardan en Event.missingFields; las etiquetas son para mostrar.
  */
@@ -16,7 +17,7 @@ export const MISSING_FIELD_LABELS = {
 } as const;
 
 export const WARNING_LABELS = {
-  photo: "foto",
+  photo: "foto (por ser destacado o patrocinado)",
   activityTypes: "tipo de actividad",
   description: "descripción",
   organizers: "organizador",
@@ -33,6 +34,8 @@ type CompletenessInput = {
 
 type WarningsInput = CompletenessInput & {
   photoId: string | null;
+  isFeatured: boolean;
+  isSponsored: boolean;
   description: string | null;
   activityTypes: unknown[];
   ticketUrl: string | null;
@@ -50,7 +53,7 @@ export function getMissingFields(event: CompletenessInput): MissingField[] {
 
 export function getWarnings(event: WarningsInput): EventWarning[] {
   const warnings: EventWarning[] = [];
-  if (!event.photoId) warnings.push("photo");
+  if (!event.photoId && (event.isFeatured || event.isSponsored)) warnings.push("photo");
   if (event.activityTypes.length === 0) warnings.push("activityTypes");
   if (!event.description) warnings.push("description");
   if (event.organizerCount === 0) warnings.push("organizers");

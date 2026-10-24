@@ -7,6 +7,7 @@ import { useFavorites } from '@/presentation/contexts/FavoritesContext';
 import Link from 'next/link';
 import { getOccurrencesByMonth } from "@/actions/events";
 import { PriceType, ActivityType } from "@prisma/client";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 // Map PriceType enum to friendly Spanish text
 const PRICE_TYPE_LABELS: Record<PriceType, string> = {
@@ -590,7 +591,7 @@ function CalendarContent() {
                                                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-brand-accent/10">
                                                     {occ.event.photoId ? (
                                                         <img
-                                                                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`}
+                                                                src={imageUrl(occ.event.photoId, { width: 200, defaultFolder: "events" })}
                                                                 alt={occ.event.title}
                                                                 className="w-full h-full object-cover"
                                                         />
@@ -1050,7 +1051,7 @@ function CalendarContent() {
                                     }}
                                 >
                                     <img
-                                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_800,q_auto,f_auto/${selectedEventOccurrence.event.photoId.includes('/') ? selectedEventOccurrence.event.photoId : 'events/' + selectedEventOccurrence.event.photoId}`}
+                                        src={imageUrl(selectedEventOccurrence.event.photoId, { width: 800, defaultFolder: "events" })}
                                         alt={selectedEventOccurrence.event.title}
                                         className="w-full h-full object-cover"
                                     />

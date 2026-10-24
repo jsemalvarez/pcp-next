@@ -24,6 +24,8 @@ import 'dayjs/locale/es';
 import utc from 'dayjs/plugin/utc';
 import { SearchablePlaceSelect } from "./SearchablePlaceSelect";
 import { SearchableOrganizerSelect } from "./SearchableOrganizerSelect";
+import { imageUrl } from '@/presentation/utils/imageUrl';
+import { uploadImage } from '@/presentation/utils/uploadImage';
 dayjs.locale('es');
 dayjs.extend(utc);
 
@@ -178,18 +180,17 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
     initialData ? initialData.priceType : 'FREE_ENTRY'
   );
   const [selectedColor, setSelectedColor] = useState<string>(initialData?.bgColor ?? '#9575CD');
+  const [isFeatured, setIsFeatured] = useState(initialData?.isFeatured ?? false);
+  const [isSponsored, setIsSponsored] = useState(initialData?.isSponsored ?? false);
   const [selectedOrganizerIds, setSelectedOrganizerIds] = useState<string[]>(
     initialData?.organizers?.map((o) => o.organizerId) ?? []
   );
 
   // ── Datos de imagen ──
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
-
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.photoId
-      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_300,q_auto,f_auto/${initialData.photoId.includes('/') ? initialData.photoId : 'events/' + initialData.photoId}`
+      ? imageUrl(initialData.photoId, { width: 300, defaultFolder: 'events' })
       : null
   );
   const [photoWidth, setPhotoWidth] = useState<number | undefined>(initialData?.photoWidth ?? undefined);
@@ -227,6 +228,8 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
     priceType,
     occurrences: occurrences.map((o) => ({ placeId: o.placeId || null })),
     photoId: imagePreview,
+    isFeatured,
+    isSponsored,
     description: initialData?.description ?? null,
     activityTypes,
     ticketUrl: initialData?.ticketUrl ?? null,
@@ -236,22 +239,9 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
   const [previewGenerated, setPreviewGenerated] = useState(isEditing);
 
   // ── Upload helper ──
-  const uploadToCloudinary = async (file: File): Promise<{ id: string; width: number; height: number }> => {
-    const data = new FormData();
-    data.append('file', file);
-    data.append('upload_preset', uploadPreset);
-    data.append('folder', 'events');
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: 'POST', body: data }
-    );
-    const result = await res.json();
-    if (!res.ok) {
-      throw new Error('Error al subir la imagen a Cloudinary');
-    }
-    const publicId = result.public_id;
-    return { id: `${publicId}.${result.format}`, width: result.width, height: result.height };
+  const uploadPhoto = async (file: File): Promise<{ id: string; width?: number; height?: number }> => {
+    const { photoId, width, height } = await uploadImage(file, 'events');
+    return { id: photoId, width: width ?? undefined, height: height ?? undefined };
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -340,7 +330,7 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
 
       // Si se cargó una nueva imagen local, se sube primero
       if (imageFile) {
-        const uploadResult = await uploadToCloudinary(imageFile);
+        const uploadResult = await uploadPhoto(imageFile);
         uploadedPhotoId = uploadResult.id;
         currentPhotoWidth = uploadResult.width;
         currentPhotoHeight = uploadResult.height;
@@ -480,7 +470,8 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
               <input
                 name="isFeatured"
                 type="checkbox"
-                defaultChecked={initialData?.isFeatured}
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
                 className="w-5 h-5 rounded border-gray-300 text-brand-primary focus:ring-brand-primary shrink-0"
               />
               <div className="text-left leading-tight">
@@ -496,7 +487,8 @@ export function EventForm({ places, organizers = [], initialData }: Props) {
               <input
                 name="isSponsored"
                 type="checkbox"
-                defaultChecked={initialData?.isSponsored}
+                checked={isSponsored}
+                onChange={(e) => setIsSponsored(e.target.checked)}
                 className="w-5 h-5 rounded border-gray-300 text-brand-accent focus:ring-brand-accent shrink-0"
               />
               <div className="text-left leading-tight">

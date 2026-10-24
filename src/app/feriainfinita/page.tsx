@@ -1,13 +1,13 @@
 import { LocationPartner } from "@/presentation/components/Partner/LocationPartner";
 import Image from "next/image";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
-const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
-const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${cloudName}/image/upload/w_600,q_auto,f_auto/feriainfinita/`;
+const feriaImage = (file: string) => imageUrl(`feriainfinita/${file}`, { width: 600 });
 
 const partner = {
     name: "Feria Infinita",
     category: "Tienda de Ropa - Moda circular",
-    coverImage:`https://res.cloudinary.com/${cloudName}/image/upload/feriainfinita/banner_feriainfinita_le7plk.webp`,
+    coverImage: imageUrl("feriainfinita/banner_feriainfinita_le7plk.webp", { original: true }),
     mision:"La ropa es mucho más que ropa y cómo te vestís importa. En Feria Infinita creemos en una moda más consciente, accesible y circular. Queremos que cada persona pueda renovar su estilo disfrutando de un espacio donde la moda y los buenos precios conviven en armonía. Por eso seleccionamos cada prenda con dedicación, dándole una segunda vida y asegurando siempre calidad.",
     description:'',
     services: [
@@ -28,49 +28,49 @@ const partner = {
         {
             id:'DemoPartnerPage-1',
             alt:'Demo Partner Page img 1',
-            path:`${CLOUDINARY_BASE_URL}ropa-2_uerzwj.webp`,
+            path: feriaImage("ropa-2_uerzwj.webp"),
             style:'relative h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-2',
             alt:'Demo Partner Page img 2',
-            path:`${CLOUDINARY_BASE_URL}ropa-3_h7f0cb.webp`,
+            path: feriaImage("ropa-3_h7f0cb.webp"),
             style:'relative h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-3',
             alt:'Demo Partner Page img 3',
-            path:`${CLOUDINARY_BASE_URL}profile_feria_infinita_abgru6.webp`,
+            path: feriaImage("profile_feria_infinita_abgru6.webp"),
             style:'relative col-span-2 row-span-2 md:col-span-3 lg:col-span-2 h-96 overflow-hidden'
         },
             {
             id:'DemoPartnerPage-4',
             alt:'Demo Partner Page img 4',
-            path:`${CLOUDINARY_BASE_URL}zapatos_syc48r.webp`,
+            path: feriaImage("zapatos_syc48r.webp"),
             style:'relative col-span-2 h-48 overflow-hidden'
         },
             {
             id:'DemoPartnerPage-5',
             alt:'Demo Partner Page img 5',
-            path:`${CLOUDINARY_BASE_URL}ropa-1_dejsk4.webp`,
+            path: feriaImage("ropa-1_dejsk4.webp"),
             style:'relative h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-6',
             alt:'Demo Partner Page img 6',
-            path:`${CLOUDINARY_BASE_URL}perchero_clmxp7.webp`,
+            path: feriaImage("perchero_clmxp7.webp"),
             style:'relative md:col-span-2 h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-7',
             alt:'Demo Partner Page img 7',
-            path:`${CLOUDINARY_BASE_URL}ropa-4_qsuy9j.webp`,
+            path: feriaImage("ropa-4_qsuy9j.webp"),
             style:'relative col-span-2 lg:col-span-1 h-48 overflow-hidden'
         },
         {
             id:'DemoPartnerPage-8',
             alt:'Demo Partner Page img 8',
-            path:`${CLOUDINARY_BASE_URL}entrada_ierb76.webp`,
+            path: feriaImage("entrada_ierb76.webp"),
             style:'relative col-span-2 sm:col-span-4 md:col-span-5 lg:col-span-2 h-48 overflow-hidden'
         },
     ],

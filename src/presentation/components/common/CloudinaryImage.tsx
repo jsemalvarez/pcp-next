@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { imageUrl as buildImageUrl } from "@/presentation/utils/imageUrl";
 
 interface Props {
   imageName?: string;
@@ -17,18 +18,11 @@ export const CloudinaryImage = ({
   actualHeight,
   fallbackImage,
 }: Props) => {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
-  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
-  
   // Si no hay imagen, usamos una imagen por defecto local
   const finalFallback = fallbackImage || "/images/fallbackImage.webp";
   
-  // Dado que el photoId guardado ya contiene la subcarpeta (ej. 'events/nombre.jpg'), 
-  // solo lo concatenamos directamente a la URL base.
-  const formattedImageName = imageName?.includes('/') ? imageName : `events/${imageName}`;
-  const photoUrl = `${baseUrl}/w_600,q_auto,f_auto/${formattedImageName}`;
-
-  const imageUrl = imageName ? photoUrl : finalFallback;
+  // El photoId guardado ya trae la carpeta (ej. 'events/nombre.jpg'); los viejos sin carpeta son de eventos
+  const imageUrl = imageName ? buildImageUrl(imageName, { width: 600, defaultFolder: "events" }) : finalFallback;
 
   const width = actualWidth || 600;
   const height = actualHeight || 400;

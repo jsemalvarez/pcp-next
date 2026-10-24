@@ -125,7 +125,7 @@ Requisitos: Node 20+ y Docker.
 npm install
 
 # 2. Crear el archivo de entorno local a partir de la plantilla
-cp .env.example .env.dev   # completar JWT_SECRET, ADMIN_* y Cloudinary
+cp .env.example .env.dev   # completar JWT_SECRET y ADMIN_*
 
 # 3. Levantar Postgres 17 (localhost:5433) y pgAdmin (http://localhost:5050)
 npm run db:up
@@ -146,6 +146,8 @@ npm run dev
 | `.env.example` | Plantilla (es el único que se sube al repo) |
 | `.env.dev` | Desarrollo local; lo usan `npm run dev` y los scripts `db:*` |
 | `.env.prod` | Credenciales de producción; solo lo usa `db:pull-prod`. En Vercel las variables van en el dashboard |
+
+**Imágenes:** con `IMAGE_STORAGE="local"` (el valor de la plantilla), las imágenes que subís desde el admin se guardan en `./.uploads` (ignorada por git) y no tocan Cloudinary. Las fotos de una copia de producción se siguen viendo desde Cloudinary. En producción, el servidor firma cada subida y el navegador sube directo a Cloudinary; para eso hacen falta `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` en Vercel.
 
 Otros comandos: `npm run db:studio` (Prisma Studio), `npm run db:down`, `npm run lint`.
 

@@ -13,6 +13,7 @@ import prisma from "@/data/prisma/db";
 import { getFeaturedUpcomingOccurrences } from "@/server/events/event.queries";
 import { fortmatDate } from "@/presentation/utils/formatDate";
 import { CloudinaryImage } from "@/presentation/components/common/CloudinaryImage";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 
 export const revalidate = 28800; // Revalidate every 8 hours
@@ -25,7 +26,7 @@ export default async function Home() {
     title: item.title,
     description: item.subtitle || item.content.substring(0, 150),
     image: item.photoId
-      ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${item.photoId.includes('/') ? item.photoId : 'events/' + item.photoId}`
+      ? imageUrl(item.photoId, { width: 600, defaultFolder: "events" })
       : "/images/fallbackImage.webp",
     slug: item.slug,
     photoWidth: item.photoWidth,
@@ -68,7 +69,7 @@ export default async function Home() {
     location: occ.place.name,
     isSponsored: occ.event.isSponsored,
     image: occ.event.photoId
-      ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${occ.event.photoId.includes('/') ? occ.event.photoId : 'events/' + occ.event.photoId}`
+      ? imageUrl(occ.event.photoId, { width: 300, defaultFolder: "events" })
       : "/images/fallbackImage.webp",
   }));
 

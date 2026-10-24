@@ -12,6 +12,7 @@ import Link from "next/link";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 dayjs.locale("es");
 dayjs.extend(utc); // las fechas de los eventos se guardan a medianoche UTC
@@ -92,7 +93,7 @@ export default async function PerfilOrganizadorPage({ params }: Props) {
           <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-100 shrink-0 mx-auto md:mx-0">
             {organizer.photoId ? (
               <img
-                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_400,h_400,c_fill,q_auto,f_auto/${organizer.photoId}`}
+                src={imageUrl(organizer.photoId, { width: 400, height: 400, crop: "fill" })}
                 alt={organizer.name}
                 className="w-full h-full object-cover"
               />
@@ -251,7 +252,7 @@ export default async function PerfilOrganizadorPage({ params }: Props) {
                         {event.photoId && (
                           <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
                             <img
-                              src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_200,h_200,c_fill,q_auto,f_auto/${event.photoId.includes('/') ? event.photoId : 'events/' + event.photoId}`}
+                              src={imageUrl(event.photoId, { width: 200, height: 200, crop: "fill", defaultFolder: "events" })}
                               alt={event.title}
                               className="w-full h-full object-cover"
                             />

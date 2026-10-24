@@ -43,3 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# imágenes subidas en desarrollo (IMAGE_STORAGE=local)
+/.uploads

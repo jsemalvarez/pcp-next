@@ -6,6 +6,7 @@ import { HeroPartner } from "@/presentation/components/Partner/HeroPartner";
 import { JoinUs } from "@/presentation/components/Partner/JoinUs";
 import { PremiumServices } from "@/presentation/components/Partner/PremiumServices";
 import { Pricing } from "@/presentation/components/Partner/Pricing";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 export const metadata: Metadata = {
   title: 'Paseos con Peques | Guía de actividades en Mar del Plata',
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
     locale: "es_ES",
     images: [
       {
-        url: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/logo_pcp_mppj0w.webp`,
+        url: imageUrl("logo_pcp_mppj0w.webp", { width: 300 }),
         width: 300,
         height: 300,
         alt: "Paseos con Peques",

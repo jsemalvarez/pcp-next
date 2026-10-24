@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getActiveNews } from "@/actions/news";
 import { Calendar, ArrowLeft, Home as HomeIcon, Newspaper, MapPin, User } from "lucide-react";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export default async function PublicNewsPage() {
                 <div className="relative aspect-video w-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                   {news.photoId ? (
                     <img
-                      src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_600,q_auto,f_auto/${news.photoId}`}
+                      src={imageUrl(news.photoId, { width: 600 })}
                       alt={news.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

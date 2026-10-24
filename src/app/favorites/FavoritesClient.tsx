@@ -6,6 +6,7 @@ import { Heart, MapPin, Calendar, ArrowRight, HeartOff, Clock, X, Info, Share2, 
 import { useFavorites } from "@/presentation/contexts/FavoritesContext";
 import { fortmatDate } from "@/presentation/utils/formatDate";
 import Link from "next/link";
+import { imageUrl as buildImageUrl } from "@/presentation/utils/imageUrl";
 
 interface Place {
   id: string;
@@ -197,7 +198,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                 const imageUrl = place.photoUrl
                   ? (place.photoUrl.startsWith("http")
                       ? place.photoUrl
-                      : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${place.photoUrl.includes('/') ? place.photoUrl : 'places/' + place.photoUrl}`)
+                      : buildImageUrl(place.photoUrl, { width: 300, defaultFolder: "places" }))
                   : "/images/fallbackImage.webp";
 
                 return (
@@ -267,7 +268,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                 const imageUrl = event.photoId
                   ? (event.photoId.startsWith("http")
                       ? event.photoId
-                      : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_300,q_auto,f_auto/${event.photoId.includes('/') ? event.photoId : 'events/' + event.photoId}`)
+                      : buildImageUrl(event.photoId, { width: 300, defaultFolder: "events" }))
                   : "/images/fallbackImage.webp";
 
                 // Find next upcoming occurrence if any
@@ -381,7 +382,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
                     src={
                       selectedPlace.photoUrl.startsWith("http")
                         ? selectedPlace.photoUrl
-                        : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_800,q_auto,f_auto/${selectedPlace.photoUrl.includes('/') ? selectedPlace.photoUrl : 'places/' + selectedPlace.photoUrl}`
+                        : buildImageUrl(selectedPlace.photoUrl, { width: 800, defaultFolder: "places" })
                     }
                     alt={selectedPlace.name}
                     className="w-full h-full object-cover"
@@ -507,7 +508,7 @@ export default function FavoritesClient({ initialPlaces, initialEvents }: Props)
               {selectedEvent.photoId && (
                 <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-855 shadow-sm">
                   <img
-                    src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_800,q_auto,f_auto/${selectedEvent.photoId.includes('/') ? selectedEvent.photoId : 'events/' + selectedEvent.photoId}`}
+                    src={buildImageUrl(selectedEvent.photoId, { width: 800, defaultFolder: "events" })}
                     alt={selectedEvent.title}
                     className="w-full h-full object-cover"
                   />

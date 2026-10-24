@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Edit2, ExternalLink, Calendar, CheckCircle2, XCircle, Star } from "lucide-react";
 import { getNews } from "@/actions/news";
 import { DeleteNewsButton } from "@/presentation/components/Admin/DeleteNewsButton";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ export default async function AdminNewsPage() {
                       <td className="p-4">
                         {news.photoId ? (
                           <img
-                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_120,h_80,c_fill,q_auto,f_auto/${news.photoId}`}
+                            src={imageUrl(news.photoId, { width: 120, height: 80, crop: "fill" })}
                             alt={news.title}
                             className="w-16 h-10 rounded-lg object-cover border border-gray-200"
                           />

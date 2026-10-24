@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createNews, updateNews } from "@/actions/news";
 import { Save, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
+import { imageUrl } from "@/presentation/utils/imageUrl";
+import { uploadImage } from "@/presentation/utils/uploadImage";
 
 interface News {
   id: string;
@@ -62,13 +64,11 @@ export function NewsForm({ initialData }: Props) {
   );
 
   // Image upload state
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.photoId
-      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_400,q_auto,f_auto/${initialData.photoId}`
+      ? imageUrl(initialData.photoId, { width: 400 })
       : null
   );
   const [photoWidth, setPhotoWidth] = useState<number | undefined>(initialData?.photoWidth ?? undefined);
@@ -102,21 +102,9 @@ export function NewsForm({ initialData }: Props) {
     setIsSlugCustomized(true);
   };
 
-  const uploadToCloudinary = async (file: File): Promise<{ id: string; width: number; height: number }> => {
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", uploadPreset);
-    data.append("folder", "news");
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: "POST", body: data }
-    );
-    const result = await res.json();
-    if (!res.ok) {
-      throw new Error("Error al subir la imagen a Cloudinary");
-    }
-    return { id: `${result.public_id}.${result.format}`, width: result.width, height: result.height };
+  const uploadPhoto = async (file: File): Promise<{ id: string; width: number | null; height: number | null }> => {
+    const { photoId, width, height } = await uploadImage(file, "news");
+    return { id: photoId, width, height };
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,7 +128,7 @@ export function NewsForm({ initialData }: Props) {
       let currentPhotoHeight = photoHeight ?? null;
 
       if (imageFile) {
-        const uploadResult = await uploadToCloudinary(imageFile);
+        const uploadResult = await uploadPhoto(imageFile);
         uploadedPhotoId = uploadResult.id;
         currentPhotoWidth = uploadResult.width;
         currentPhotoHeight = uploadResult.height;

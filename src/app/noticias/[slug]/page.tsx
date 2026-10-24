@@ -4,6 +4,7 @@ import { getNewsBySlug } from "@/actions/news";
 import { Calendar, ArrowLeft, Share2, Home as HomeIcon, Newspaper, MapPin, User } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: newsItem.photoId
         ? [
             {
-              url: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1200,h_630,c_fill,q_auto,f_auto/${newsItem.photoId}`,
+              url: imageUrl(newsItem.photoId, { width: 1200, height: 630, crop: "fill" }),
               width: 1200,
               height: 630,
               alt: newsItem.title,
@@ -137,7 +138,7 @@ export default async function PublicNewsDetailPage({ params }: Props) {
               style={{ aspectRatio: newsItem.photoWidth && newsItem.photoHeight ? `${newsItem.photoWidth}/${newsItem.photoHeight}` : '16/9' }}
             >
               <img
-                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1000,q_auto,f_auto/${newsItem.photoId}`}
+                src={imageUrl(newsItem.photoId, { width: 1000 })}
                 alt={newsItem.title}
                 className="w-full h-full object-cover"
               />

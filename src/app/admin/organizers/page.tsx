@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Edit2, ExternalLink } from "lucide-react";
 import { getOrganizers } from "@/actions/organizers";
 import { DeleteOrganizerButton } from "@/presentation/components/Admin/DeleteOrganizerButton";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ export default async function AdminOrganizersPage() {
                       <td className="p-4">
                         {org.photoId ? (
                           <img
-                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_100,h_100,c_fill,q_auto,f_auto/${org.photoId}`}
+                            src={imageUrl(org.photoId, { width: 100, height: 100, crop: "fill" })}
                             alt={org.name}
                             className="w-10 h-10 rounded-full object-cover border border-gray-200"
                           />

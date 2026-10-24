@@ -9,6 +9,8 @@ import { CATEGORIES_TRANSLATE } from "@/presentation/constants/categories";
 import { Save, ArrowLeft, Search, MapPin, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { imageUrl } from "@/presentation/utils/imageUrl";
+import { uploadImage } from "@/presentation/utils/uploadImage";
 
 const LocationPickerMap = dynamic(() => import("./LocationPickerMap"), {
   ssr: false,
@@ -41,30 +43,16 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   // Image upload state
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.photoUrl
-      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_600,q_auto,f_auto/${initialData.photoUrl}`
+      ? imageUrl(initialData.photoUrl, { width: 600 })
       : null
   );
 
-  const uploadToCloudinary = async (file: File): Promise<string> => {
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", uploadPreset);
-    data.append("folder", "places");
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: "POST", body: data }
-    );
-    const result = await res.json();
-    if (!res.ok) {
-      throw new Error("Error al subir la imagen a Cloudinary");
-    }
-    return `${result.public_id}.${result.format}`;
+  const uploadPhoto = async (file: File): Promise<string> => {
+    const { photoId } = await uploadImage(file, "places");
+    return photoId;
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +141,7 @@ export function PlaceForm({ initialData }: PlaceFormProps) {
     try {
       let uploadedPhotoId = initialData?.photoUrl || null;
       if (imageFile) {
-        uploadedPhotoId = await uploadToCloudinary(imageFile);
+        uploadedPhotoId = await uploadPhoto(imageFile);
       }
       
       const data: Omit<Place, 'id' | 'createdAt' | 'updatedAt'> = {

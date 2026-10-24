@@ -6,6 +6,8 @@ import { createOrganizer, updateOrganizer } from "@/actions/organizers";
 import { Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SearchableCategorySelect } from "./SearchableCategorySelect";
+import { imageUrl } from "@/presentation/utils/imageUrl";
+import { uploadImage } from "@/presentation/utils/uploadImage";
 
 interface OrganizerType {
   id: string;
@@ -60,13 +62,11 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState(initialData?.typeId || "");
 
   // Image upload state
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dnpmw1mty";
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "pcp_images";
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.photoId
-      ? `https://res.cloudinary.com/${cloudName}/image/upload/w_300,q_auto,f_auto/${initialData.photoId}`
+      ? imageUrl(initialData.photoId, { width: 300 })
       : null
   );
 
@@ -98,21 +98,9 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
     setIsSlugCustomized(true);
   };
 
-  const uploadToCloudinary = async (file: File): Promise<string> => {
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", uploadPreset);
-    data.append("folder", "organizers");
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: "POST", body: data }
-    );
-    const result = await res.json();
-    if (!res.ok) {
-      throw new Error("Error al subir la imagen a Cloudinary");
-    }
-    return `${result.public_id}.${result.format}`;
+  const uploadPhoto = async (file: File): Promise<string> => {
+    const { photoId } = await uploadImage(file, "organizers");
+    return photoId;
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +122,7 @@ export function OrganizerForm({ organizerTypes, initialData }: Props) {
       let uploadedPhotoId = initialData?.photoId || null;
 
       if (imageFile) {
-        uploadedPhotoId = await uploadToCloudinary(imageFile);
+        uploadedPhotoId = await uploadPhoto(imageFile);
       }
 
       const data = {

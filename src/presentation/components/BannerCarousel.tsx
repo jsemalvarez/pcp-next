@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { imageUrl } from "@/presentation/utils/imageUrl";
 
 interface Banner {
   id: string;
@@ -74,7 +75,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
               {/* Background image or colored fallback */}
               {banner.photoId ? (
                 <img
-                  src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dnpmw1mty'}/image/upload/w_1200,q_auto,f_auto/${banner.photoId}`}
+                  src={imageUrl(banner.photoId, { width: 1200 })}
                   alt={banner.title}
                   className="w-full h-full object-cover"
                 />

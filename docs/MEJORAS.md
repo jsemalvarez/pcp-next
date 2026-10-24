@@ -155,10 +155,10 @@ Propuesta: el MCP **no borra eventos**, los archiva (`status = ARCHIVED`). El bo
 
 ### 2.6 Fotos
 
-Una IA no puede subir de forma confiable al MCP una imagen adjunta en el chat. Opciones:
+**Decisión:** solo llevan foto los eventos **destacados o patrocinados**, y es una pieza diseñada aparte (no una captura del post de Instagram). Por eso las fotos se suben desde el admin, no desde el MCP.
 
-1. `set_event_photo_from_url`: si la imagen está en una URL pública, el servidor la sube a Cloudinary con la API firmada (requiere `CLOUDINARY_API_KEY`/`SECRET` del lado servidor).
-2. Si no hay URL, el evento queda `INCOMPLETE` con el faltante `foto` y la foto se carga desde el admin.
+- La foto es un aviso *recomendado* solo cuando el evento es destacado o patrocinado; nunca bloquea la publicación.
+- `set_event_photo_from_url` queda descartada por ahora.
 
 ### 2.7 Tareas
 
@@ -170,7 +170,7 @@ Una IA no puede subir de forma confiable al MCP una imagen adjunta en el chat. O
 - [ ] P2 Tool para crear tipos de organizador (hoy solo desde el admin).
 - [x] OAuth para conectarlo desde claude.ai / app móvil (`src/server/oauth`, `/oauth/*`, `/.well-known/*`, migración `20261023120000_add_oauth`). Probado de punta a punta en local con el cliente CIMD real de Claude Code: consentimiento en el navegador, canje, MCP con el token, refresh con rotación, reuso de código y de refresh rechazados. **Falta probarlo con claude.ai en producción** (Claude no puede llegar a localhost).
 - [ ] P2 Pantalla en el admin para ver y revocar las conexiones OAuth activas (hoy se revocan borrando filas de `OAuthToken`).
-- [ ] P2 `set_event_photo_from_url`.
+- [-] ~~`set_event_photo_from_url`~~: descartada (ver 2.6).
 - [x] README: cómo conectar Claude Code y Claude Desktop.
 
 ---
@@ -268,7 +268,7 @@ Limitaciones: no funciona en iOS e Instagram comparte solo el link, sin imagen n
 ### 3.7 Tareas
 
 - [x] Migración `20261022180000_add_event_status_and_drafts`: `EventStatus`, campos nuevos, `placeId` opcional + `placeText`, `priceType` opcional. Los eventos existentes pasan a `PUBLISHED` y las fechas a medianoche UTC. Aplicada en local; en producción se aplica sola en el próximo deploy (`prisma migrate deploy` del build).
-- [x] `event.completeness.ts` y recálculo en cada escritura. Obligatorios: fecha, lugar en cada fecha, tipo de precio. La foto quedó como *recomendada*: 132 de los 144 eventos actuales no tienen.
+- [x] `event.completeness.ts` y recálculo en cada escritura. Obligatorios: fecha, lugar en cada fecha, tipo de precio. La foto es *recomendada* solo en eventos destacados o patrocinados (ver 2.6).
 - [x] Filtrar lecturas públicas por `PUBLISHED`.
 - [~] P1 Cambios en el admin (3.5): falta la vista de contacto de incompletos y el botón de archivar.
 - [ ] P1 Probar el flujo completo Instagram → Claude → borrador → publicar.
@@ -283,7 +283,7 @@ Limitaciones: no funciona en iOS e Instagram comparte solo el link, sin imagen n
 - [x] Validar `JWT_SECRET`.
 - [~] P1 No devolver `error.message` de Prisma al cliente. Hecho en eventos, lugares y organizadores; falta en noticias y banners.
 - [ ] P1 `getPlaces()` público no debe devolver lugares inactivos.
-- [ ] P2 El upload preset de Cloudinary es *unsigned*: cualquiera que lo conozca puede subir imágenes. Pasar a subida firmada desde el servidor (se resuelve con 5.2).
+- [x] El upload preset de Cloudinary era *unsigned*: cualquiera que lo conociera podía subir imágenes. Ahora el servidor firma cada subida (`/api/images/sign`, solo con sesión de admin) y fija la carpeta y los formatos permitidos. **Falta desactivar el preset `pcp_images` en Cloudinary** después del deploy.
 - [ ] P3 Renombrar `middleware.ts` → `proxy.ts` (Next 16).
 
 ### Calidad
@@ -291,7 +291,7 @@ Limitaciones: no funciona en iOS e Instagram comparte solo el link, sin imagen n
 - [ ] P1 Centralizar el manejo de fechas y zona horaria (Argentina, UTC−3) con `dayjs`. Hoy hay cálculos manuales distintos en la home y en el calendario.
 - [ ] P2 Partir `calendario/page.tsx` (1.230 líneas, todo cliente) en server component + componentes chicos; revisar si los componentes `Calendar/*` existentes se pueden reutilizar o borrar.
 - [ ] P2 Partir `EventForm.tsx` (920 líneas) y `FavoritesClient.tsx` (695).
-- [ ] P2 Sacar el cloud name de Cloudinary hardcodeado (`'dnpmw1mty'`) y el preset por defecto; usar solo variables de entorno.
+- [x] Cloud name y preset estaban repetidos en ~25 archivos. El preset ya no se usa y el cloud name quedó en dos lugares (`imageUrl.ts` y `server/images/cloudinary.ts`), con el valor actual como respaldo si falta la variable.
 - [ ] P3 Reducir los 28 `any` y los `console.log` sueltos.
 - [ ] P3 Corregir nombres: `usescases`, `fortmatDate`, `isPlaceAvtive`.
 
@@ -362,11 +362,11 @@ Nota: pgAdmin importa la conexión solo la primera vez que arranca. Si se cambia
 - [x] Postgres local en versión 17, igual que producción.
 - [x] Script `npm run db:pull-prod` (`scripts/db-pull-prod.sh`). Exporta solo el schema `public` (Supabase agrega los suyos: `auth`, `storage`, etc.). Los dumps van a `backups/`, ignorado por git.
 - [x] Primera copia hecha el 2026-10-22: 144 eventos, 461 fechas, 52 lugares, 5 banners, 2 organizadores, 1 noticia, 1 usuario. Coincide con producción.
-- [~] P1 Agregar a `.env.example` las variables nuevas cuando se implementen. Ya están `MCP_API_TOKEN` y `SITE_URL`; faltan `IMAGE_STORAGE` y `CLOUDINARY_API_KEY/SECRET`.
+- [x] `.env.example` con todas las variables: `MCP_API_TOKEN`, `SITE_URL`, `IMAGE_STORAGE`, `CLOUDINARY_API_KEY/SECRET`.
 - [x] Sección "Desarrollo local" del README actualizada con este flujo.
 - [ ] P1 `npm install` reporta 62 vulnerabilidades (5 críticas, 45 altas). Revisar con `npm audit`; probablemente se resuelvan en buena parte actualizando Next (16.0.7) y Prisma (5.22, hay versión 6/7).
 - [ ] P2 `build` sigue corriendo `prisma migrate deploy`. En local ya no es peligroso (sin `.env` falla), pero conviene moverlo a un script `vercel-build` para que quede explícito.
-- [ ] P2 Las imágenes en local siguen subiendo al Cloudinary real (ver 5.2).
+- [x] Las imágenes en local se guardan en `./.uploads` (ver 5.2).
 - [ ] P2 Seed con datos de ejemplo (lugares, eventos con varias fechas, un borrador incompleto) para poder trabajar sin depender de la copia de prod.
 - [x] Quitar `version: "3.9"` del compose (Docker Compose ya no lo usa y muestra un aviso).
 
@@ -401,16 +401,20 @@ src/app/api/uploads/[...path]/route.ts
   - cualquier otro → URL de Cloudinary (como hoy).
 - Así, con una **copia de producción en local**, las fotos existentes se siguen viendo desde Cloudinary (solo lectura, no se toca nada), y las fotos nuevas que subas en local quedan en tu máquina, sin ensuciar Cloudinary.
 - En local no hay transformaciones (`w_600`, `f_auto`): se sirve el archivo original. Para desarrollo alcanza.
-- Bonus: al pasar la subida al servidor, se elimina el preset *unsigned* (problema de seguridad de la sección 4) y la tool `set_event_photo_from_url` del MCP reutiliza el mismo `upload()`.
+- Bonus: al pasar la subida al servidor, se elimina el preset *unsigned* (problema de seguridad de la sección 4).
+
+**Implementado** (con un cambio respecto de la propuesta): en producción la imagen **no pasa por el servidor**. Vercel limita el cuerpo de los pedidos a 4,5 MB y una pieza exportada de Canva puede pesar más, así que el servidor solo firma (`/api/images/sign`) y el navegador sube directo a Cloudinary. La firma fija la carpeta y los formatos (jpg, png, webp, gif) y vence a la hora. En local, `/api/images` guarda el archivo en `./.uploads` y valida el formato por los primeros bytes. Todo el front sube con `uploadImage()` y arma las URLs con `imageUrl()`.
 
 **Alternativa más simple (sin código):** crear una carpeta o un preset `pcp_dev` en Cloudinary (o una cuenta gratuita aparte) y usarlo en el `.env` local. Sirve como parche, pero no funciona sin internet, mezcla pruebas con la cuenta real y no resuelve el preset *unsigned*.
 
 **Tareas**
 
-- [ ] P1 `imageUrl()` único y reemplazar las ~20 URLs armadas a mano (incluye `CloudinaryImage.tsx`).
-- [ ] P1 Endpoint `/api/images` con subida firmada a Cloudinary; los formularios del admin pasan a usarlo.
-- [ ] P1 Implementación `local` + ruta `/api/uploads` + variable `IMAGE_STORAGE`.
-- [ ] P2 Desactivar el preset *unsigned* en Cloudinary una vez migrados los formularios.
+- [x] `imageUrl()` único (`src/presentation/utils/imageUrl.ts`): reemplaza las 19 URLs armadas a mano, `CloudinaryImage`, el ícono del mapa y la página de Feria Infinita. Mismas transformaciones que antes.
+- [x] Subida firmada a Cloudinary (`/api/images/sign`); los 5 formularios del admin (eventos, lugares, organizadores, noticias, banners) usan `uploadImage()`.
+- [x] Implementación `local` (`/api/images` + `/api/uploads`) con `IMAGE_STORAGE=local`. En Vercel siempre es Cloudinary. Probado: 12 checks de los endpoints (sin sesión, carpeta inválida, archivo que no es imagen, rutas con `../`) y en el navegador, una foto subida a un evento destacado.
+- [ ] P1 **Antes del push:** cargar `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` en Vercel. Sin ellas, la subida de imágenes del admin falla en producción.
+- [ ] P1 Probar una subida real a Cloudinary (en local con `IMAGE_STORAGE=cloudinary` y las claves en `.env.dev`, o en producción después del deploy).
+- [ ] P2 Desactivar el preset *unsigned* `pcp_images` en Cloudinary una vez probada la subida firmada.
 
 ---
 
